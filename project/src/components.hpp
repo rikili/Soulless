@@ -22,6 +22,12 @@ struct Eatable
 
 };
 
+
+struct LightUp
+{
+	float counter_ms = 1000;
+};
+
 // All data relevant to the shape and motion of entities
 struct Motion {
 	vec2 position = { 0, 0 };
