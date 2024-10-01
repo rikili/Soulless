@@ -28,7 +28,7 @@ endif()
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ext/project_path.hpp.in" "${CMAKE_CURRENT_SOURCE_DIR}/ext/project_path.hpp")
 
 # You can switch to use the file GLOB for simplicity but at your own risk
-file(GLOB SOURCE_FILES src/*.cpp src/*.hpp)
+file(GLOB SOURCE_FILES a1/src/*.cpp a1/src/*.hpp)
 
 # external libraries will be installed into /usr/local/include and /usr/local/lib but that folder is not automatically included in the search on MACs
 if (IS_OS_MAC)
@@ -40,10 +40,10 @@ if (IS_OS_MAC)
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES}
-        src/entities/ecs_registry.hpp
-        src/components.cpp
-        src/entities/components/general_components.cpp)
-target_include_directories(${PROJECT_NAME} PUBLIC src/)
+        a1/src/entities/ecs_registry.hpp
+        a1/src/components.cpp
+        a1/src/entities/components/general_components.cpp)
+target_include_directories(${PROJECT_NAME} PUBLIC a1/src/)
 
 # Added this so policy CMP0065 doesn't scream
 set_target_properties(${PROJECT_NAME} PROPERTIES ENABLE_EXPORTS 0)

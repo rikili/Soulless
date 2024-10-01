@@ -8,6 +8,13 @@ This project uses CPSC 427's A1 as a template.
 The source code has the following structure
 
 ```txt
+/include
+    /core
+    /entities
+    /graphics
+    /utils
+    /input
+    main.cpp
 /src
     /core
     /entities
@@ -24,7 +31,8 @@ The source code has the following structure
 
 ```
 
-- /src: Contains all source code. 
+- /src: Contains all source code.
+- /include: contains all header files
   - /core: Core game systems like the main game loop, window. 
   - /entities: Classes for game objects like the player, enemies, items. 
   - /graphics: Rendering and sprite management. 
