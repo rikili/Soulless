@@ -53,5 +53,5 @@ int main()
     //     renderer.draw();
     // }
 
-    return EXIT_SUCCESS;
+    return 0;
 }
