@@ -1,8 +1,8 @@
 #pragma once
 #include <vector>
 
-#include "tiny_ecs.hpp"
-#include "components.hpp"
+#include "ecs.hpp"
+#include "general_components.hpp"
 
 class ECSRegistry
 {
@@ -11,35 +11,33 @@ class ECSRegistry
 
 public:
 	// Manually created list of all components this game has
-	// TODO: A1 add a LightUp component
-	ComponentContainer<DeathTimer> deathTimers;
-	ComponentContainer<Motion> motions;
-	ComponentContainer<Collision> collisions;
-	ComponentContainer<Player> players;
-	ComponentContainer<Mesh*> meshPtrs;
-	ComponentContainer<RenderRequest> renderRequests;
-	ComponentContainer<ScreenState> screenStates;
-	ComponentContainer<Eatable> eatables;
-	ComponentContainer<Deadly> deadlys;
-	ComponentContainer<DebugComponent> debugComponents;
-	ComponentContainer<vec3> colors;
+	// ComponentContainer<DeathTimer> deathTimers;
+	// ComponentContainer<Motion> motions;
+	// ComponentContainer<Collision> collisions;
+	// ComponentContainer<Player> players;
+	// ComponentContainer<Mesh*> meshPtrs;
+	// ComponentContainer<RenderRequest> renderRequests;
+	// ComponentContainer<ScreenState> screenStates;
+	// ComponentContainer<Eatable> eatables;
+	// ComponentContainer<Deadly> deadlys;
+	// ComponentContainer<DebugComponent> debugComponents;
+	// ComponentContainer<vec3> colors;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
 	{
-		// TODO: A1 add a LightUp component
-		registry_list.push_back(&deathTimers);
-		registry_list.push_back(&motions);
-		registry_list.push_back(&collisions);
-		registry_list.push_back(&players);
-		registry_list.push_back(&meshPtrs);
-		registry_list.push_back(&renderRequests);
-		registry_list.push_back(&screenStates);
-		registry_list.push_back(&eatables);
-		registry_list.push_back(&deadlys);
-		registry_list.push_back(&debugComponents);
-		registry_list.push_back(&colors);
+		// registry_list.push_back(&deathTimers);
+		// registry_list.push_back(&motions);
+		// registry_list.push_back(&collisions);
+		// registry_list.push_back(&players);
+		// registry_list.push_back(&meshPtrs);
+		// registry_list.push_back(&renderRequests);
+		// registry_list.push_back(&screenStates);
+		// registry_list.push_back(&eatables);
+		// registry_list.push_back(&deadlys);
+		// registry_list.push_back(&debugComponents);
+		// registry_list.push_back(&colors);
 	}
 
 	void clear_all_components() {

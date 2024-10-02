@@ -1,7 +1,7 @@
-#include "common.hpp"
+#include "core/common.hpp"
 #include <iostream>
 
-// Note, we could also use the functions from GLM but we write the transformations here to show the uderlying math
+// Note, we could also use the functions from GLM, but we write the transformations here to show the underlying math
 void Transform::scale(vec2 scale)
 {
 	mat3 S = { { scale.x, 0.f, 0.f },{ 0.f, scale.y, 0.f },{ 0.f, 0.f, 1.f } };
