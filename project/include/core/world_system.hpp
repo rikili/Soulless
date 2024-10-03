@@ -1,7 +1,7 @@
 #pragma once
 
 // internal
-#include "common.hpp"
+#include "core/common.hpp"
 
 // stlib
 #include <vector>
@@ -46,22 +46,22 @@ private:
 	void restart_game();
 
 	// OpenGL window handle
-	GLFWwindow* window;
+	GLFWwindow* window{};
 
 	// Number of fish eaten by the salmon, displayed in the window title
 	unsigned int points;
 
 	// Game state
-	RenderSystem* renderer;
-	float current_speed;
+	RenderSystem* renderer{};
+	float current_speed{};
 	float next_eel_spawn;
 	float next_fish_spawn;
 	Entity player_salmon;
 
 	// music references
-	Mix_Music* background_music;
-	Mix_Chunk* salmon_dead_sound;
-	Mix_Chunk* salmon_eat_sound;
+	Mix_Music* background_music{};
+	Mix_Chunk* salmon_dead_sound{};
+	Mix_Chunk* salmon_eat_sound{};
 
 	// C++ random number generator
 	std::default_random_engine rng;
