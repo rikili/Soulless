@@ -11,7 +11,7 @@ struct Motion {
     vec2 scale = { 1, 1 };
     float mass = 0;
     float speedModifier = 1.f;
-    unsigned int angle = 0;
+    float angle = 0;
 };
 
 // Resistance Modifier
