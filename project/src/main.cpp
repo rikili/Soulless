@@ -1,76 +1,65 @@
 
 #define GL3W_IMPLEMENTATION
 #include <gl3w.h>
-
-// stlib
 #include <chrono>
+#include "core/render_system.hpp"
+#include "core/world_system.hpp"
+#include "input/glrender.hpp"
 
-// internal
-// #include "physics_system.hpp"
-// #include "render_system.hpp"
-// #include "world_system.hpp"
+#define ERROR_SUCCESS 0
 
-using Clock = std::chrono::high_resolution_clock;
-
-// Entry point
-int main()
+int main(int argc, char* argv[])
 {
-    // TODO: Implement the main function
-    // Global systems
-    // WorldSystem world;
-    // RenderSystem renderer;
-    // PhysicsSystem physics;
-    
-    // // Initializing window
-    // GLFWwindow* window = world.create_window();
-    // if (!window) {
-    //     // Time to read the error message
-    //     printf("Press any key to exit");
-    //     getchar();
-    //     return EXIT_FAILURE;
-    // }
-    
-    // // initialize the main systems
-    // renderer.init(window);
-    // world.init(&renderer);
 
+	// create the window and size it
+	GLWindow glWindow(1024, 768);
 
-    // auto t = Clock::now();
-    
-    // Countdown timer
-    auto start = std::chrono::steady_clock::now();
-    auto countdown_duration = std::chrono::minutes(5);
+	glfwMakeContextCurrent(glWindow.window);
+	//glfwSwapInterval(1); // vsync
 
-    // while (!world.is_over()) {
-    while (true) {
-    //     // Processes system messages, if this wasn't present the window would become unresponsive
-    //     glfwPollEvents();
-    //
+	// Load OpenGL function pointers... before we render or you will segfault below...
+	const int is_fine = gl3w_init();
+	assert(is_fine == 0);
 
-        auto now = std::chrono::steady_clock::now();
-        auto remaining = countdown_duration - (now - start);
+	// viewport - necessary if we allow re-sizing of window, which we do not
+	glViewport(0, 0, glWindow.window_width_px(), glWindow.window_width_px());
 
-        if (remaining <= std::chrono::seconds(0)) {
-            // TODO: Trigger boss when countdown is over?
-        }
+	GLuint frame_buffer;
+	frame_buffer = 0;
+	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
 
-        auto remaining_seconds = std::chrono::duration_cast<std::chrono::seconds>(remaining).count();
-        // Example print statement -- Can use remaining_seconds to display time remaining until boss otherwise
-        // printf("Time remaining: %d:%d\n", remaining_seconds / 60, remaining_seconds % 60);
+	// check if the pixel buffer is as expected... apparently not the case for some high DPI displays (ex. Retina Display on Macbooks)
+	// https://stackoverflow.com/questions/36672935/why-retina-screen-coordinate-value-is-twice-the-value-of-pixel-value
+	int frame_buffer_width_px, frame_buffer_height_px;
+	glfwGetFramebufferSize(glWindow.window, &frame_buffer_width_px, &frame_buffer_height_px);  // Note, this will be 2x the resolution given to glfwCreateWindow on Mac Retina displays
+	if (frame_buffer_width_px != glWindow.window_width_px())
+	{
+		std::cerr << "WARNING: retina display! https://stackoverflow.com/questions/36672935/why-retina-screen-coordinate-value-is-twice-the-value-of-pixel-value" << std::endl;
+		std::cerr << "glfwGetFramebufferSize = " << frame_buffer_width_px << ", " << frame_buffer_height_px << std::endl;
+		std::cerr << "window width_height = " << glWindow.window_width_px() << ", " << glWindow.window_height_px() << std::endl;
+	}
 
-        // Calculating elapsed times in milliseconds from the previous iteration
-		// auto now = Clock::now();
-		// float elapsed_ms =
-		// 	(float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000;
-		// t = now;
-    
-    //     world.step(elapsed_ms);
-    //     physics.step(elapsed_ms);
-    //     world.handle_collisions();
-    //
-    //     renderer.draw();
-        
-    }
+	// create our renderer
+	GLRender render;
+	render.init(glWindow);
 
-    return 0;
+	// game loop
+	while (!glWindow.shouldClose()) {
+
+		// we must poll for event or the window will stop responding
+		glfwPollEvents();
+
+		// clear the screen (RGB)
+		glClearColor((0.376), (0.78), (0.376), 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		// render
+		render.render(glWindow);
+
+		glfwSwapBuffers(glWindow.window);
+	}
+
+	// clean up
+	glDeleteFramebuffers(1, &frame_buffer);
+
+	return ERROR_SUCCESS;
 }
