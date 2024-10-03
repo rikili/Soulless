@@ -137,7 +137,7 @@ void RenderSystem::drawToScreen()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, w, h);
 	glDepthRange(0, 10);
-	glClearColor(1.f, 0, 0, 1.0);
+	glClearColor(0.376f, 0.78f, 0.376f, 1.0);
 	glClearDepth(1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	gl_has_errors();
