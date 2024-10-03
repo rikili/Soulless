@@ -10,6 +10,8 @@ enum class DamageType
     elementless
 };
 
+unsigned int QUEUE_SIZE = 8;
+
 // Spell/Projectile Constants
 
 // RANGED ENEMY

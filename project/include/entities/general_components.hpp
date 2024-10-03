@@ -2,6 +2,7 @@
 
 #include <core/common.hpp>
 #include <utils/constants.hpp> 
+#include <utils/spell_queue.hpp>
 
 // Motion Component
 struct Motion {
@@ -40,7 +41,7 @@ struct Player {
     DamageType left_hand;
     float cooldown = -1.f;
     unsigned int health_gauge = 0;
-    std::vector<DamageType> spell_queue;
+    SpellQueue spell_queue;
 };
 struct Projectile {
     DamageType type;
