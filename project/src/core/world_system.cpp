@@ -2,7 +2,12 @@
 
 #include "entities/ecs_registry.hpp"
 
-WorldSystem::WorldSystem() {}
+WorldSystem::WorldSystem(RenderSystem* renderer)
+{
+	this->renderer = renderer;
+	this->collision_system = new CollisionSystem(renderer);
+}
+
 WorldSystem::~WorldSystem() {}
 
 // Should the game be over ?
@@ -18,6 +23,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		Motion& motion = motions_registry.get(entity);
 		motion.position += motion.velocity * elapsed_ms_since_last_update;
 	}
+
+	this->collision_system->handle_collisions();
 
 	return true;
 }
@@ -38,9 +45,18 @@ void WorldSystem::initialize()
 	registry.players.emplace(player);
 	Motion& motion = registry.motions.emplace(player);
 	motion.position = { 0.0f, 0.0f };  // Center of the screen
-	motion.velocity = { 0.1f, 0.1f };
+	motion.velocity = { 0.0f, 0.0f };
 	motion.scale = { 0.5f, 0.5f };
 	this->renderer->addRenderRequest(player, "basic");
+
+
+	Entity player2;
+	registry.players.emplace(player2);
+	Motion& motion2 = registry.motions.emplace(player2);
+	motion2.position = { 0.0f, 0.5f };  // Center of the screen
+	motion2.velocity = { -0.0f, -0.1f };
+	motion2.scale = { 0.5f, 0.5f };
+	this->renderer->addRenderRequest(player2, "basic");
 }
 
 
