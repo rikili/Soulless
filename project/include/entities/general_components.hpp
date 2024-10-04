@@ -2,6 +2,12 @@
 
 #include "core/common.hpp"
 
+// Player component
+struct Player
+{
+    bool isPlayer = true;
+};
+
 // Motion Component
 struct Motion {
     vec2 position = { 0, 0 };

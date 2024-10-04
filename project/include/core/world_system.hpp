@@ -58,11 +58,6 @@ private:
 	float next_fish_spawn;
 	Entity player_salmon;
 
-	// music references
-	Mix_Music* background_music{};
-	Mix_Chunk* salmon_dead_sound{};
-	Mix_Chunk* salmon_eat_sound{};
-
 	// C++ random number generator
 	std::default_random_engine rng;
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
