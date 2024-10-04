@@ -95,6 +95,7 @@ public:
     AssetId createMaterial(const std::string& name, const AssetId& shader, const AssetId& texture = "");
     Shader* getShader(const AssetId& name);
     Mesh* getMesh(const AssetId& name);
+    Texture* getTexture(const AssetId& name);
 
 private:
     std::unordered_map<AssetId, std::shared_ptr<Mesh>> meshes;
