@@ -9,6 +9,14 @@
 
 using AssetId = std::string;  // Using strings for more flexible identification
 
+struct VertexAttribute {
+    GLint size;
+    GLenum type;
+    GLboolean normalized;
+    const char* semanticName;
+};
+
+
 struct Mesh {
     GLuint vao = 0;
     GLuint vbo = 0;
@@ -17,6 +25,7 @@ struct Mesh {
     size_t indexCount = 0;
     std::vector<float> vertices;
     std::vector<uint32_t> indices;
+    std::vector<VertexAttribute> attributes;
 };
 struct Texture {
     GLuint handle = 0;
@@ -66,14 +75,7 @@ struct Transform2D {
     }
 };
 
-class Box {
-public:
-    Transform2D transform;
-    glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);  // White by default
 
-    Box(const glm::vec2& position, const glm::vec2& size, float rotation = 0.0f)
-        : transform{position, rotation, size} {}
-};
 
 
 /**
@@ -86,7 +88,7 @@ public:
     AssetManager();
     ~AssetManager();
 
-    AssetId loadMesh(const std::string& name, const std::vector<float>& vertices, const std::vector<uint32_t>& indices = std::vector<uint32_t>());
+    AssetId loadMesh(const std::string& name, const std::vector<float>& vertices, const std::vector<uint32_t>& indices, const std::vector<VertexAttribute>& attributes);
     AssetId loadTexture(const std::string& name, const std::string& path);
     AssetId loadShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
     AssetId createMaterial(const std::string& name, const AssetId& shader, const AssetId& texture = "");

@@ -30,7 +30,7 @@ AssetManager::~AssetManager() {
     }
 }
 
-AssetId AssetManager::loadMesh(const std::string& name, const std::vector<float>& vertices, const std::vector<uint32_t>& indices) {
+AssetId AssetManager::loadMesh(const std::string& name, const std::vector<float>& vertices, const std::vector<uint32_t>& indices, const std::vector<VertexAttribute>& attributes) {
     auto mesh = std::make_shared<Mesh>();
 
     glGenVertexArrays(1, &mesh->vao);
@@ -41,11 +41,18 @@ AssetId AssetManager::loadMesh(const std::string& name, const std::vector<float>
     glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-    // Assuming vertex format: position (3 floats), texcoord (2 floats)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
+    GLsizei stride = 0;
+    for (const auto& attr : attributes) {
+        stride += attr.size * sizeof(float);
+    }
+
+    GLuint offset = 0;
+    for (GLuint i = 0; i < attributes.size(); ++i) {
+        const auto& attr = attributes[i];
+        glVertexAttribPointer(i, attr.size, attr.type, attr.normalized, stride, (void*)(offset * sizeof(float)));
+        glEnableVertexAttribArray(i);
+        offset += attr.size;
+    }
 
     if (!indices.empty()) {
         glGenBuffers(1, &mesh->ebo);
@@ -54,13 +61,15 @@ AssetId AssetManager::loadMesh(const std::string& name, const std::vector<float>
         mesh->indexCount = indices.size();
     }
 
-    mesh->vertexCount = vertices.size() / 5;  // 5 floats per vertex
+    mesh->vertexCount = vertices.size() / (stride / sizeof(float));
     mesh->vertices = vertices;
     mesh->indices = indices;
+    mesh->attributes = attributes;
 
     meshes[name] = std::move(mesh);
     return name;
 }
+
 
 AssetId AssetManager::loadTexture(const std::string& name, const std::string& path) {
     auto texture = std::make_shared<Texture>();

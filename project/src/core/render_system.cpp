@@ -88,7 +88,7 @@ void RenderSystem::drawFrame()
 	for (const RenderRequest& render_request : this->render_requests)
 	{
 		Entity entity = render_request.entity;
-		const Motion &motion = registry.motions.get(entity);
+		Motion &motion = registry.motions.get(entity);
 
 		if (!registry.motions.has(entity))
 		{
@@ -107,13 +107,13 @@ void RenderSystem::drawFrame()
 		const GLuint shaderProgram = shader->program;
 		glUseProgram(shaderProgram);
 
-		Transform transform;
-		transform.translate(motion.position);
-		transform.scale(motion.scale);
+		mat4 transform = mat4(1.0f); // Start with an identity matrix
+		transform = translate(transform, glm::vec3(motion.position, 0.0f)); // Apply translation
+		transform = scale(transform, glm::vec3(motion.scale, 1.0f)); // Apply scaling
 
 
 		const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform.mat));
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
 		const Mesh* mesh = this->asset_manager.getMesh(render_request.asset_id);
 
