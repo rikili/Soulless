@@ -18,8 +18,6 @@ public:
 	void initialize();
 
 private:
-	void on_key(int key, int, int action, int mod);
-	void on_mouse_move(vec2 pos);
 	GLFWwindow* window{};
 	RenderSystem* renderer;
 };
