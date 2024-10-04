@@ -1,3 +1,5 @@
+#pragma once
+
 #include <random>
 #include <utils/constants.hpp>
 
@@ -5,7 +7,7 @@ class SpellQueue
 {
 private:
 	unsigned int index = 0;
-	DamageType queue[QUEUE_SIZE];
+	std::array<DamageType, QUEUE_SIZE> queue;
 
 public:
 	SpellQueue()
@@ -20,11 +22,17 @@ public:
 
 	DamageType dequeue()
 	{
-		// TODO
+		// TODO: Implement + remove placeholder
+
+		// Placeholder return
+		return DamageType::fire;
 	}
 
-	DamageType get_queue()[QUEUE_SIZE]
+	const std::array<DamageType, QUEUE_SIZE>& getQueue() const
 	{
-		// TODO
+		// TODO: Implement + remove placeholder
+
+		// Placeholder return
+		return queue;
 	}
 };
