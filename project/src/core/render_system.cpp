@@ -38,6 +38,25 @@ bool RenderSystem::initialize(const int width, const int height, const char* tit
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
+
+	glfwSetWindowUserPointer(this->window, this);
+
+	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) {
+		((RenderSystem *)glfwGetWindowUserPointer(wnd))->inputHandler.onKey(_0, _1, _2, _3);
+	};
+
+	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) {
+		((RenderSystem *)glfwGetWindowUserPointer(wnd))->inputHandler.onMouseMove({_0, _1});
+	};
+
+	auto mouse_button_redirect = [](GLFWwindow* wnd, int _1, int _2, int _3) {
+			((RenderSystem *)glfwGetWindowUserPointer(wnd))->inputHandler.onMouseKey(_1, _2, _3);
+	};
+
+	glfwSetKeyCallback(window, key_redirect);
+	glfwSetCursorPosCallback(window, cursor_pos_redirect);
+	glfwSetMouseButtonCallback(window, mouse_button_redirect);
+
 	glfwMakeContextCurrent(this->window);
 	glfwSwapInterval(1);
 

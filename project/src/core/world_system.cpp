@@ -42,11 +42,3 @@ void WorldSystem::initialize()
 	motion.scale = { 0.5f, 0.5f };
 	this->renderer->addRenderRequest(player, "basic");
 }
-
-
-// On key callback
-void WorldSystem::on_key(int key, int, int action, int mod) {
-}
-
-void WorldSystem::on_mouse_move(vec2 mouse_position) {
-}
