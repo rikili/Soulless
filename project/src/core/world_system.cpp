@@ -18,6 +18,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		Motion& motion = motions_registry.get(entity);
 		motion.position += motion.velocity * elapsed_ms_since_last_update;
 	}
+
+	return true;
 }
 
 void WorldSystem::set_renderer(RenderSystem* renderer)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <random>
+#include <array>
 #include <utils/constants.hpp>
 
 class SpellQueue

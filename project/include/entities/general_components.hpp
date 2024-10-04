@@ -4,12 +4,6 @@
 #include <utils/constants.hpp> 
 #include <utils/spell_queue.hpp>
 
-// Player component
-struct Player
-{
-    bool isPlayer = true;
-};
-
 // Motion Component
 struct Motion {
     vec2 position = { 0, 0 };
