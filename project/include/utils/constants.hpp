@@ -1,3 +1,5 @@
+#pragma once
+
 enum class DamageType
 {
     fire,
@@ -10,20 +12,22 @@ enum class DamageType
     elementless
 };
 
-unsigned int QUEUE_SIZE = 8;
+// NOTE: Need to add `const` for global constants
+    // For non-const global vars, use `extern` to declare in a .hpp and define in a .cpp
+const unsigned int QUEUE_SIZE = 8;
 
 // Spell/Projectile Constants
 
 // RANGED ENEMY
-float RANGED_BASIC_VELOCITY = 1.f;
+const float RANGED_BASIC_VELOCITY = 1.f;
 
 // FIRE
-float FIRE_VELOCITY = 1.f;
+const float FIRE_VELOCITY = 1.f;
 
 // ICE
-float ICE_VELOCITY = 1.f;
-float ICE_DEGREE_DIFFERENCE = 15.f;
-int ICE_SHARD_COUNT = 4;
+const float ICE_VELOCITY = 1.f;
+const float ICE_DEGREE_DIFFERENCE = 15.f;
+const int ICE_SHARD_COUNT = 4;
 
 // LIGHTNING
 // PLASMA
