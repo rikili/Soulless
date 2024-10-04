@@ -6,6 +6,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <memory>
 
 using AssetId = std::string;  // Using strings for more flexible identification
 
