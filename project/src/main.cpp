@@ -1,65 +1,35 @@
-
 #define GL3W_IMPLEMENTATION
-#include <gl3w.h>
-#include <chrono>
+
 #include "core/render_system.hpp"
 #include "core/world_system.hpp"
-#include "input/glrender.hpp"
+#include "utils/game_assets.hpp"
 
-#define ERROR_SUCCESS 0
+#define ERROR_SUCCESS 0 // For Mac OS
 
 int main(int argc, char* argv[])
 {
+	WorldSystem world;
+	AssetManager asset_manager;
+	RenderSystem renderer;
 
-	// create the window and size it
-	GLWindow glWindow(1024, 768);
+	renderer.initialize(1200, 800, "Soulless"); // must be called at the beginning of the program
+	GLFWwindow* window = renderer.getGLWindow();
 
-	glfwMakeContextCurrent(glWindow.window);
-	//glfwSwapInterval(1); // vsync
+	GameAssets gameAssets = initializeGameAssets(asset_manager); // Initialize the asset manager
+	renderer.setAssetManager(&asset_manager);
+	world.set_renderer(&renderer);
+	world.initialize(); // Initialize the game world
 
-	// Load OpenGL function pointers... before we render or you will segfault below...
-	const int is_fine = gl3w_init();
-	assert(is_fine == 0);
+	while (!glfwWindowShouldClose(window)) { // Game loop
+		// IMPORTANT: The following lines order are CRUCIAL to the rendering process
+		renderer.setUpView(); // clear the screen
 
-	// viewport - necessary if we allow re-sizing of window, which we do not
-	glViewport(0, 0, glWindow.window_width_px(), glWindow.window_width_px());
+		world.step(0.01f); // Update the game state
 
-	GLuint frame_buffer;
-	frame_buffer = 0;
-	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
-
-	// check if the pixel buffer is as expected... apparently not the case for some high DPI displays (ex. Retina Display on Macbooks)
-	// https://stackoverflow.com/questions/36672935/why-retina-screen-coordinate-value-is-twice-the-value-of-pixel-value
-	int frame_buffer_width_px, frame_buffer_height_px;
-	glfwGetFramebufferSize(glWindow.window, &frame_buffer_width_px, &frame_buffer_height_px);  // Note, this will be 2x the resolution given to glfwCreateWindow on Mac Retina displays
-	if (frame_buffer_width_px != glWindow.window_width_px())
-	{
-		std::cerr << "WARNING: retina display! https://stackoverflow.com/questions/36672935/why-retina-screen-coordinate-value-is-twice-the-value-of-pixel-value" << std::endl;
-		std::cerr << "glfwGetFramebufferSize = " << frame_buffer_width_px << ", " << frame_buffer_height_px << std::endl;
-		std::cerr << "window width_height = " << glWindow.window_width_px() << ", " << glWindow.window_height_px() << std::endl;
+		renderer.drawFrame(); // Re-render the scene (where the magic happens)
+		glfwSwapBuffers(window); // swap front and back buffers
+		glfwPollEvents(); // poll for and process events
 	}
-
-	// create our renderer
-	GLRender render;
-	render.init(glWindow);
-
-	// game loop
-	while (!glWindow.shouldClose()) {
-
-		// we must poll for event or the window will stop responding
-		glfwPollEvents();
-
-		// clear the screen (RGB)
-		glClearColor((0.376), (0.78), (0.376), 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		// render
-		render.render(glWindow);
-
-		glfwSwapBuffers(glWindow.window);
-	}
-
-	// clean up
-	glDeleteFramebuffers(1, &frame_buffer);
-
+	// TODO: Add cleanup code here
 	return ERROR_SUCCESS;
 }

@@ -15,6 +15,8 @@ public:
 	ComponentContainer<Health> healths;
 	ComponentContainer<ResistanceModifier> resistanceModifiers;
 	ComponentContainer<Collision> collisions;
+	ComponentContainer<Player> players;
+
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -24,6 +26,7 @@ public:
 		registry_list.push_back(&healths);
 		registry_list.push_back(&resistanceModifiers);
 		registry_list.push_back(&collisions);
+		registry_list.push_back(&players);
 	}
 
 	void clear_all_components() {
