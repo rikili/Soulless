@@ -42,5 +42,5 @@ void WorldSystem::initialize()
 	motion.position = { 0.0f, 0.0f };  // Center of the screen
 	motion.velocity = { 0.25f, 0.25f };
 	motion.scale = { 0.5f, 0.5f };
-	this->renderer->addRenderRequest(player, "basic");
+	this->renderer->addRenderRequest(player, "basic", "", "basic");
 }
