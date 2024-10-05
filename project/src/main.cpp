@@ -8,9 +8,9 @@
 
 int main(int argc, char* argv[])
 {
-	WorldSystem world;
 	AssetManager asset_manager;
 	RenderSystem renderer;
+	WorldSystem world = WorldSystem(&renderer);
 
 	renderer.initialize(1200, 800, "Soulless"); // must be called at the beginning of the program
 	GLFWwindow* window = renderer.getGLWindow();

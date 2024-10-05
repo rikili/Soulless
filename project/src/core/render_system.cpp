@@ -180,3 +180,12 @@ void RenderSystem::drawFrame()
 	}
 }
 
+
+void RenderSystem::removeRenderRequest(Entity entity)
+{
+    auto it = std::remove_if(this->render_requests.begin(), this->render_requests.end(),
+                             [entity](const RenderRequest& render_request) {
+                                 return render_request.entity == entity;
+                             });
+    this->render_requests.erase(it, this->render_requests.end());
+}
