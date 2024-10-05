@@ -103,7 +103,28 @@ void RenderSystem::drawFrame()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// Draw the background
+	const Shader* bgShader = this->asset_manager.getShader("background");
+	const Mesh* bgMesh = this->asset_manager.getMesh("background");
+	const Texture* bgTexture = this->asset_manager.getTexture("grass");
 
+	if (bgShader && bgMesh && bgTexture) {
+		glUseProgram(bgShader->program);
+
+		// Set the texture
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, bgTexture->handle);  // Assuming Texture struct has an 'id' field
+		glUniform1i(glGetUniformLocation(bgShader->program, "backgroundTexture"), 0);
+
+		// Set the repeat factor (adjust these values to control the number of repetitions)
+		glUniform2f(glGetUniformLocation(bgShader->program, "repeatFactor"), 10.0f, 10.0f);
+
+		glBindVertexArray(bgMesh->vao);
+		glDrawElements(GL_TRIANGLES, bgMesh->indexCount, GL_UNSIGNED_INT, 0);
+	}
+
+
+	// Draw all entities
 	for (const RenderRequest& render_request : this->render_requests)
 	{
 		Entity entity = render_request.entity;

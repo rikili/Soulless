@@ -166,7 +166,7 @@ AssetId AssetManager::createMaterial(const std::string& name, const AssetId& sha
 }
 
 Shader* AssetManager::getShader(const AssetId& name)  {
-    auto it = shaders.find(name);
+    const auto it = shaders.find(name);
     if (it != shaders.end()) {
         return it->second.get();
     }
@@ -174,10 +174,18 @@ Shader* AssetManager::getShader(const AssetId& name)  {
 }
 
  Mesh* AssetManager::getMesh(const AssetId& name)  {
-    auto it = meshes.find(name);
+     const auto it = meshes.find(name);
     if (it != meshes.end()) {
         return it->second.get();
     }
     return nullptr;
 }
 
+
+Texture* AssetManager::getTexture(const AssetId& name)  {
+    auto it = textures.find(name);
+    if (it != textures.end()) {
+        return it->second.get();
+    }
+    return nullptr;
+}
