@@ -4,6 +4,7 @@
 #include <utility>
 #include "common.hpp"
 #include "graphics/asset_manager.hpp"
+#include "input/input_handler.hpp"
 
 /**
  * Struct to hold the render request data for the render system
@@ -29,6 +30,7 @@ public:
 	void addRenderRequest(Entity entity, AssetId asset_id) { render_requests.push_back({entity, std::move(asset_id)}); }
 
 private:
+	InputHandler inputHandler;
 	GLuint frame_buffer = 0;
 	Entity screen_state_entity;
 	GLFWwindow* window = nullptr;

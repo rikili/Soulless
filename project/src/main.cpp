@@ -20,11 +20,16 @@ int main(int argc, char* argv[])
 	world.set_renderer(&renderer);
 	world.initialize(); // Initialize the game world
 
+	auto t = std::chrono::high_resolution_clock::now();
 	while (!glfwWindowShouldClose(window)) { // Game loop
 		// IMPORTANT: The following lines order are CRUCIAL to the rendering process
 		renderer.setUpView(); // clear the screen
 
-		world.step(0.01f); // Update the game state
+		auto now = std::chrono::high_resolution_clock::now();
+		float elapsed_ms = (std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000.0f;
+		t = now;
+
+		world.step(elapsed_ms); // Update the game state
 
 		renderer.drawFrame(); // Re-render the scene (where the magic happens)
 		glfwSwapBuffers(window); // swap front and back buffers
