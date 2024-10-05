@@ -4,6 +4,7 @@
 #include "graphics/asset_manager.hpp"
 #include <unordered_map>
 #include <string>
+#include <chrono>
 
 // Structure to hold all asset IDs for easy access
 struct GameAssets {
