@@ -16,7 +16,9 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// Update all motions
 	for (Entity entity : motions_registry.entities) {
 		Motion& motion = motions_registry.get(entity);
-		motion.position += motion.velocity * elapsed_ms_since_last_update;
+
+		float seconds = elapsed_ms_since_last_update / 1000.0f;
+		motion.position += motion.velocity * seconds;
 	}
 
 	return true;
@@ -38,7 +40,7 @@ void WorldSystem::initialize()
 	registry.players.emplace(player);
 	Motion& motion = registry.motions.emplace(player);
 	motion.position = { 0.0f, 0.0f };  // Center of the screen
-	motion.velocity = { 0.1f, 0.1f };
+	motion.velocity = { 0.25f, 0.25f };
 	motion.scale = { 0.5f, 0.5f };
 	this->renderer->addRenderRequest(player, "basic");
 }
