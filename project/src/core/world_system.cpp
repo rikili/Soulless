@@ -118,5 +118,5 @@ void WorldSystem::createEnemy(vec2 position, vec2 velocity)
 	damage.value = 10.f;
 	damage.type = DamageType::enemy;
 
-	this->renderer->addRenderRequest(enemy, "basic");
+        this->renderer->addRenderRequest(enemy, "basic", "", "basic");
 }
