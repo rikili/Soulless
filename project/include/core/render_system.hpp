@@ -13,7 +13,9 @@
  */
 struct RenderRequest {
 	Entity entity;
-	AssetId asset_id;
+	AssetId mesh;
+	AssetId texture;
+	AssetId shader;
 };
 
 /**
@@ -27,7 +29,7 @@ public:
 	GLFWwindow* getGLWindow() const;
 	void drawFrame();
 	void setAssetManager(AssetManager* asset_manager) { this->asset_manager = *asset_manager; }
-	void addRenderRequest(Entity entity, AssetId asset_id) { render_requests.push_back({entity, std::move(asset_id)}); }
+	void addRenderRequest(Entity entity, AssetId mesh, AssetId texture, AssetId shader);
 	void removeRenderRequest(Entity entity);
 
 private:

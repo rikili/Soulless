@@ -94,6 +94,11 @@ GLFWwindow* RenderSystem::getGLWindow() const
 	return this->window;
 }
 
+void RenderSystem::addRenderRequest(Entity entity, AssetId mesh, AssetId texture, AssetId shader)
+{
+	render_requests.push_back({ entity, std::move(mesh), std::move(texture), std::move(shader)});
+}
+
 /**
  * @brief Draw the frame
  * This function is called every frame to draw the frame
@@ -137,29 +142,33 @@ void RenderSystem::drawFrame()
 			continue;
 		}
 
-		const Shader* shader = this->asset_manager.getShader(render_request.asset_id);
-		if (!shader)
-		{
-			printf("Could not find shader with id %s\n", render_request.asset_id.c_str());
-			printf("Skipping rendering of this shader\n");
-			continue;
+		if (render_request.shader != "") {
+			const Shader* shader = this->asset_manager.getShader(render_request.shader);
+			if (!shader)
+			{
+				printf("Could not find shader with id %s\n", render_request.shader.c_str());
+				printf("Skipping rendering of this shader\n");
+				continue;
+			}
+			const GLuint shaderProgram = shader->program;
+			glUseProgram(shaderProgram);
+
+			mat4 transform = mat4(1.0f); // Start with an identity matrix
+			transform = translate(transform, glm::vec3(motion.position, 0.0f)); // Apply translation
+			transform = scale(transform, glm::vec3(motion.scale, 1.0f)); // Apply scaling
+
+
+			const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
+			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 		}
-		const GLuint shaderProgram = shader->program;
-		glUseProgram(shaderProgram);
+		
+		// TODO: textures
 
-		mat4 transform = mat4(1.0f); // Start with an identity matrix
-		transform = translate(transform, glm::vec3(motion.position, 0.0f)); // Apply translation
-		transform = scale(transform, glm::vec3(motion.scale, 1.0f)); // Apply scaling
-
-
-		const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
-
-		const Mesh* mesh = this->asset_manager.getMesh(render_request.asset_id);
+		const Mesh* mesh = this->asset_manager.getMesh(render_request.mesh);
 
 		if (!mesh)
 		{
-			std::cerr << "Mesh with id " << render_request.asset_id << " not found!" << std::endl;
+			std::cerr << "Mesh with id " << render_request.mesh << " not found!" << std::endl;
 			std::cerr << "Skipping rendering of this mesh" << std::endl;
 			continue;
 		}
