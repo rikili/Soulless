@@ -16,11 +16,14 @@ public:
 	bool step(float elapsed_ms);
 	bool is_over()const;
 	void set_renderer(RenderSystem* renderer);
+	void handle_movements(float elapsed_ms_since_last_update);
 	void initialize();
 
 private:
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
+	void createPlayer();
+	void createEnemy(vec2 position, vec2 velocity);
 	GLFWwindow* window{};
 	RenderSystem* renderer;
 	CollisionSystem* collision_system;

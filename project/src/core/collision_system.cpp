@@ -32,9 +32,20 @@ void CollisionSystem::handle_collisions()
                 motion.position.y < other_motion.position.y + other_motion.scale.y &&
                 motion.position.y + motion.scale.y > other_motion.position.y)
             {
-                // Collision detected!
-                // For now, we just print a message
-                printf("Collision detected between entity %d and entity %d\n", static_cast<int>(entity), static_cast<int>(other_entity));
+                Deadly& deadly = registry.deadlies.get(entity);
+                if (deadly.to_enemy && registry.enemies.has(other_entity)){
+                    // printf("Entity %d is deadly to entity %d\n", static_cast<int>(entity), static_cast<int>(other_entity));
+                }
+                else if (deadly.to_player && registry.players.has(other_entity))
+                {
+                    // printf("Entity %d is deadly to entity %d\n", static_cast<int>(entity), static_cast<int>(other_entity));
+                }
+                else
+                {
+                    // printf("Collision detected between entity %d and entity %d\n", static_cast<int>(entity), static_cast<int>(other_entity));
+                }
+
+                // printf("Collision detected between entity %d and entity %d\n", static_cast<int>(entity), static_cast<int>(other_entity));
             }
         }
     }
