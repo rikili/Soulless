@@ -30,12 +30,13 @@ struct Health
 struct Damage
 {
     float value = 0.f;
-    DamageType type;
+    DamageType type = DamageType::enemy;
 };
 
 // Type Components
-struct RangedEnemy { };
-struct MeleeEnemy { };
+// struct RangedEnemy { };
+// struct MeleeEnemy { };
+struct Enemy { };
 struct Player {
     DamageType right_hand;
     DamageType left_hand;
@@ -57,4 +58,19 @@ struct Collision
     // Note, the first object is stored in the ECS container.entities
     Entity other{}; // the second object involved in the collision
     explicit Collision(Entity& other) { this->other = other; };
+};
+
+// Structure to store entities marked to die
+struct Death
+{
+    float timer = 10;
+};
+
+
+// Structure to store what entites affect/damage other entities
+struct Deadly
+{
+    bool to_player = false;
+    bool to_enemy = false;
+    bool to_projectile = false;
 };

@@ -30,6 +30,7 @@ public:
 	void drawFrame();
 	void setAssetManager(AssetManager* asset_manager) { this->asset_manager = *asset_manager; }
 	void addRenderRequest(Entity entity, AssetId mesh, AssetId texture, AssetId shader);
+	void removeRenderRequest(Entity entity);
 
 private:
 	InputHandler inputHandler;
