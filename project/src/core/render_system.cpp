@@ -94,6 +94,11 @@ GLFWwindow* RenderSystem::getGLWindow() const
 	return this->window;
 }
 
+void RenderSystem::addRenderRequest(Entity entity, AssetId mesh, AssetId texture, AssetId shader)
+{
+	render_requests.push_back({ entity, std::move(mesh), std::move(texture), std::move(shader)});
+}
+
 /**
  * @brief Draw the frame
  * This function is called every frame to draw the frame
