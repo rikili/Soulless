@@ -53,7 +53,7 @@ void WorldSystem::initialize()
 	this->createPlayer();
 
 	// Create an enemy
-	constexpr int num_enemies = 10;
+	constexpr int num_enemies = 2;
 	std::random_device rd;  // Random device
 	std::mt19937 gen(rd()); // Mersenne Twister generator
 	std::uniform_real_distribution<float> dis(-1.0f, 1.0f); // Distribution range [-1, 1]
@@ -62,18 +62,10 @@ void WorldSystem::initialize()
 	{
 		float x = dis(gen);
 		float y = dis(gen);
-		// float vx = dis(gen);
-		// float vy = dis(gen);
-		this->createEnemy({ x, y }, { 0.3f, 0.1f });
+		float vx = dis(gen) / 1000;
+		float vy = dis(gen) / 1000;
+		this->createEnemy({ x, y }, { vx, vy });
 	}
-}
-
-
-// On key callback
-void WorldSystem::on_key(int key, int, int action, int mod) {
-}
-
-void WorldSystem::on_mouse_move(vec2 mouse_position) {
 }
 
 
@@ -83,13 +75,12 @@ void WorldSystem::createPlayer() {
 	Motion& motion = registry.motions.emplace(player);
 	motion.position = { 0.0f, 0.0f };  // Center of the screen
 	motion.velocity = { 0.0f, 0.0f };
-	motion.scale = { 0.1f, 0.1f };
+	motion.scale = { 0.2f, 0.2f };
 
 	Health& health = registry.healths.emplace(player);
 	health.health = 100;
 	health.maxHealth = 100;
 	// TODO: Add resistances here!
-
 
 	// Player& player_component = registry.players.emplace(player);
 	// // TODO: Add player initialization code here!
@@ -121,7 +112,7 @@ void WorldSystem::createEnemy(vec2 position, vec2 velocity)
 	Deadly& deadly = registry.deadlies.emplace(enemy);
 	deadly.to_projectile = true;
 	deadly.to_enemy = false;
-	deadly.to_player = true;
+	deadly.to_player = false;
 
 	Damage& damage = registry.damages.emplace(enemy);
 	damage.value = 10.f;

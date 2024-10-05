@@ -5,8 +5,7 @@
 #include "render_system.hpp"
 
 /**
- * Container for all our entities and game logic. Individual rendering / update is
- * deferred to the relative update() methods
+ * Container for all our entities and game logic.
  */
 class WorldSystem
 {
@@ -20,10 +19,11 @@ public:
 	void initialize();
 
 private:
-	void on_key(int key, int, int action, int mod);
-	void on_mouse_move(vec2 pos);
+	// helper functions to set the world
 	void createPlayer();
 	void createEnemy(vec2 position, vec2 velocity);
+
+
 	GLFWwindow* window{};
 	RenderSystem* renderer;
 	CollisionSystem* collision_system;
