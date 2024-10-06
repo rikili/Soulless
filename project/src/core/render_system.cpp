@@ -181,9 +181,6 @@ void RenderSystem::drawFrame()
 				glBindTexture(GL_TEXTURE_2D, texture->handle);
 				glUniform1i(glGetUniformLocation(shader->program, "image"), 0);
 			}
-
-		}
-
 			mat4 projection = glm::ortho(0.f, (float)window_width_px, (float)window_height_px, 0.f, -1.f, 1.f);
 
 			const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
@@ -191,9 +188,8 @@ void RenderSystem::drawFrame()
 			const GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
 			glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 			gl_has_errors();
-		}
-
-
+		}	
+	
 		const Mesh* mesh = this->asset_manager.getMesh(render_request.mesh);
 
 		if (!mesh)
