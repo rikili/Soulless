@@ -91,6 +91,7 @@ public:
 
     AssetId loadMesh(const std::string& name, const std::vector<float>& vertices, const std::vector<uint32_t>& indices, const std::vector<VertexAttribute>& attributes);
     AssetId loadTexture(const std::string& name, const std::string& path);
+    AssetId loadBackgroundTexture(const std::string& name, const std::string& path);
     AssetId loadShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
     AssetId createMaterial(const std::string& name, const AssetId& shader, const AssetId& texture = "");
     Shader* getShader(const AssetId& name);

@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
 	RenderSystem renderer;
 	WorldSystem world = WorldSystem(&renderer);
 
-	renderer.initialize(1200, 800, "Soulless"); // must be called at the beginning of the program
+	renderer.initialize(window_width_px, window_height_px, "Soulless"); // must be called at the beginning of the program
 	GLFWwindow* window = renderer.getGLWindow();
 
 	GameAssets gameAssets = initializeGameAssets(asset_manager); // Initialize the asset manager
