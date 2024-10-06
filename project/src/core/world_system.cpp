@@ -53,17 +53,17 @@ void WorldSystem::initialize()
 	player_mage = this->createPlayer();
 
 	// Create an enemy
-	constexpr int num_enemies = 2;
+	constexpr int num_enemies = 0;
 	std::random_device rd;  // Random device
 	std::mt19937 gen(rd()); // Mersenne Twister generator
-	std::uniform_real_distribution<float> dis(-1.0f, 1.0f); // Distribution range [-1, 1]
+	std::uniform_real_distribution<float> dis(0.f, 1.0f); // Distribution range [0, 1]
 
 	for (int i = 0; i < num_enemies; i++)
 	{
-		float x = dis(gen);
-		float y = dis(gen);
-		float vx = dis(gen) / 1000;
-		float vy = dis(gen) / 1000;
+		float x = dis(gen) * (float)window_height_px;
+		float y = dis(gen) * (float)window_width_px;
+		float vx = dis(gen) * (dis(gen) > 0.5f ? 1 : -1) * 50;
+		float vy = dis(gen) * (dis(gen) > 0.5f ? 1 : -1) * 50;
 		this->createEnemy({ x, y }, { vx, vy });
 	}
 }
@@ -74,7 +74,7 @@ Entity WorldSystem::createPlayer() {
 
 	registry.players.emplace(player);
 	Motion& motion = registry.motions.emplace(player);
-	motion.position = { 0.0f, 0.0f };  // Center of the screen
+	motion.position = { window_width_px / 2.0f, window_height_px / 2.0f };  // Center of the screen
 	motion.velocity = { 0.0f, 0.0f };
 	motion.scale = { 0.1f, 0.1f };
 
