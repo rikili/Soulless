@@ -18,10 +18,11 @@ public:
 	void handle_movements(float elapsed_ms_since_last_update);
 	void handle_timers(float elapsed_ms_since_last_update);
 	void initialize();
+	Entity getPlayer();
 
 private:
 	// helper functions to set the world
-	void createPlayer();
+	Entity createPlayer();
 	void createEnemy(vec2 position, vec2 velocity);
 
 
@@ -29,4 +30,5 @@ private:
 	RenderSystem* renderer;
 	CollisionSystem* collision_system;
 	InputHandler inputHandler;
+	Entity player_mage;
 };

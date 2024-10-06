@@ -92,7 +92,7 @@ void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 void WorldSystem::initialize()
 {
 	// Create a player
-	this->createPlayer();
+	player_mage = this->createPlayer();
 
 	// Create an enemy
 	constexpr int num_enemies = 0;
@@ -113,13 +113,14 @@ void WorldSystem::initialize()
 }
 
 
-void WorldSystem::createPlayer() {
-	const Entity player;
+Entity WorldSystem::createPlayer() {
+	auto player = Entity();
+
 	registry.players.emplace(player);
 	Motion& motion = registry.motions.emplace(player);
 	motion.position = { window_width_px / 2.0f, window_height_px / 2.0f };  // Center of the screen
 	motion.velocity = { 0.0f, 0.0f };
-	motion.scale = { 1.f, 1.f };
+	motion.scale = { 0.5f, 0.5f };
 
 	Health& health = registry.healths.emplace(player);
 	health.health = 100;
@@ -130,8 +131,11 @@ void WorldSystem::createPlayer() {
 	// // TODO: Add player initialization code here!
 
 	RenderRequest& request = registry.render_requests.emplace(player);
-	request.mesh = "basic";
-	request.shader = "basic";
+	request.mesh = "sprite";
+	request.texture = "mage";
+	request.shader = "sprite";
+
+	return player;
 }
 
 

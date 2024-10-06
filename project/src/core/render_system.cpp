@@ -103,6 +103,11 @@ GLFWwindow* RenderSystem::getGLWindow() const
 void RenderSystem::drawFrame()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_DEPTH_TEST); // native OpenGL does not work with a depth buffer
+							  // and alpha blending, one would have to sort
+							  // sprites back to front
 
 	// Draw the background
 	const Shader* bgShader = this->asset_manager.getShader("background");
@@ -154,6 +159,20 @@ void RenderSystem::drawFrame()
 			transform = translate(transform, glm::vec3(motion.position, 0.0f));
 			transform = scale(transform, vec3(motion.scale * 100.f, 1.0f));
 
+
+			if (render_request.shader == "sprite") {
+
+				const Texture* texture = this->asset_manager.getTexture(render_request.texture);
+				if (!texture)
+				{
+					std::cerr << "Texture with id " << render_request.texture << " not found!" << std::endl;
+					continue;
+				}
+
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, texture->handle);
+				glUniform1i(glGetUniformLocation(shader->program, "image"), 0);
+			}
 			mat4 projection = glm::ortho(0.f, (float)window_width_px, (float)window_height_px, 0.f, -1.f, 1.f);
 
 			const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
@@ -161,10 +180,8 @@ void RenderSystem::drawFrame()
 			const GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
 			glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 			gl_has_errors();
-		}
-
-		// TODO: textures
-
+		}	
+	
 		const Mesh* mesh = this->asset_manager.getMesh(render_request.mesh);
 
 		if (!mesh)
@@ -173,6 +190,7 @@ void RenderSystem::drawFrame()
 			std::cerr << "Skipping rendering of this mesh" << std::endl;
 			continue;
 		}
+
 		glBindVertexArray(mesh->vao);
 		glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
 
@@ -189,13 +207,3 @@ void RenderSystem::drawFrame()
 		// 	  << ", index count: " << mesh->indexCount << std::endl;
 	}
 }
-
-
-//void RenderSystem::removeRenderRequest(Entity entity)
-//{
-//	auto it = std::remove_if(this->render_requests.begin(), this->render_requests.end(),
-//		[entity](const RenderRequest& render_request) {
-//			return render_request.entity == entity;
-//		});
-//	this->render_requests.erase(it, this->render_requests.end());
-//}

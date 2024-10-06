@@ -6,6 +6,7 @@ GameAssets initializeGameAssets(AssetManager& assetManager) {
     GameAssets assets;
     assets.shaders["basic"] = assetManager.loadShader("basic", shader_path("basic") + ".vs.glsl", shader_path("basic") + ".fs.glsl");
     assets.shaders["background"] = assetManager.loadShader("background", shader_path("background") + ".vs.glsl", shader_path("background") + ".fs.glsl");
+    assets.shaders["sprite"] = assetManager.loadShader("sprite", shader_path("sprite") + ".vs.glsl", shader_path("sprite") + ".fs.glsl");
 
     const std::vector<float> vertices = {
         // positions        // colors           // texture coords
@@ -27,6 +28,24 @@ GameAssets initializeGameAssets(AssetManager& assetManager) {
     };
     AssetId meshId = assetManager.loadMesh("basic", vertices, indices, attributes);
 
+    const std::vector<float> spriteVertices = {
+        // positions        // texture coords
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+         1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+         1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f
+    };
+
+    const std::vector<VertexAttribute> spriteAttributes = {
+        {3, GL_FLOAT, GL_FALSE, "position"},
+        {2, GL_FLOAT, GL_FALSE, "texCoord"}
+    };
+
+    AssetId spriteMeshId = assetManager.loadMesh("sprite", spriteVertices, indices, spriteAttributes);
+
+    AssetId mageTextureId = assetManager.loadTexture("mage", textures_path("mage") + ".png");
+    assets.textures["mage"] = mageTextureId;
+
     // Add a new mesh for the background (full screen quad)
     const std::vector<float> bgVertices = {
         // positions        // texture coords
@@ -42,7 +61,7 @@ GameAssets initializeGameAssets(AssetManager& assetManager) {
     };
     AssetId bgMeshId = assetManager.loadMesh("background", bgVertices, indices, bgAttributes);
 
-    AssetId grassTextureId  = assetManager.loadTexture("grass", textures_path("grass") + ".jpg");
+    AssetId grassTextureId  = assetManager.loadBackgroundTexture("grass", textures_path("grass") + ".jpg");
     assets.textures["grass"] = grassTextureId;
 
     // Set texture parameters for repeating
