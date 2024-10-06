@@ -116,19 +116,15 @@ void InputHandler::onMouseKey(int button, int action, int mods) {
 void InputHandler::updateVelocity() {
     // TODO: get global player
     // Entity player = player_wizard;
-    auto player = Entity();
-    Motion& motion = registry.motions.emplace(player);
-    motion.position = { 50, 50 };
-    motion.angle = 0.f;
-    motion.velocity = { 0.f, 0.f };
+    auto player = registry.players.entities[0];
 
     auto& motion_registry = registry.motions;
     Motion& playerMotion = motion_registry.get(player);
 
-    int verticalDir = activeMoveKeys.count(GLFW_KEY_S) - activeMoveKeys.count(GLFW_KEY_W);
+    int verticalDir = activeMoveKeys.count(GLFW_KEY_W) - activeMoveKeys.count(GLFW_KEY_S);
     int horizontalDir = activeMoveKeys.count(GLFW_KEY_D) - activeMoveKeys.count(GLFW_KEY_A);
 
-    float maxSpeed = 10; // TODO: get this from component
+    float maxSpeed = 0.001; // TODO: get this from component
 
     if (horizontalDir != 0 || verticalDir != 0) {
         float normalizedSpeed = maxSpeed;
@@ -145,4 +141,5 @@ void InputHandler::updateVelocity() {
     }
 
     printd("New velocity is: %f, %f\n", playerMotion.velocity.x, playerMotion.velocity.y);
+    printd("New position is: %f, %f\n", playerMotion.position.x, playerMotion.position.y);
 }
