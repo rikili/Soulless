@@ -18,8 +18,10 @@ bool WorldSystem::is_over() const {
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
+	this->handle_timers(elapsed_ms_since_last_update);
 	this->handle_movements(elapsed_ms_since_last_update);
 	this->collision_system->handle_collisions();
+
 	return true;
 }
 
@@ -42,6 +44,46 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 	}
 }
 
+/**
+ * @brief In charge of updating timers and their side effects
+ * @param elapsed_ms_since_last_update
+ */
+void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
+{
+	for (Entity& hit_ent : registry.onHits.entities)
+	{
+		OnHit& hit = registry.onHits.get(hit_ent);
+		hit.invincibility_timer -= elapsed_ms_since_last_update;
+		if (hit.invincibility_timer < 0)
+		{
+			registry.onHits.remove(hit_ent);
+		}
+	}
+
+	for (Entity& dead_ent : registry.deaths.entities)
+	{
+		Death& death = registry.deaths.get(dead_ent);
+		death.timer -= elapsed_ms_since_last_update;
+		if (death.timer < 0)
+		{
+			// TODO: add custom player death
+			if (!registry.players.has(dead_ent))
+			{
+				registry.remove_all_components_of(dead_ent);
+			}
+		}
+	}
+
+	for (Entity& player_ent : registry.players.entities)
+	{
+		Player& player = registry.players.get(player_ent);
+		player.cooldown -= elapsed_ms_since_last_update;
+		if (player.cooldown < 0)
+		{
+			player.cooldown = 0;
+		}
+	}
+}
 
 /**
  * Initialize the game world
@@ -58,14 +100,16 @@ void WorldSystem::initialize()
 	std::mt19937 gen(rd()); // Mersenne Twister generator
 	std::uniform_real_distribution<float> dis(0.f, 1.0f); // Distribution range [0, 1]
 
-	for (int i = 0; i < num_enemies; i++)
-	{
-		float x = dis(gen) * (float)window_height_px;
-		float y = dis(gen) * (float)window_width_px;
-		float vx = dis(gen) * (dis(gen) > 0.5f ? 1 : -1) * 50;
-		float vy = dis(gen) * (dis(gen) > 0.5f ? 1 : -1) * 50;
-		this->createEnemy({ x, y }, { vx, vy });
-	}
+	//for (int i = 0; i < num_enemies; i++)
+	//{
+	//	float x = dis(gen) * (float)window_height_px;
+	//	float y = dis(gen) * (float)window_width_px;
+	//	float vx = dis(gen) * (dis(gen) > 0.5f ? 1 : -1) * 50;
+	//	float vy = dis(gen) * (dis(gen) > 0.5f ? 1 : -1) * 50;
+	//	this->createEnemy({ x, y }, { vx, vy });
+	//}
+	
+	this->createEnemy({ 900, 400 }, { 0, 0 });
 }
 
 
@@ -85,25 +129,20 @@ void WorldSystem::createPlayer() {
 	// Player& player_component = registry.players.emplace(player);
 	// // TODO: Add player initialization code here!
 
-
-	// Player itself has no damage on other entities
-	Deadly& deadly = registry.deadlies.emplace(player);
-	deadly.to_projectile = false;
-	deadly.to_enemy = false;
-	deadly.to_player = false;
-
-	this->renderer->addRenderRequest(player, "basic", "", "basic");
+	RenderRequest& request = registry.render_requests.emplace(player);
+	request.mesh = "basic";
+	request.shader = "basic";
 }
 
 
 void WorldSystem::createEnemy(vec2 position, vec2 velocity)
 {
-	const Entity enemy;
+	Entity enemy;
 	registry.enemies.emplace(enemy);
 	Motion& motion = registry.motions.emplace(enemy);
 	motion.position = position;
 	motion.velocity = velocity;
-	motion.scale = { 0.1f, 0.1f };
+	motion.scale = { 1.f, 1.f };
 
 	Health& health = registry.healths.emplace(enemy);
 	health.health = 100;
@@ -118,5 +157,7 @@ void WorldSystem::createEnemy(vec2 position, vec2 velocity)
 	damage.value = 10.f;
 	damage.type = DamageType::enemy;
 
-    this->renderer->addRenderRequest(enemy, "basic", "", "basic");
+	RenderRequest& request = registry.render_requests.emplace(enemy);
+	request.mesh = "basic";
+	request.shader = "basic";
 }

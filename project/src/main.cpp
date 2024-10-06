@@ -10,9 +10,10 @@ int main(int argc, char* argv[])
 {
 	AssetManager asset_manager;
 	RenderSystem renderer;
+	InputHandler input_handler;
 	WorldSystem world = WorldSystem(&renderer);
 
-	renderer.initialize(1200, 800, "Soulless"); // must be called at the beginning of the program
+	renderer.initialize(input_handler, window_width_px, window_height_px, "Soulless"); // must be called at the beginning of the program
 	GLFWwindow* window = renderer.getGLWindow();
 
 	GameAssets gameAssets = initializeGameAssets(asset_manager); // Initialize the asset manager
