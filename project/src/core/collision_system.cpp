@@ -104,14 +104,12 @@ void CollisionSystem::handle_collisions()
                         // projectile <-> player collision
                         if (deadly.to_player && registry.players.has(other_target))
                         {
-                            printd("collision with player\n");
+                            // TODO
                         }
                         // projectile <-> enemy collision
                         else if (deadly.to_enemy && registry.enemies.has(other_target))
                         {
-                            printd("collision with enemy\n");
                             this->applyDamage(deadly_target, other_target);
-
                         }
                         else
                         {
