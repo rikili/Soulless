@@ -50,7 +50,7 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 void WorldSystem::initialize()
 {
 	// Create a player
-	this->createPlayer();
+	player_mage = this->createPlayer();
 
 	// Create an enemy
 	constexpr int num_enemies = 2;
@@ -69,13 +69,14 @@ void WorldSystem::initialize()
 }
 
 
-void WorldSystem::createPlayer() {
-	const Entity player;
+Entity WorldSystem::createPlayer() {
+	auto player = Entity();
+
 	registry.players.emplace(player);
 	Motion& motion = registry.motions.emplace(player);
 	motion.position = { 0.0f, 0.0f };  // Center of the screen
 	motion.velocity = { 0.0f, 0.0f };
-	motion.scale = { 0.2f, 0.2f };
+	motion.scale = { 0.1f, 0.1f };
 
 	Health& health = registry.healths.emplace(player);
 	health.health = 100;
@@ -92,7 +93,9 @@ void WorldSystem::createPlayer() {
 	deadly.to_enemy = false;
 	deadly.to_player = false;
 
-	this->renderer->addRenderRequest(player, "basic", "", "basic");
+	this->renderer->addRenderRequest(player, "sprite", "mage", "sprite");
+
+	return player;
 }
 
 
@@ -118,5 +121,5 @@ void WorldSystem::createEnemy(vec2 position, vec2 velocity)
 	damage.value = 10.f;
 	damage.type = DamageType::enemy;
 
-        this->renderer->addRenderRequest(enemy, "basic", "", "basic");
+    this->renderer->addRenderRequest(enemy, "basic", "", "basic");
 }

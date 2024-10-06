@@ -17,14 +17,16 @@ public:
 	void set_renderer(RenderSystem* renderer);
 	void handle_movements(float elapsed_ms_since_last_update);
 	void initialize();
+	Entity getPlayer();
 
 private:
 	// helper functions to set the world
-	void createPlayer();
+	Entity createPlayer();
 	void createEnemy(vec2 position, vec2 velocity);
 
 
 	GLFWwindow* window{};
 	RenderSystem* renderer;
 	CollisionSystem* collision_system;
+	Entity player_mage;
 };
