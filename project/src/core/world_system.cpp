@@ -76,7 +76,7 @@ Entity WorldSystem::createPlayer() {
 	Motion& motion = registry.motions.emplace(player);
 	motion.position = { window_width_px / 2.0f, window_height_px / 2.0f };  // Center of the screen
 	motion.velocity = { 0.0f, 0.0f };
-	motion.scale = { 1.f, 1.f };
+	motion.scale = { 0.5f, 0.5f };
 
 	Health& health = registry.healths.emplace(player);
 	health.health = 100;
