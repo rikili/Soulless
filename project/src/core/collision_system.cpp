@@ -50,6 +50,11 @@ void CollisionSystem::handle_collisions()
                 continue;
             }
 
+            if (!check_collision(entity, other_entity))
+            {
+                continue;
+            }
+
             bool is_main_deadly = registry.deadlies.has(entity);
             bool is_other_deadly = registry.deadlies.has(other_entity);
 
@@ -68,59 +73,56 @@ void CollisionSystem::handle_collisions()
                 bool is_other_projectile = registry.projectiles.has(other_target);
 
 
-                if (check_collision(deadly_target, other_target))
+                if (!is_deadly_projectile && !is_other_projectile)
                 {
-                    if (!is_deadly_projectile && !is_other_projectile)
+                    if (!is_player)
                     {
-                        if (!is_player)
-                        {
-                            // none are projectile and player isn't involved, skip
-                            continue;
-                        }
-                        // player is involved and non are projectiles, close collision
+                        // none are projectile and player isn't involved, skip
+                        continue;
                     }
+                    // player is involved and non are projectiles, close collision
+                }
 
-                    if (is_main_deadly && is_other_deadly)
+                if (is_main_deadly && is_other_deadly)
+                {
+                    if (is_other_projectile)
                     {
-                        if (is_other_projectile)
-                        {
-                            deadly_target = other_entity;
-                            other_target = entity;
-                        }
+                        deadly_target = other_entity;
+                        other_target = entity;
                     }
+                }
 
-                    Deadly& deadly = registry.deadlies.get(deadly_target);
+                Deadly& deadly = registry.deadlies.get(deadly_target);
                     
-                    // DEBUG: Collisions
-                    if (registry.debug)
+                // DEBUG: Collisions
+                if (registry.debug)
+                {
+                    registry.list_all_components_of(deadly_target);
+                    registry.list_all_components_of(other_target);
+                }
+
+                if (registry.projectiles.has(deadly_target))
+                {
+
+                    // projectile <-> player collision
+                    if (deadly.to_player && registry.players.has(other_target))
                     {
-                        registry.list_all_components_of(deadly_target);
-                        registry.list_all_components_of(other_target);
+                        // TODO
                     }
-
-                    if (registry.projectiles.has(deadly_target))
+                    // projectile <-> enemy collision
+                    else if (deadly.to_enemy && registry.enemies.has(other_target))
                     {
-
-                        // projectile <-> player collision
-                        if (deadly.to_player && registry.players.has(other_target))
-                        {
-                            // TODO
-                        }
-                        // projectile <-> enemy collision
-                        else if (deadly.to_enemy && registry.enemies.has(other_target))
-                        {
-                            this->applyDamage(deadly_target, other_target);
-                        }
-                        else
-                        {
+                        this->applyDamage(deadly_target, other_target);
+                    }
+                    else
+                    {
                             
-                        }
-                        // TODO: possible feature
-                        /*else if (deadly.to_projectile && registry.projectiles.has(other_target))
-                        {
-
-                        }*/
                     }
+                    // TODO: possible feature
+                    /*else if (deadly.to_projectile && registry.projectiles.has(other_target))
+                    {
+
+                    }*/
                 }
 
             }
