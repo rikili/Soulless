@@ -39,6 +39,7 @@ public:
 		registry_list.push_back(&deaths);
 		registry_list.push_back(&projectiles);
 		registry_list.push_back(&damages);
+		registry_list.push_back(&onHits);
 		registry_list.push_back(&render_requests);
 	}
 
