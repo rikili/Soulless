@@ -16,6 +16,7 @@ public:
 	bool is_over()const;
 	void set_renderer(RenderSystem* renderer);
 	void handle_movements(float elapsed_ms_since_last_update);
+	void handle_timers(float elapsed_ms_since_last_update);
 	void initialize();
 	Entity getPlayer();
 
@@ -28,5 +29,6 @@ private:
 	GLFWwindow* window{};
 	RenderSystem* renderer;
 	CollisionSystem* collision_system;
+	InputHandler inputHandler;
 	Entity player_mage;
 };

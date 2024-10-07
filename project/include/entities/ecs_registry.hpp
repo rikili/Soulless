@@ -21,6 +21,9 @@ public:
 	ComponentContainer<Death> deaths;
 	ComponentContainer<Projectile> projectiles;
 	ComponentContainer<Damage> damages;
+	ComponentContainer<OnHit> onHits;
+	ComponentContainer<RenderRequest> render_requests;
+	bool debug = false;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -36,6 +39,8 @@ public:
 		registry_list.push_back(&deaths);
 		registry_list.push_back(&projectiles);
 		registry_list.push_back(&damages);
+		registry_list.push_back(&onHits);
+		registry_list.push_back(&render_requests);
 	}
 
 	void clear_all_components() const

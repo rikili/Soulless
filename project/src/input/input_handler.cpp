@@ -48,6 +48,8 @@ void InputHandler::onKey(int key, int scancode, int action, int mods) {
                 activeMoveKeys.erase(key);
                 updateVelocity();
                 break;
+            case GLFW_KEY_K:
+                registry.debug = true;
             default:
                 break;
         }
@@ -55,53 +57,86 @@ void InputHandler::onKey(int key, int scancode, int action, int mods) {
 }
 
 void InputHandler::onMouseMove(vec2 mouse_position) {
-    //auto player = Entity();
-    //Motion& motion = registry.motions.emplace(player);
-    //motion.position = { 320, 240 };
-    //motion.angle = 0.f;
-    //motion.velocity = { 0.f, 0.f };
-    //// Entity player = player_wizard;
-    //Motion &playerMotion = registry.motions.get(player);
+    Entity& player = registry.players.entities[0];
+    Motion& playerMotion = registry.motions.get(player);
 
-    //float dx = mouse_position.x - playerMotion.position.x;
-    //float dy = mouse_position.y - playerMotion.position.y;
+    float dx = mouse_position.x - playerMotion.position.x;
+    float dy = mouse_position.y - playerMotion.position.y;
 
-    //float angle = atan2(dy, dx);
-    //playerMotion.angle = angle;
+    float angle = atan2(dy, dx);
+    playerMotion.angle = angle;
 
-    //constexpr std::array<float, 8> cardinalAngles = {
-    //    0.f,                  // East
-    //    -M_PI / 4,            // North-East
-    //    -M_PI / 2,            // North
-    //    -3 * M_PI / 4,        // North-West
-    //    -M_PI,                // West
-    //    3 * M_PI / 4,         // South-West
-    //    M_PI / 2,             // South
-    //    M_PI / 4              // South-East
-    //};
+    constexpr std::array<float, 8> cardinalAngles = {
+        0.f,                  // East
+        -M_PI / 4,            // North-East
+        -M_PI / 2,            // North
+        -3 * M_PI / 4,        // North-West
+        -M_PI,                // West
+        3 * M_PI / 4,         // South-West
+        M_PI / 2,             // South
+        M_PI / 4              // South-East
+    };
 
-    //float closestAngle = cardinalAngles[0];
-    //float smallestDifference = std::abs(angle - closestAngle);
+    float closestAngle = cardinalAngles[0];
+    float smallestDifference = std::abs(angle - closestAngle);
 
-    //for (const float& cardinalAngle : cardinalAngles) {
-    //    float difference = std::abs(angle - cardinalAngle);
-    //    
-    //    if (difference < smallestDifference) {
-    //        smallestDifference = difference;
-    //        closestAngle = cardinalAngle;
-    //    }
-    //}
+    for (const float& cardinalAngle : cardinalAngles) {
+        float difference = std::abs(angle - cardinalAngle); 
+        if (difference < smallestDifference) {
+            smallestDifference = difference;
+            closestAngle = cardinalAngle;
+        }
+    }
 
-    //playerMotion.angle = closestAngle;
-    //printd("New angle in degrees: %f\n", playerMotion.angle * 180 / M_PI);
+    playerMotion.angle = closestAngle;
 }
 
-void InputHandler::onMouseKey(int button, int action, int mods) {
+void create_player_projectile(Entity& player_ent, double x, double y)
+{
+    Motion& player_motion = registry.motions.get(player_ent);
+
+    Entity projectile_ent;
+    Projectile& projectile = registry.projectiles.emplace(projectile_ent);
+    Motion& projectile_motion = registry.motions.emplace(projectile_ent);
+    Deadly& deadly = registry.deadlies.emplace(projectile_ent);
+    deadly.to_enemy = true;
+    projectile_motion.position = player_motion.position;
+
+    // TODO: change once finalization is needed
+    projectile.type = DamageType::fire;
+    projectile_motion.velocity = vec2({ cos(player_motion.angle), sin(player_motion.angle) });
+    Damage& damage = registry.damages.emplace(projectile_ent);
+    damage.value = 25.f;
+
+    RenderRequest& request = registry.render_requests.emplace(projectile_ent);
+    request.mesh = "basic";
+    request.shader = "basic";
+}
+
+void invoke_player_cooldown(Player& player, bool is_left)
+{
+    player.cooldown = 700;
+}
+
+void cast_player_spell(double x, double y, bool is_left)
+{
+    Entity& player_ent = registry.players.entities[0];
+    Player& player = registry.players.get(player_ent);
+    if (player.cooldown > 0)
+    {
+        return;
+    }
+    create_player_projectile(player_ent,  x, y);
+    invoke_player_cooldown(player, is_left);
+}
+
+void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mods) {
     if (action == GLFW_PRESS) {
         switch (button) {
             case GLFW_MOUSE_BUTTON_LEFT:
-                // TODO: Shoot spell 1
-                printd("Left mouse button pressed.\n");
+                double x, y;
+                glfwGetCursorPos(window, &x, &y);
+                cast_player_spell(x, y, true);
                 break;
             case GLFW_MOUSE_BUTTON_RIGHT:
                 // TODO: Shoot spell 2

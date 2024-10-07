@@ -3,20 +3,8 @@
 #include <array>
 #include <utility>
 #include "common.hpp"
-#include "graphics/asset_manager.hpp"
 #include "input/input_handler.hpp"
-
-/**
- * Struct to hold the render request data for the render system
- * Does not need to be 1-to-1 with the entity struct
- * It tells the render system what to render and with what asset
- */
-struct RenderRequest {
-	Entity entity;
-	AssetId mesh;
-	AssetId texture;
-	AssetId shader;
-};
+#include "graphics/asset_manager.hpp"
 
 /**
  * System responsible for setting up OpenGL and for rendering all the visual entities in the game
@@ -24,16 +12,15 @@ struct RenderRequest {
 class RenderSystem {
 
 public:
-	bool initialize(int width = 480, int height = 500, const char* title = "OpenGL Example");
+	bool initialize(InputHandler& input_handler, int width = 480, int height = 500, const char* title = "OpenGL Example");
 	void setUpView() const;
 	GLFWwindow* getGLWindow() const;
 	void drawFrame();
 	void setAssetManager(AssetManager* asset_manager) { this->asset_manager = *asset_manager; }
-	void addRenderRequest(Entity entity, AssetId mesh, AssetId texture, AssetId shader);
-	void removeRenderRequest(Entity entity);
+	// void removeRenderRequest(Entity entity);
+	InputHandler input_handler;
 
 private:
-	InputHandler inputHandler;
 	GLuint frame_buffer = 0;
 	Entity screen_state_entity;
 	GLFWwindow* window = nullptr;

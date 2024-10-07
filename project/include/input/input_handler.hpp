@@ -12,7 +12,7 @@ public:
 
 	void onMouseMove(vec2 mouse_position);
 
-	void onMouseKey(int button, int action, int mods);
+	void onMouseKey(GLFWwindow* window, int button, int action, int mods);
 
 private:
 	// keeps track of pressed movement keys (up, right, left, down) 

@@ -16,7 +16,7 @@
  * @return true: if the render system is initialized successfully
  * @return false: if the render system is not initialized successfully
  */
-bool RenderSystem::initialize(const int width, const int height, const char* title)
+bool RenderSystem::initialize(InputHandler& input_handler, const int width, const int height, const char* title)
 {
 	// Most of the code below is just boilerplate code to create a window
 	if (!glfwInit()) { 	// Initialize the window
@@ -43,15 +43,15 @@ bool RenderSystem::initialize(const int width, const int height, const char* tit
 	glfwSetWindowUserPointer(this->window, this);
 
 	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) {
-		((RenderSystem*)glfwGetWindowUserPointer(wnd))->inputHandler.onKey(_0, _1, _2, _3);
+		((RenderSystem*)glfwGetWindowUserPointer(wnd))->input_handler.onKey(_0, _1, _2, _3);
 		};
 
 	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) {
-		((RenderSystem*)glfwGetWindowUserPointer(wnd))->inputHandler.onMouseMove({ _0, _1 });
+		((RenderSystem*)glfwGetWindowUserPointer(wnd))->input_handler.onMouseMove({ _0, _1 });
 		};
 
 	auto mouse_button_redirect = [](GLFWwindow* wnd, int _1, int _2, int _3) {
-		((RenderSystem*)glfwGetWindowUserPointer(wnd))->inputHandler.onMouseKey(_1, _2, _3);
+		((RenderSystem*)glfwGetWindowUserPointer(wnd))->input_handler.onMouseKey(wnd, _1, _2, _3);
 		};
 
 	glfwSetKeyCallback(window, key_redirect);
@@ -96,15 +96,6 @@ GLFWwindow* RenderSystem::getGLWindow() const
 }
 
 /**
- * @brief Add entity to be rendered
- * Pushes to render requests, which are iterated through in each draw call
- */
-void RenderSystem::addRenderRequest(Entity entity, AssetId mesh, AssetId texture, AssetId shader)
-{
-	render_requests.push_back({ entity, std::move(mesh), std::move(texture), std::move(shader) });
-}
-
-/**
  * @brief Draw the frame
  * This function is called every frame to draw the frame
  * @attention Skips rendering if the shader is not found
@@ -140,9 +131,10 @@ void RenderSystem::drawFrame()
 
 
 	// Draw all entities
-	for (const RenderRequest& render_request : this->render_requests)
+	for (const Entity& entity : registry.render_requests.entities)
 	{
-		Entity entity = render_request.entity;
+		RenderRequest& render_request = registry.render_requests.get(entity);
+
 		Motion& motion = registry.motions.get(entity);
 
 		if (!registry.motions.has(entity))
@@ -214,14 +206,4 @@ void RenderSystem::drawFrame()
 		// 	std::cout << "Mesh vertex count: " << mesh->vertexCount
 		// 	  << ", index count: " << mesh->indexCount << std::endl;
 	}
-}
-
-
-void RenderSystem::removeRenderRequest(Entity entity)
-{
-	auto it = std::remove_if(this->render_requests.begin(), this->render_requests.end(),
-		[entity](const RenderRequest& render_request) {
-			return render_request.entity == entity;
-		});
-	this->render_requests.erase(it, this->render_requests.end());
 }
