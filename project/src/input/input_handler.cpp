@@ -94,13 +94,14 @@ void InputHandler::onMouseMove(vec2 mouse_position) {
 void create_player_projectile(Entity& player_ent, double x, double y)
 {
     Motion& player_motion = registry.motions.get(player_ent);
+    printd("Player position: %f, %f\n", player_motion.position.x, player_motion.position.y);
 
     Entity projectile_ent;
     Projectile& projectile = registry.projectiles.emplace(projectile_ent);
     Motion& projectile_motion = registry.motions.emplace(projectile_ent);
     Deadly& deadly = registry.deadlies.emplace(projectile_ent);
     deadly.to_enemy = true;
-    projectile_motion.position = player_motion.position;
+    projectile_motion.position = vec2({ player_motion.position.x, player_motion.position.y });
 
     // TODO: change once finalization is needed
     projectile.type = DamageType::fire;
@@ -124,6 +125,7 @@ void cast_player_spell(double x, double y, bool is_left)
     Player& player = registry.players.get(player_ent);
     if (player.cooldown > 0)
     {
+        printd("Player is on cooldown -- %f\n", player.cooldown);
         return;
     }
     create_player_projectile(player_ent,  x, y);
@@ -134,6 +136,7 @@ void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mo
     if (action == GLFW_PRESS) {
         switch (button) {
             case GLFW_MOUSE_BUTTON_LEFT:
+                printd("Left mouse button pressed.\n");
                 double x, y;
                 glfwGetCursorPos(window, &x, &y);
                 cast_player_spell(x, y, true);

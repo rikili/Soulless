@@ -20,6 +20,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	this->handle_timers(elapsed_ms_since_last_update);
 	this->handle_movements(elapsed_ms_since_last_update);
+
+	for (Entity& proj_ent : registry.projectiles.entities)
+	{
+		Motion& proj_motion = registry.motions.get(proj_ent);
+		printd("Projectile position: %f, %f\n", proj_motion.position.x, proj_motion.position.y);
+	}
+
 	this->collision_system->handle_collisions();
 
 	return true;
