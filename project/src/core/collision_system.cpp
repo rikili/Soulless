@@ -67,6 +67,7 @@ void CollisionSystem::handle_collisions()
                 Entity& deadly_target = is_main_deadly ? entity : other_entity;
                 Entity& other_target = is_main_deadly ? other_entity : entity;
 
+                // Assumes player isn't deadly, they shouldn't be
                 bool is_player = registry.players.has(other_target);
 
                 bool is_deadly_projectile = registry.projectiles.has(deadly_target);
@@ -80,7 +81,8 @@ void CollisionSystem::handle_collisions()
                         // none are projectile and player isn't involved, skip
                         continue;
                     }
-                    // player is involved and non are projectiles, close collision
+                    // player is involved and none are projectiles, enemy/player collision case
+                    this->applyDamage(deadly_target, other_target);
                 }
 
                 if (is_main_deadly && is_other_deadly)
