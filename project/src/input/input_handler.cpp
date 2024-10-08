@@ -101,6 +101,7 @@ void create_player_projectile(Entity& player_ent, double x, double y)
     Deadly& deadly = registry.deadlies.emplace(projectile_ent);
     deadly.to_enemy = true;
     projectile_motion.position = player_motion.position;
+    projectile_motion.angle = player_motion.angle;
     projectile.init_pos = player_motion.position;
 
     // TODO: change once finalization is needed
@@ -111,8 +112,9 @@ void create_player_projectile(Entity& player_ent, double x, double y)
     damage.value = 25.f;
 
     RenderRequest& request = registry.render_requests.emplace(projectile_ent);
-    request.mesh = "basic";
-    request.shader = "basic";
+    request.mesh = "sprite";
+    request.texture = "fireball";
+    request.shader = "sprite";
 }
 
 void invoke_player_cooldown(Player& player, bool is_left)
