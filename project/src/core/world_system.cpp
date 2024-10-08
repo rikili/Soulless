@@ -134,6 +134,7 @@ Entity WorldSystem::createPlayer() {
 	request.mesh = "sprite";
 	request.texture = "mage";
 	request.shader = "sprite";
+	request.type = PLAYER;
 
 	return player;
 }
@@ -164,4 +165,5 @@ void WorldSystem::createEnemy(vec2 position, vec2 velocity)
 	RenderRequest& request = registry.render_requests.emplace(enemy);
 	request.mesh = "basic";
 	request.shader = "basic";
+	request.type = ENEMY;
 }
