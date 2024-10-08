@@ -90,4 +90,5 @@ struct RenderRequest
     AssetId mesh = "";
     AssetId texture = "";
     AssetId shader = "";
+    unsigned int type = BACK;
 };
