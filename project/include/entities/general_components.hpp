@@ -47,8 +47,11 @@ struct Player {
     unsigned int health_gauge = 0;
     SpellQueue spell_queue;
 };
+
 struct Projectile {
     DamageType type;
+    float range = 0;
+    vec2 init_pos = { 0, 0 }; // Needed to compare with its (current) position to calculate range travelled
 };
 
 // Timed Component

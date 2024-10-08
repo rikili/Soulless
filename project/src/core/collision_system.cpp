@@ -31,6 +31,13 @@ void CollisionSystem::handle_collisions()
         // Check if the entity is colliding with any other entity
         for (Entity other_entity : registry.motions.entities)
         {
+
+            // Skip entities marked for removal
+            if (registry.deaths.has(entity))
+            {
+                continue;
+            }
+
             if (entity == other_entity)
             {
                 continue;
@@ -72,7 +79,6 @@ void CollisionSystem::handle_collisions()
 
                 bool is_deadly_projectile = registry.projectiles.has(deadly_target);
                 bool is_other_projectile = registry.projectiles.has(other_target);
-
 
                 if (!is_deadly_projectile && !is_other_projectile)
                 {
@@ -132,12 +138,13 @@ void CollisionSystem::handle_collisions()
         visited.push_back(entity);
     }
 
-    for (const Entity entity : to_destroy)
-    {
-        printf("Entity %u has been destroyed\n", static_cast<unsigned>(entity));
-        registry.remove_all_components_of(entity);
-        // this->renderer->removeRenderRequest(entity);
-    }
+    // TODO: Doesn't seem to do anything right now -- Maybe we can remove since we remove `death` entities in handleTimers()
+    // for (const Entity entity : to_destroy)
+    // {
+    //     printf("Entity %u has been destroyed\n", static_cast<unsigned>(entity));
+    //     registry.remove_all_components_of(entity);
+    //     // this->renderer->removeRenderRequest(entity);
+    // }
 }
 
 void CollisionSystem::applyDamage(Entity attacker, Entity victim)
@@ -152,7 +159,7 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
     if (health.health - damage.value <= 0) {
         health.health = 0;
         Death& death = registry.deaths.emplace(victim);
-        death.timer = 300;
+        death.timer = 10;
     } else {
         health.health -= damage.value;
         OnHit& hit = registry.onHits.emplace(victim);
@@ -168,6 +175,7 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
 
     if (registry.projectiles.has(attacker))
     {
-        registry.remove_all_components_of(attacker);
+        registry.deaths.emplace(attacker);
+        // printd("Marked for removal due to collision -> Entity value: %u\n", static_cast<unsigned>(attacker));
     }
 }
