@@ -74,7 +74,7 @@ struct OnHit
 // Structure to store entities marked to die
 struct Death
 {
-    float timer = 10;
+    float timer = 2;
 };
 
 // Structure to store what entites affect/damage other entities
