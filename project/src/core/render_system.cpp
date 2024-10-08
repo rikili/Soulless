@@ -133,7 +133,7 @@ void RenderSystem::drawFrame()
 
 	// Draw all entities
 	registry.render_requests.sort(typeAscending);
-	printd("%d\n", registry.render_requests.size());
+	// printd("%d\n", registry.render_requests.size());
 	for (const Entity& entity : registry.render_requests.entities)
 	{
 		RenderRequest& render_request = registry.render_requests.get(entity);
