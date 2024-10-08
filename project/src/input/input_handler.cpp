@@ -128,6 +128,7 @@ void create_player_projectile(Entity& player_ent, double x, double y)
     RenderRequest& request = registry.render_requests.emplace(projectile_ent);
     request.mesh = "basic";
     request.shader = "basic";
+    request.type = PROJECTILE;
 }
 
 void invoke_player_cooldown(Player& player, bool is_left)

@@ -1,6 +1,7 @@
 #include "core/render_system.hpp"
 #include <SDL.h>
 #include "entities/ecs_registry.hpp"
+#include "utils/sorting_functions.hpp"
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -131,6 +132,8 @@ void RenderSystem::drawFrame()
 
 
 	// Draw all entities
+	registry.render_requests.sort(typeAscending);
+	printd("%d\n", registry.render_requests.size());
 	for (const Entity& entity : registry.render_requests.entities)
 	{
 		RenderRequest& render_request = registry.render_requests.get(entity);

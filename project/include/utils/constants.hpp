@@ -33,3 +33,11 @@ const int ICE_SHARD_COUNT = 4;
 // PLASMA
 // WATER
 // WIND
+
+// Draw order (largest number = frontmost)
+enum {
+    BACK = 0,
+    PROJECTILE = 1,
+    ENEMY = 2,
+    PLAYER = 3
+};
