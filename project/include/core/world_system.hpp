@@ -4,9 +4,6 @@
 #include "core/common.hpp"
 #include "render_system.hpp"
 
-#define ENEMY_SPAWN_INTERVAL_MS 5000.f
-#define ENEMY_VELOCITY 0.05f
-
 /**
  * Container for all our entities and game logic.
  */

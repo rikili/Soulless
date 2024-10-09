@@ -239,7 +239,7 @@ void WorldSystem::handleEnemyLogic(const float elapsed_ms_since_last_update)
 		vec2 distance = { des.x - position->x, des.y - position->y };
 		if (enemy_component.range <= sqrt(distance.x * distance.x + distance.y * distance.y))
 		{
-			const vec2 velocity = glm::normalize(distance) * ENEMY_VELOCITY;
+			const vec2 velocity = glm::normalize(distance) * ENEMY_BASIC_VELOCITY;
 			motion.velocity = velocity;
 		} else {
 			motion.velocity = { 0, 0 };

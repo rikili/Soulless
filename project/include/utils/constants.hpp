@@ -1,5 +1,11 @@
 #pragma once
 
+// Game Logic Constants
+const float ENEMY_SPAWN_INTERVAL_MS = 5000.f;
+const unsigned int QUEUE_SIZE = 8;
+
+// Spell/Projectile Constants
+
 enum class DamageType
 {
     fire,
@@ -12,14 +18,9 @@ enum class DamageType
     elementless
 };
 
-// NOTE: Need to add `const` for global constants
-    // For non-const global vars, use `extern` to declare in a .hpp and define in a .cpp
-const unsigned int QUEUE_SIZE = 8;
-
-// Spell/Projectile Constants
-
-// RANGED ENEMY
-const float RANGED_BASIC_VELOCITY = 1.f;
+// ENEMY
+const float ENEMY_BASIC_VELOCITY = 0.0f;
+const float ENEMY_BASIC_RANGE = 500.f;
 
 // FIRE
 const float FIRE_DAMAGE = 25.f;
