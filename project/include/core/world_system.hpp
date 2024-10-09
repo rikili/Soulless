@@ -15,7 +15,7 @@ public:
 	bool step(float elapsed_ms);
 	bool is_over()const;
 	void set_renderer(RenderSystem* renderer);
-	void handle_projectiles();
+	void handle_projectiles(float elapsed_ms_since_last_update);
 	void handle_timers(float elapsed_ms_since_last_update);
 	void handle_movements(float elapsed_ms_since_last_update);
 	void initialize();
