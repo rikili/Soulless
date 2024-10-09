@@ -42,9 +42,14 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 		Motion& motion = motions_registry.get(entity);
 		if (registry.players.has(entity) || registry.enemies.has(entity))
 		{
-			motion.position = glm::clamp(motion.position + motion.velocity * elapsed_ms_since_last_update, { 0.f, 0.f }, { window_width_px, window_height_px });
+			float x_offset = motion.collider.x * motion.scale.x;
+			float y_offset = motion.collider.y * motion.scale.y;
+			motion.position = glm::clamp(motion.position + motion.velocity * elapsed_ms_since_last_update, { x_offset, y_offset }, { window_width_px - x_offset, window_height_px - y_offset });
 		}
-		motion.position += motion.velocity * elapsed_ms_since_last_update;
+		else
+		{
+			motion.position += motion.velocity * elapsed_ms_since_last_update;
+		}
 	}
 }
 
