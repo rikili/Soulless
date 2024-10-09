@@ -151,11 +151,13 @@ Entity WorldSystem::createPlayer() {
 void WorldSystem::createEnemy(vec2 position, vec2 velocity)
 {
 	Entity enemy;
-	registry.enemies.emplace(enemy);
 	Motion& motion = registry.motions.emplace(enemy);
 	motion.position = position;
 	motion.velocity = velocity;
-	motion.scale = { 1.f, 1.f };
+	motion.scale = { 0.7f, 0.7f };
+
+	Enemy& enemy_component = registry.enemies.emplace(enemy);
+	enemy_component.range = 500.f;
 
 	Health& health = registry.healths.emplace(enemy);
 	health.health = 100;
@@ -171,8 +173,9 @@ void WorldSystem::createEnemy(vec2 position, vec2 velocity)
 	damage.type = DamageType::enemy;
 
 	RenderRequest& request = registry.render_requests.emplace(enemy);
-	request.mesh = "basic";
-	request.shader = "basic";
+	request.mesh = "sprite";
+	request.texture = "archer";
+	request.shader = "sprite";
 	request.type = ENEMY;
 }
 
@@ -221,7 +224,7 @@ void WorldSystem::handleEnemyLogic(const float elapsed_ms_since_last_update)
 			candidate_y = dis(gen) * window_height_px;
 			break;
 		}
-		vec2 position = { candidate_x, candidate_y };
+		const vec2 position = { candidate_x, candidate_y };
 		this->createEnemy(position, { 0, 0 });
 	}
 
@@ -229,10 +232,17 @@ void WorldSystem::handleEnemyLogic(const float elapsed_ms_since_last_update)
 	for (const auto& enemy : registry.enemies.entities)
 	{
 		Motion& motion = registry.motions.get(enemy);
+		const Enemy& enemy_component = registry.enemies.get(enemy);
 		const vec2* position = &motion.position;
 		const vec2 des = registry.motions.get(player_mage).position;
-		vec2 velocity = { des.x - position->x, des.y - position->y };
-		velocity = glm::normalize(velocity) * ENEMY_VELOCITY;
-		motion.velocity = velocity;
+		vec2 distance = { des.x - position->x, des.y - position->y };
+		if (enemy_component.range <= sqrt(distance.x * distance.x + distance.y * distance.y))
+		{
+			const vec2 velocity = glm::normalize(distance) * ENEMY_VELOCITY;
+			motion.velocity = velocity;
+		} else {
+			motion.velocity = { 0, 0 };
+		}
+
 	}
 }
