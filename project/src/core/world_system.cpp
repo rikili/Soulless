@@ -23,6 +23,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	this->handle_movements(elapsed_ms_since_last_update);
 	this->collision_system->handle_collisions();
 
+	this->handleEnemyLogic(elapsed_ms_since_last_update);
+
 	return true;
 }
 
@@ -124,15 +126,16 @@ void WorldSystem::initialize()
 	std::mt19937 gen(rd()); // Mersenne Twister generator
 	std::uniform_real_distribution<float> dis(0.f, 1.0f); // Distribution range [0, 1]
 
-	//for (int i = 0; i < num_enemies; i++)
-	//{
-	//	float x = dis(gen) * (float)window_height_px;
-	//	float y = dis(gen) * (float)window_width_px;
-	//	float vx = dis(gen) * (dis(gen) > 0.5f ? 1 : -1) * 50;
-	//	float vy = dis(gen) * (dis(gen) > 0.5f ? 1 : -1) * 50;
-	//	this->createEnemy({ x, y }, { vx, vy });
-	//}
-	
+	// Create enemies
+	// for (int i = 0; i < num_enemies; i++)
+	// {
+	// 	float x = dis(gen) * (float)window_height_px;
+	// 	float y = dis(gen) * (float)window_width_px;
+	// 	float vx = dis(gen) * (dis(gen) > 0.5f ? 1 : -1) * 50;
+	// 	float vy = dis(gen) * (dis(gen) > 0.5f ? 1 : -1) * 50;
+	// 	this->createEnemy({ x, y }, { vx, vy });
+	// }
+	//
 	this->createEnemy({ 900, 400 }, { 0, 0 });
 }
 
@@ -190,4 +193,36 @@ void WorldSystem::createEnemy(vec2 position, vec2 velocity)
 	request.mesh = "basic";
 	request.shader = "basic";
 	request.type = ENEMY;
+}
+
+/**
+ * @brief Handles the logic for spawning enemies and their movement direction towards the player
+ * @param elapsed_ms_since_last_update
+ * @return void
+ * If the enemy spawn timer has elapsed, a new enemy is spawned at a random location
+ */
+void WorldSystem::handleEnemyLogic(const float elapsed_ms_since_last_update)
+{
+	this->enemy_spawn_timer -= elapsed_ms_since_last_update;
+	const bool should_spawn = this->enemy_spawn_timer <= 0;
+	if (should_spawn)
+	{
+		this->enemy_spawn_timer = ENEMY_SPAWN_INTERVAL_MS;
+		std::random_device rd;  // Random device
+		std::mt19937 gen(rd()); // Mersenne Twister generator
+		std::uniform_real_distribution<float> dis(0.f, 1.0f); // Distribution range [0, 1]
+		vec2 position = { dis(gen) * static_cast<float>(window_height_px), dis(gen) * static_cast<float>(window_width_px) };
+		this->createEnemy(position, { 0, 0 });
+	}
+
+	// Reorient enemies towards the player
+	for (const auto& enemy : registry.enemies.entities)
+	{
+		Motion& motion = registry.motions.get(enemy);
+		const vec2* position = &motion.position;
+		const vec2 des = registry.motions.get(player_mage).position;
+		vec2 velocity = { des.x - position->x, des.y - position->y };
+		velocity = glm::normalize(velocity) * ENEMY_VELOCITY;
+		motion.velocity = velocity;
+	}
 }

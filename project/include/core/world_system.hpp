@@ -4,6 +4,9 @@
 #include "core/common.hpp"
 #include "render_system.hpp"
 
+#define ENEMY_SPAWN_INTERVAL_MS 5000.f
+#define ENEMY_VELOCITY 0.05f
+
 /**
  * Container for all our entities and game logic.
  */
@@ -21,10 +24,14 @@ public:
 	void initialize();
 	Entity getPlayer();
 
+	// World state specific variables
+	float enemy_spawn_timer = 0.0f;
+
 private:
 	// helper functions to set the world
 	Entity createPlayer();
 	void createEnemy(vec2 position, vec2 velocity);
+	void handleEnemyLogic(float elapsed_ms_since_last_update);
 
 
 	GLFWwindow* window{};
