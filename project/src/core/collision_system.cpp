@@ -15,10 +15,18 @@ bool check_collision(Entity& entity, Entity& other_entity)
     Motion& motion = registry.motions.get(entity);
     Motion& other_motion = registry.motions.get(other_entity);
 
-    return (motion.position.x < other_motion.position.x + other_motion.collider.x &&
-        motion.position.x + motion.collider.x > other_motion.position.x &&
-        motion.position.y < other_motion.position.y + other_motion.collider.y &&
-        motion.position.y + motion.collider.y > other_motion.position.y);
+    vec2 bounding_box = motion.collider * motion.scale;
+    vec2 other_bounding_box = other_motion.collider * other_motion.scale; // Its x and y means width and height
+
+    return (
+        // Horizontal intersection tests
+        motion.position.x < other_motion.position.x + other_bounding_box.x &&
+        other_motion.position.x < motion.position.x + bounding_box.x &&
+
+        // Vertical intersection tests
+        motion.position.y < other_motion.position.y + other_bounding_box.y &&
+        other_motion.position.y < motion.position.y + bounding_box.y
+    );
 }
 
 void CollisionSystem::handle_collisions()
@@ -31,6 +39,13 @@ void CollisionSystem::handle_collisions()
         // Check if the entity is colliding with any other entity
         for (Entity other_entity : registry.motions.entities)
         {
+
+            // Skip entities marked for removal
+            if (registry.deaths.has(entity))
+            {
+                continue;
+            }
+
             if (entity == other_entity)
             {
                 continue;
@@ -73,7 +88,6 @@ void CollisionSystem::handle_collisions()
                 bool is_deadly_projectile = registry.projectiles.has(deadly_target);
                 bool is_other_projectile = registry.projectiles.has(other_target);
 
-
                 if (!is_deadly_projectile && !is_other_projectile)
                 {
                     if (!is_player)
@@ -114,6 +128,7 @@ void CollisionSystem::handle_collisions()
                     // projectile <-> enemy collision
                     else if (deadly.to_enemy && registry.enemies.has(other_target))
                     {
+                        // printd("Enemy has been hit by a projectile!\n");
                         this->applyDamage(deadly_target, other_target);
                     }
                     else
@@ -132,12 +147,13 @@ void CollisionSystem::handle_collisions()
         visited.push_back(entity);
     }
 
-    for (const Entity entity : to_destroy)
-    {
-        printf("Entity %u has been destroyed\n", static_cast<unsigned>(entity));
-        registry.remove_all_components_of(entity);
-        // this->renderer->removeRenderRequest(entity);
-    }
+    // TODO: Doesn't seem to do anything right now -- Maybe we can remove since we remove `death` entities in handleTimers()
+    // for (const Entity entity : to_destroy)
+    // {
+    //     printf("Entity %u has been destroyed\n", static_cast<unsigned>(entity));
+    //     registry.remove_all_components_of(entity);
+    //     // this->renderer->removeRenderRequest(entity);
+    // }
 }
 
 void CollisionSystem::applyDamage(Entity attacker, Entity victim)
@@ -152,7 +168,7 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
     if (health.health - damage.value <= 0) {
         health.health = 0;
         Death& death = registry.deaths.emplace(victim);
-        death.timer = 300;
+        death.timer = 10;
     } else {
         health.health -= damage.value;
         OnHit& hit = registry.onHits.emplace(victim);
@@ -168,6 +184,7 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
 
     if (registry.projectiles.has(attacker))
     {
-        registry.remove_all_components_of(attacker);
+        registry.deaths.emplace(attacker);
+        // printd("Marked for removal due to collision -> Entity value: %u\n", static_cast<unsigned>(attacker));
     }
 }

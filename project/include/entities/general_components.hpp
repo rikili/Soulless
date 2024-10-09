@@ -47,8 +47,10 @@ struct Player {
     unsigned int health_gauge = 0;
     SpellQueue spell_queue;
 };
+
 struct Projectile {
     DamageType type;
+    float range = 0;
 };
 
 // Timed Component
@@ -71,7 +73,7 @@ struct OnHit
 // Structure to store entities marked to die
 struct Death
 {
-    float timer = 10;
+    float timer = 2;
 };
 
 // Structure to store what entites affect/damage other entities

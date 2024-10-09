@@ -46,6 +46,10 @@ GameAssets initializeGameAssets(AssetManager& assetManager) {
     AssetId mageTextureId = assetManager.loadTexture("mage", textures_path("mage") + ".png");
     assets.textures["mage"] = mageTextureId;
 
+    assets.textures["archer"] = assetManager.loadTexture("archer", textures_path("archer") + ".png");
+    AssetId fireballTextureId = assetManager.loadTexture("fireball", textures_path("fireball") + ".png");
+    assets.textures["fireball"] = fireballTextureId;
+
     // Add a new mesh for the background (full screen quad)
     const std::vector<float> bgVertices = {
         // positions        // texture coords
