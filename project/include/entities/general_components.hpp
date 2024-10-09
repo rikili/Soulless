@@ -51,7 +51,6 @@ struct Player {
 struct Projectile {
     DamageType type;
     float range = 0;
-    vec2 init_pos = { 0, 0 }; // Needed to compare with its (current) position to calculate range travelled
 };
 
 // Timed Component

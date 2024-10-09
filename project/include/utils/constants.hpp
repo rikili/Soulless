@@ -22,7 +22,9 @@ const unsigned int QUEUE_SIZE = 8;
 const float RANGED_BASIC_VELOCITY = 1.f;
 
 // FIRE
+const float FIRE_DAMAGE = 25.f;
 const float FIRE_VELOCITY = 1.f;
+const float FIRE_RANGE = 250.f;
 
 // ICE
 const float ICE_VELOCITY = 1.f;
