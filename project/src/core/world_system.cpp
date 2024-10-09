@@ -113,30 +113,11 @@ void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 
 /**
  * Initialize the game world
- * TODO: Add your game initialization code here!
  */
 void WorldSystem::initialize()
 {
 	// Create a player
 	player_mage = this->createPlayer();
-
-	// Create an enemy
-	constexpr int num_enemies = 0;
-	std::random_device rd;  // Random device
-	std::mt19937 gen(rd()); // Mersenne Twister generator
-	std::uniform_real_distribution<float> dis(0.f, 1.0f); // Distribution range [0, 1]
-
-	// Create enemies
-	// for (int i = 0; i < num_enemies; i++)
-	// {
-	// 	float x = dis(gen) * (float)window_height_px;
-	// 	float y = dis(gen) * (float)window_width_px;
-	// 	float vx = dis(gen) * (dis(gen) > 0.5f ? 1 : -1) * 50;
-	// 	float vy = dis(gen) * (dis(gen) > 0.5f ? 1 : -1) * 50;
-	// 	this->createEnemy({ x, y }, { vx, vy });
-	// }
-	//
-	this->createEnemy({ 900, 400 }, { 0, 0 });
 }
 
 
