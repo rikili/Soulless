@@ -181,6 +181,7 @@ void WorldSystem::createEnemy(vec2 position, vec2 velocity)
  * @param elapsed_ms_since_last_update
  * @return void
  * If the enemy spawn timer has elapsed, a new enemy is spawned at a random location
+ * Enemies are spawned outside the window and move towards the player
  */
 void WorldSystem::handleEnemyLogic(const float elapsed_ms_since_last_update)
 {
@@ -188,11 +189,39 @@ void WorldSystem::handleEnemyLogic(const float elapsed_ms_since_last_update)
 	const bool should_spawn = this->enemy_spawn_timer <= 0;
 	if (should_spawn)
 	{
-		this->enemy_spawn_timer = ENEMY_SPAWN_INTERVAL_MS;
+		this->enemy_spawn_timer = ENEMY_SPAWN_INTERVAL_MS; // Reset the timer
+
 		std::random_device rd;  // Random device
 		std::mt19937 gen(rd()); // Mersenne Twister generator
-		std::uniform_real_distribution<float> dis(0.f, 1.0f); // Distribution range [0, 1]
-		vec2 position = { dis(gen) * static_cast<float>(window_height_px), dis(gen) * static_cast<float>(window_width_px) };
+		enum SIDE { TOP, RIGHT, BOTTOM, LEFT }; // Side of the window to spawn from
+		std::uniform_int_distribution<int> side_dis(TOP, LEFT);
+		const int side = side_dis(gen);
+
+		float candidate_x = 0.f, candidate_y = 0.f;
+		std::uniform_real_distribution<float> dis(0.f, 1.f);
+		constexpr float offset_x = window_width_px / 10.f;
+		constexpr float offset_y = window_height_px / 10.f;
+
+		switch(side) {
+		case TOP:
+			candidate_x = dis(gen) * window_width_px;
+			candidate_y = -offset_y;
+			break;
+		case RIGHT:
+			candidate_x = window_width_px + offset_x;
+			candidate_y = dis(gen) * window_height_px;
+			break;
+		case BOTTOM:
+			candidate_x = dis(gen) * window_width_px;
+			candidate_y = window_height_px + offset_y;
+			break;
+		case LEFT:
+		default: // Should never happen but just in case
+			candidate_x = -offset_x;
+			candidate_y = dis(gen) * window_height_px;
+			break;
+		}
+		vec2 position = { candidate_x, candidate_y };
 		this->createEnemy(position, { 0, 0 });
 	}
 
