@@ -40,6 +40,10 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 	// Update all motions
 	for (Entity entity : motions_registry.entities) {
 		Motion& motion = motions_registry.get(entity);
+		if (registry.players.has(entity) || registry.enemies.has(entity))
+		{
+			motion.position = glm::clamp(motion.position + motion.velocity * elapsed_ms_since_last_update, { 0.f, 0.f }, { window_width_px, window_height_px });
+		}
 		motion.position += motion.velocity * elapsed_ms_since_last_update;
 	}
 }
