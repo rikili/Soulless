@@ -56,6 +56,23 @@ void InputHandler::onKey(int key, int scancode, int action, int mods) {
     }
 }
 
+float normalizeAngle(float angle) {
+    while (angle > M_PI) {
+        angle -= 2.f * M_PI;
+    }
+
+    while (angle < -M_PI) {
+        angle += 2.f * M_PI;
+    }
+
+    return angle;
+}
+
+float angularDifference(float a, float b) {
+    float diff = normalizeAngle(a - b);
+    return std::abs(a - b);
+}
+
 void InputHandler::onMouseMove(vec2 mouse_position) {
     Entity& player = registry.players.entities[0];
     Motion& playerMotion = registry.motions.get(player);
@@ -64,7 +81,6 @@ void InputHandler::onMouseMove(vec2 mouse_position) {
     float dy = mouse_position.y - playerMotion.position.y;
 
     float angle = atan2(dy, dx);
-    playerMotion.angle = angle;
 
     constexpr std::array<float, 8> cardinalAngles = {
         0.f,                  // East
@@ -78,10 +94,11 @@ void InputHandler::onMouseMove(vec2 mouse_position) {
     };
 
     float closestAngle = cardinalAngles[0];
-    float smallestDifference = std::abs(angle - closestAngle);
+    float smallestDifference = angularDifference(angle, closestAngle);
 
     for (const float& cardinalAngle : cardinalAngles) {
-        float difference = std::abs(angle - cardinalAngle); 
+        float difference = angularDifference(angle, cardinalAngle);
+
         if (difference < smallestDifference) {
             smallestDifference = difference;
             closestAngle = cardinalAngle;
@@ -113,6 +130,7 @@ void create_player_projectile(Entity& player_ent, double x, double y)
 
     request.mesh = "basic";
     request.shader = "basic";
+    request.type = PROJECTILE;
 }
 
 void invoke_player_cooldown(Player& player, bool is_left)
