@@ -144,7 +144,6 @@ void cast_player_spell(double x, double y, bool is_left)
     Player& player = registry.players.get(player_ent);
     if (player.cooldown > 0)
     {
-        printd("Player is on cooldown -- %f\n", player.cooldown);
         return;
     }
     create_player_projectile(player_ent,  x, y);
