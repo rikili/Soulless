@@ -110,22 +110,24 @@ void InputHandler::onMouseMove(vec2 mouse_position) {
 
 void create_player_projectile(Entity& player_ent, double x, double y)
 {
-    Motion& player_motion = registry.motions.get(player_ent);
 
     Entity projectile_ent;
     Projectile& projectile = registry.projectiles.emplace(projectile_ent);
     Motion& projectile_motion = registry.motions.emplace(projectile_ent);
     Deadly& deadly = registry.deadlies.emplace(projectile_ent);
+    Damage& damage = registry.damages.emplace(projectile_ent);
+    RenderRequest& request = registry.render_requests.emplace(projectile_ent);
+
     deadly.to_enemy = true;
+
+    Motion& player_motion = registry.motions.get(player_ent);
     projectile_motion.position = player_motion.position;
 
     // TODO: change once finalization is needed
     projectile.type = DamageType::fire;
     projectile_motion.velocity = vec2({ cos(player_motion.angle), sin(player_motion.angle) });
-    Damage& damage = registry.damages.emplace(projectile_ent);
     damage.value = 25.f;
 
-    RenderRequest& request = registry.render_requests.emplace(projectile_ent);
     request.mesh = "basic";
     request.shader = "basic";
     request.type = PROJECTILE;
@@ -152,6 +154,7 @@ void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mo
     if (action == GLFW_PRESS) {
         switch (button) {
             case GLFW_MOUSE_BUTTON_LEFT:
+                printd("Left mouse button pressed.\n");
                 double x, y;
                 glfwGetCursorPos(window, &x, &y);
                 cast_player_spell(x, y, true);
