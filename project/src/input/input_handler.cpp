@@ -117,10 +117,11 @@ void create_player_projectile(Entity& player_ent, double x, double y)
     Deadly& deadly = registry.deadlies.emplace(projectile_ent);
     Damage& damage = registry.damages.emplace(projectile_ent);
     RenderRequest& request = registry.render_requests.emplace(projectile_ent);
+    Motion& player_motion = registry.motions.get(player_ent);
 
     deadly.to_enemy = true;
 
-    Motion& player_motion = registry.motions.get(player_ent);
+    projectile_motion.scale = { 0.4f, 0.4f };
     projectile_motion.position = player_motion.position;
     projectile_motion.angle = player_motion.angle;
     projectile.init_pos = player_motion.position;
@@ -131,7 +132,6 @@ void create_player_projectile(Entity& player_ent, double x, double y)
     projectile_motion.velocity = vec2({ cos(player_motion.angle), sin(player_motion.angle) });
     damage.value = 25.f;
 
-    RenderRequest& request = registry.render_requests.emplace(projectile_ent);
     request.mesh = "sprite";
     request.texture = "fireball";
     request.shader = "sprite";

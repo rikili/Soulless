@@ -15,10 +15,18 @@ bool check_collision(Entity& entity, Entity& other_entity)
     Motion& motion = registry.motions.get(entity);
     Motion& other_motion = registry.motions.get(other_entity);
 
-    return (motion.position.x < other_motion.position.x + other_motion.collider.x &&
-        motion.position.x + motion.collider.x > other_motion.position.x &&
-        motion.position.y < other_motion.position.y + other_motion.collider.y &&
-        motion.position.y + motion.collider.y > other_motion.position.y);
+    vec2 bounding_box = motion.collider * motion.scale;
+    vec2 other_bounding_box = other_motion.collider * other_motion.scale; // Its x and y means width and height
+
+    return (
+        // Horizontal intersection tests
+        motion.position.x < other_motion.position.x + other_bounding_box.x &&
+        other_motion.position.x < motion.position.x + bounding_box.x &&
+
+        // Vertical intersection tests
+        motion.position.y < other_motion.position.y + other_bounding_box.y &&
+        other_motion.position.y < motion.position.y + bounding_box.y
+    );
 }
 
 void CollisionSystem::handle_collisions()
@@ -120,6 +128,7 @@ void CollisionSystem::handle_collisions()
                     // projectile <-> enemy collision
                     else if (deadly.to_enemy && registry.enemies.has(other_target))
                     {
+                        // printd("Enemy has been hit by a projectile!\n");
                         this->applyDamage(deadly_target, other_target);
                     }
                     else
