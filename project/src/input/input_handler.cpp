@@ -131,7 +131,6 @@ void create_player_projectile(Entity& player_ent, double x, double y)
     projectile_motion.velocity = vec2({ cos(player_motion.angle), sin(player_motion.angle) });
     damage.value = 25.f;
 
-    RenderRequest& request = registry.render_requests.emplace(projectile_ent);
     request.mesh = "sprite";
     request.texture = "fireball";
     request.shader = "sprite";
