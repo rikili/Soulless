@@ -19,8 +19,8 @@ enum class DamageType
 };
 
 // ENEMY
-const float ENEMY_BASIC_VELOCITY = 0.0f;
-const float ENEMY_BASIC_RANGE = 500.f;
+const float ENEMY_BASIC_VELOCITY = 0.05f;
+const float ENEMY_BASIC_RANGE = 100.f;
 
 // FIRE
 const float FIRE_DAMAGE = 25.f;
