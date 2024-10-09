@@ -18,6 +18,7 @@ bool WorldSystem::is_over() const {
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
+	this->handle_projectiles(elapsed_ms_since_last_update);
 	this->handle_timers(elapsed_ms_since_last_update);
 	this->handle_movements(elapsed_ms_since_last_update);
 	this->collision_system->handle_collisions();
@@ -28,6 +29,30 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 void WorldSystem::set_renderer(RenderSystem* renderer)
 {
 	this->renderer = renderer;
+}
+
+/**
+ * @brief Handle projectiles to reduce their range at each step and mark for deletion if they are out of range
+ * @param 
+ */
+void WorldSystem::handle_projectiles(float elapsed_ms_since_last_update)
+{
+	for (Entity& projectile_ent : registry.projectiles.entities)
+	{
+		if (registry.deaths.has(projectile_ent))
+		{
+			continue;
+		}
+
+		Projectile& projectile = registry.projectiles.get(projectile_ent);
+		Motion& motion = registry.motions.get(projectile_ent);
+		projectile.range -= sqrt(motion.velocity.x * motion.velocity.x + motion.velocity.y * motion.velocity.y) * elapsed_ms_since_last_update;
+		if (projectile.range <= 0)
+		{
+			registry.deaths.emplace(projectile_ent);
+			// printd("Marked for removal due to distance travelled - Entity value: %u\n", static_cast<unsigned>(projectile_ent));
+		}
+	}
 }
 
 /**

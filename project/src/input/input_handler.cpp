@@ -70,7 +70,7 @@ float normalizeAngle(float angle) {
 
 float angularDifference(float a, float b) {
     float diff = normalizeAngle(a - b);
-    return std::abs(a - b);
+    return std::abs(diff);
 }
 
 void InputHandler::onMouseMove(vec2 mouse_position) {
@@ -122,14 +122,17 @@ void create_player_projectile(Entity& player_ent, double x, double y)
 
     Motion& player_motion = registry.motions.get(player_ent);
     projectile_motion.position = player_motion.position;
+    projectile_motion.angle = player_motion.angle;
 
     // TODO: change once finalization is needed
     projectile.type = DamageType::fire;
+    projectile.range = FIRE_RANGE;
     projectile_motion.velocity = vec2({ cos(player_motion.angle), sin(player_motion.angle) });
-    damage.value = 25.f;
+    damage.value = FIRE_DAMAGE;
 
-    request.mesh = "basic";
-    request.shader = "basic";
+    request.mesh = "sprite";
+    request.texture = "fireball";
+    request.shader = "sprite";
     request.type = PROJECTILE;
 }
 
