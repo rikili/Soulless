@@ -21,10 +21,14 @@ public:
 	void initialize();
 	Entity getPlayer();
 
+	// World state specific variables
+	float enemy_spawn_timer = 0.0f;
+
 private:
 	// helper functions to set the world
 	Entity createPlayer();
 	void createEnemy(vec2 position, vec2 velocity);
+	void handleEnemyLogic(float elapsed_ms_since_last_update);
 
 
 	GLFWwindow* window{};
