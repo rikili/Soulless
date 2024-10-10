@@ -7,8 +7,9 @@
 #include "core/common.hpp"
 
 enum class SoundEffect {
-		FIRE,
-		VILLAGER_DAMAGE
+    FIRE,
+    VILLAGER_DAMAGE,
+    PITCHFORK_DAMAGE
 };
 
 class SoundManager {

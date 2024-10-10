@@ -178,9 +178,11 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
         }
 
     } else {
+        SoundManager *soundManager = SoundManager::getSoundManager();
         if (!registry.players.has(victim)) {
-            SoundManager *soundManager = SoundManager::getSoundManager();
             soundManager->playSound(SoundEffect::VILLAGER_DAMAGE);
+        } else if (registry.players.has(victim)) {
+            soundManager->playSound(SoundEffect::PITCHFORK_DAMAGE);
         }
 
         health.health -= damage.value;

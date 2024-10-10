@@ -26,24 +26,25 @@ SoundManager* SoundManager::getSoundManager() {
 
 bool SoundManager::initialize() {
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
-				printd("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+        printd("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
         return false;
     }
 
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-				printd("SDL_mixer could not initialize! Mix_Error: %s\n", Mix_GetError());
+        printd("SDL_mixer could not initialize! Mix_Error: %s\n", Mix_GetError());
         return false;
     }
 
-		backgroundMusic = Mix_LoadMUS(audio_path("background_music.mp3").c_str());
+    backgroundMusic = Mix_LoadMUS(audio_path("background_music.mp3").c_str());
 
     if (backgroundMusic == nullptr) {
-				printd("Failed to load background music: Mix_Error: %s\n", Mix_GetError());
-				return false;
+        printd("Failed to load background music: Mix_Error: %s\n", Mix_GetError());
+        return false;
     }
 
     registerSound(SoundEffect::FIRE, audio_path("fireball.mp3").c_str());
     registerSound(SoundEffect::VILLAGER_DAMAGE, audio_path("villager_damage.mp3").c_str());
+    registerSound(SoundEffect::PITCHFORK_DAMAGE, audio_path("pitchfork_damage.mp3").c_str());
 
     return true;
 }
@@ -53,7 +54,7 @@ void SoundManager::playSound(SoundEffect effect) {
     if (soundEffect != soundEffects.end()) {
         Mix_PlayChannel(-1, soundEffect->second, 0);
     } else {
-			printd("Sound effect not found!\n");
+        printd("Sound effect not found!\n");
     }
 }
 
@@ -70,7 +71,7 @@ void SoundManager::removeSoundManager() {
 
     if (backgroundMusic != nullptr) {
         Mix_FreeMusic(backgroundMusic);
-				backgroundMusic = nullptr;
+        backgroundMusic = nullptr;
     }
 
     soundEffects.clear();
@@ -81,7 +82,7 @@ void SoundManager::removeSoundManager() {
 void SoundManager::registerSound(SoundEffect effect, const char *filePath) {
     Mix_Chunk *chunk = Mix_LoadWAV(filePath);
     if (chunk == nullptr) {
-				printd("Failed to load sound %s with error %s\n", filePath, Mix_GetError());
+        printd("Failed to load sound %s with error %s\n", filePath, Mix_GetError());
     } else {
         soundEffects[effect] = chunk;
     }
