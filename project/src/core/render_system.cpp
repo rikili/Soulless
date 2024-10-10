@@ -173,12 +173,15 @@ void RenderSystem::drawFrame()
 			// Rotate the sprite for all eight directions if request type is a PROJECTILE
 			if (render_request.type == PROJECTILE) {
 				// printd("Fireball angle: %f\n", motion.angle);
-        transform = rotate(transform, motion.angle, glm::vec3(0.0f, 0.0f, 1.0f)); // Apply rotation
+				transform = rotate(transform, motion.angle, glm::vec3(0.0f, 0.0f, 1.0f)); // Apply rotation
 			}
 			transform = scale(transform, vec3(motion.scale * 100.f, 1.0f));
 
 
 			if (render_request.shader == "sprite") {
+				if (registry.players.has(entity) && registry.deaths.has(entity)) {
+					transform = rotate(transform, (float) M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
+				}
 
 				const Texture* texture = this->asset_manager.getTexture(render_request.texture);
 				if (!texture)

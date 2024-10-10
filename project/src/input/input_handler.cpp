@@ -19,7 +19,16 @@ Mergekk
 
 InputHandler::InputHandler() { }
 
+bool isPlayerDead() {
+    Entity& player_ent = registry.players.entities[0];
+    return registry.deaths.has(player_ent);
+}
+
 void InputHandler::onKey(int key, int scancode, int action, int mods) {
+    if (isPlayerDead()) {
+        return;
+    }
+
     if (action == GLFW_PRESS) {
         switch (key) {
             case GLFW_KEY_W:
@@ -62,6 +71,10 @@ void InputHandler::onKey(int key, int scancode, int action, int mods) {
 }
 
 void InputHandler::onMouseMove(vec2 mouse_position) {
+    if (isPlayerDead()) {
+        return;
+    }
+
     Entity& player = registry.players.entities[0];
     Motion& playerMotion = registry.motions.get(player);
 
@@ -124,6 +137,10 @@ void cast_player_spell(double x, double y, bool is_left)
 }
 
 void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mods) {
+    if (isPlayerDead()) {
+        return;
+    }
+
     if (action == GLFW_PRESS) {
         switch (button) {
             case GLFW_MOUSE_BUTTON_LEFT:
