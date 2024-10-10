@@ -77,6 +77,8 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 		{
 			motion.position += motion.velocity * elapsed_ms_since_last_update;
 		}
+      RenderRequest& render_request = registry.render_requests.get(entity);
+			render_request.smooth_position.update(motion.position.y);
 	}
 }
 
