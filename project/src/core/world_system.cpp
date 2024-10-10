@@ -79,6 +79,7 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 		else
 		{
 			motion.position += motion.velocity * elapsed_ms_since_last_update;
+		}
 
 		if (registry.enemies.has(entity))
 		{
@@ -86,7 +87,6 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 			motion.angle = atan2(player_motion.position.y - motion.position.y, player_motion.position.x - motion.position.x);
 			// printd("Enemy angle towards player: %f\n", motion.angle);
 		}	
-		}
 	}
 }
 
