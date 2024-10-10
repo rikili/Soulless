@@ -3,6 +3,10 @@
 #include "utils/angle_functions.hpp"
 #include <cstdio>
 #include <iostream>
+#include "sound/sound_manager.hpp"
+
+#include <SDL.h>
+#include <SDL_mixer.h>
 
 /*
 - player slots for spell 1 and spell 2 (component) ? (needs to hold some spells)
@@ -109,7 +113,13 @@ void cast_player_spell(double x, double y, bool is_left)
     {
         return;
     }
+
+
     create_player_projectile(player_ent,  x, y);
+
+    SoundManager *soundManager = SoundManager::getSoundManager();
+    soundManager->playSound(SoundEffect::FIRE);
+
     invoke_player_cooldown(player, is_left);
 }
 

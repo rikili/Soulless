@@ -4,6 +4,8 @@
 #include "core/common.hpp"
 #include "render_system.hpp"
 
+#include <SDL.h>
+#include <SDL_mixer.h>
 /**
  * Container for all our entities and game logic.
  */
@@ -34,6 +36,7 @@ private:
 	void createFarmer(vec2 position, vec2 velocity);
 	void handle_enemy_logic(float elapsed_ms_since_last_update);
 
+	Mix_Music* background_music;
 
 	GLFWwindow* window{};
 	RenderSystem* renderer;

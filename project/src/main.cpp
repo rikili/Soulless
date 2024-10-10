@@ -3,6 +3,8 @@
 #include "core/render_system.hpp"
 #include "core/world_system.hpp"
 #include "utils/game_assets.hpp"
+#include "sound/sound_manager.hpp"
+#include "core/common.hpp"
 
 #define ERROR_SUCCESS 0 // For Mac OS
 
@@ -15,6 +17,12 @@ int main(int argc, char* argv[])
 
 	renderer.initialize(input_handler, window_width_px, window_height_px, "Soulless"); // must be called at the beginning of the program
 	GLFWwindow* window = renderer.getGLWindow();
+
+	SoundManager *soundManager = SoundManager::getSoundManager();
+	if (!soundManager->initialize()) {
+		printd("Error initializing sound manager\n");
+	}
+	soundManager->playMusic();
 
 	GameAssets gameAssets = initializeGameAssets(asset_manager); // Initialize the asset manager
 	renderer.setAssetManager(&asset_manager);
@@ -37,5 +45,6 @@ int main(int argc, char* argv[])
 	}
 
 	// TODO: Add cleanup code here
+	soundManager->removeSoundManager();
 	return ERROR_SUCCESS;
 }
