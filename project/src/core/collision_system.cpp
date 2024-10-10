@@ -123,7 +123,7 @@ void CollisionSystem::handle_collisions()
                     // projectile <-> player collision
                     if (deadly.to_player && registry.players.has(other_target))
                     {
-                        // TODO
+                        this->applyDamage(deadly_target, other_target);
                     }
                     // projectile <-> enemy collision
                     else if (deadly.to_enemy && registry.enemies.has(other_target))
@@ -169,12 +169,20 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
         health.health = 0;
         Death& death = registry.deaths.emplace(victim);
         death.timer = 10;
+
+        if (registry.players.has(victim))
+        {   
+            // TODO: Handle player death logic -> Check world_system.cpp logic as well
+            printd("Player has died!\n");
+        }
+
     } else {
         health.health -= damage.value;
         OnHit& hit = registry.onHits.emplace(victim);
         if (registry.players.has(victim))
         {
-            hit.invincibility_timer = 3000;
+            // printd("Player has been hit! Remaining health: %f\n", health.health);
+            hit.invincibility_timer = 1500;
         }
         else
         {
