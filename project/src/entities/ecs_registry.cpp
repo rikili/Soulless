@@ -1,3 +1,3 @@
 #include "entities/ecs_registry.hpp"
 
-ECSRegistry registry;
+ECSRegistry registry; // Global registry
