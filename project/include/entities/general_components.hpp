@@ -37,9 +37,11 @@ struct Damage
 
 // Type Components
 struct Enemy {
-    bool is_ranged = false;
+    EnemyType type;
     float range = 0;
+    float cooldown = -1.f;
 };
+
 struct Player {
     DamageType right_hand;
     DamageType left_hand;

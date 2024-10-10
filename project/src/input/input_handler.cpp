@@ -1,5 +1,6 @@
 #include "input/input_handler.hpp"
 #include "entities/general_components.hpp"
+#include "utils/angle_functions.hpp"
 #include <cstdio>
 #include <iostream>
 
@@ -56,23 +57,6 @@ void InputHandler::onKey(int key, int scancode, int action, int mods) {
     }
 }
 
-float normalizeAngle(float angle) {
-    while (angle > M_PI) {
-        angle -= 2.f * M_PI;
-    }
-
-    while (angle < -M_PI) {
-        angle += 2.f * M_PI;
-    }
-
-    return angle;
-}
-
-float angularDifference(float a, float b) {
-    float diff = normalizeAngle(a - b);
-    return std::abs(diff);
-}
-
 void InputHandler::onMouseMove(vec2 mouse_position) {
     Entity& player = registry.players.entities[0];
     Motion& playerMotion = registry.motions.get(player);
@@ -80,32 +64,7 @@ void InputHandler::onMouseMove(vec2 mouse_position) {
     float dx = mouse_position.x - playerMotion.position.x;
     float dy = mouse_position.y - playerMotion.position.y;
 
-    float angle = atan2(dy, dx);
-
-    constexpr std::array<float, 8> cardinalAngles = {
-        0.f,                  // East
-        -M_PI / 4,            // North-East
-        -M_PI / 2,            // North
-        -3 * M_PI / 4,        // North-West
-        -M_PI,                // West
-        3 * M_PI / 4,         // South-West
-        M_PI / 2,             // South
-        M_PI / 4              // South-East
-    };
-
-    float closestAngle = cardinalAngles[0];
-    float smallestDifference = angularDifference(angle, closestAngle);
-
-    for (const float& cardinalAngle : cardinalAngles) {
-        float difference = angularDifference(angle, cardinalAngle);
-
-        if (difference < smallestDifference) {
-            smallestDifference = difference;
-            closestAngle = cardinalAngle;
-        }
-    }
-
-    playerMotion.angle = closestAngle;
+    playerMotion.angle = find_closest_angle(dx, dy);
 }
 
 void create_player_projectile(Entity& player_ent, double x, double y)
@@ -200,6 +159,6 @@ void InputHandler::updateVelocity() {
         playerMotion.velocity.y = 0;
     }
 
-    printd("New velocity is: %f, %f\n", playerMotion.velocity.x, playerMotion.velocity.y);
-    printd("New position is: %f, %f\n", playerMotion.position.x, playerMotion.position.y);
+    // printd("New velocity is: %f, %f\n", playerMotion.velocity.x, playerMotion.velocity.y);
+    // printd("New position is: %f, %f\n", playerMotion.position.x, playerMotion.position.y);
 }

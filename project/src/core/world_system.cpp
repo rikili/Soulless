@@ -19,11 +19,12 @@ bool WorldSystem::is_over() const {
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	this->handle_projectiles(elapsed_ms_since_last_update);
+	this->handle_enemy_attacks(elapsed_ms_since_last_update);
 	this->handle_timers(elapsed_ms_since_last_update);
 	this->handle_movements(elapsed_ms_since_last_update);
 	this->collision_system->handle_collisions();
 
-	this->handleEnemyLogic(elapsed_ms_since_last_update);
+	this->handle_enemy_logic(elapsed_ms_since_last_update);
 
 	return true;
 }
@@ -64,6 +65,8 @@ void WorldSystem::handle_projectiles(float elapsed_ms_since_last_update)
 void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 {
 	ComponentContainer<Motion> &motions_registry = registry.motions;
+	Motion& player_motion = motions_registry.get(player_mage);
+
 	// Update all motions
 	for (Entity entity : motions_registry.entities) {
 		Motion& motion = motions_registry.get(entity);
@@ -77,8 +80,16 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 		{
 			motion.position += motion.velocity * elapsed_ms_since_last_update;
 		}
-      RenderRequest& render_request = registry.render_requests.get(entity);
-			render_request.smooth_position.update(motion.position.y);
+
+		if (registry.enemies.has(entity))
+		{
+			Enemy& enemy = registry.enemies.get(entity);
+			motion.angle = atan2(player_motion.position.y - motion.position.y, player_motion.position.x - motion.position.x);
+			// printd("Enemy angle towards player: %f\n", motion.angle);
+		}	
+
+		RenderRequest& render_request = registry.render_requests.get(entity);
+		render_request.smooth_position.update(motion.position.y);
 	}
 }
 
@@ -121,6 +132,80 @@ void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 			player.cooldown = 0;
 		}
 	}
+
+	for (Entity& enemy_ent : registry.enemies.entities)
+	{
+		Enemy& enemy = registry.enemies.get(enemy_ent);
+		enemy.cooldown -= elapsed_ms_since_last_update;
+		if (enemy.cooldown < 0)
+		{
+			// printd("Enemy cooldown is less than 0\n");
+			enemy.cooldown = 0;
+		}
+	}
+}
+
+/**
+ * @brief In charge of enemies using their attacks when they are in range and off cooldown
+ * @param elapsed_ms_since_last_update
+ */
+void WorldSystem::handle_enemy_attacks(float elapsed_ms_since_last_update)
+{
+	for (Entity& enemy_ent : registry.enemies.entities)
+	{
+		Enemy& enemy = registry.enemies.get(enemy_ent);
+		Motion& enemy_motion = registry.motions.get(enemy_ent);
+		Motion& player_motion = registry.motions.get(player_mage);
+
+		// printd("Distance between player and enemy: %f\n", glm::distance(enemy_motion.position, player_motion.position));
+
+		if (enemy.cooldown <= 0 && (glm::distance(enemy_motion.position, player_motion.position) <= enemy.range))
+		{
+			create_enemy_projectile(enemy_ent);
+			invoke_enemy_cooldown(enemy_ent);
+		}
+	}
+}
+
+void WorldSystem::create_enemy_projectile(Entity& enemy_ent)
+{
+	Entity projectile_ent;
+	Projectile& projectile = registry.projectiles.emplace(projectile_ent);
+	Motion& projectile_motion = registry.motions.emplace(projectile_ent);
+	Deadly& deadly = registry.deadlies.emplace(projectile_ent);
+	Damage& damage = registry.damages.emplace(projectile_ent);
+	RenderRequest& request = registry.render_requests.emplace(projectile_ent);
+	Motion& enemy_motion = registry.motions.get(enemy_ent);
+	Enemy& enemy = registry.enemies.get(enemy_ent);
+
+	deadly.to_player = true;
+
+	projectile_motion.scale = { 0.525f, 0.525f };
+	projectile_motion.position = enemy_motion.position;
+	projectile_motion.angle = enemy_motion.angle;
+
+	projectile.type = DamageType::elementless;
+	projectile.range = enemy.range;
+	projectile_motion.velocity = vec2({ cos(enemy_motion.angle), sin(enemy_motion.angle) }) * PITCHFORK_VELOCITY;
+	damage.value = PITCHFORK_DAMAGE;
+
+	request.mesh = "sprite";
+	request.texture = "pitchfork";
+	request.shader = "sprite";
+	request.type = PROJECTILE;
+}
+
+void WorldSystem::invoke_enemy_cooldown(Entity& enemy_ent) {
+		Enemy& enemy = registry.enemies.get(enemy_ent);
+
+	if (enemy.type == EnemyType::FARMER) {
+		enemy.cooldown = FARMER_COOLDOWN;
+	} else if (enemy.type == EnemyType::ARCHER) {
+		// TODO
+	} else if (enemy.type == EnemyType::CLERIC) {
+		// TODO
+	}
+
 }
 
 /**
@@ -143,8 +228,8 @@ Entity WorldSystem::createPlayer() {
 	motion.scale = { 0.5f, 0.5f };
 
 	Health& health = registry.healths.emplace(player);
-	health.health = 100;
-	health.maxHealth = 100;
+	health.health = PLAYER_HEALTH;
+	health.maxHealth = PLAYER_MAX_HEALTH;
 	// TODO: Add resistances here!
 
 	// Player& player_component = registry.players.emplace(player);
@@ -160,33 +245,41 @@ Entity WorldSystem::createPlayer() {
 }
 
 
-void WorldSystem::createEnemy(vec2 position, vec2 velocity)
+void WorldSystem::createEnemy(EnemyType type, vec2 position, vec2 velocity)
+{
+	if (type == EnemyType::FARMER) {
+		createFarmer(position, velocity);
+	} else if (type == EnemyType::ARCHER) {
+		// TODO: Implement archer enemy (can be changed)
+	} else if (type == EnemyType::CLERIC) {
+		// TODO: Implement cleric enemy (can be changed)
+	}
+}
+
+void WorldSystem::createFarmer(vec2 position, vec2 velocity)
 {
 	Entity enemy;
+
+	Enemy& enemy_component = registry.enemies.emplace(enemy);
+	enemy_component.type = EnemyType::FARMER;
+	enemy_component.range = FARMER_RANGE;
+	enemy_component.cooldown = FARMER_COOLDOWN;
+
 	Motion& motion = registry.motions.emplace(enemy);
 	motion.position = position;
 	motion.velocity = velocity;
-	motion.scale = { 0.7f, 0.7f };
-
-	Enemy& enemy_component = registry.enemies.emplace(enemy);
-	enemy_component.range = 500.f;
+	motion.scale = { 0.5f, 0.5f };
 
 	Health& health = registry.healths.emplace(enemy);
-	health.health = 100;
-	health.maxHealth = 100;
+	health.health = FARMER_HEALTH;
+	health.maxHealth = FARMER_HEALTH;
 
 	Deadly& deadly = registry.deadlies.emplace(enemy);
 	deadly.to_projectile = true;
-	deadly.to_enemy = false;
-	deadly.to_player = false;
-
-	Damage& damage = registry.damages.emplace(enemy);
-	damage.value = 10.f;
-	damage.type = DamageType::enemy;
 
 	RenderRequest& request = registry.render_requests.emplace(enemy);
 	request.mesh = "sprite";
-	request.texture = "archer";
+	request.texture = "farmer";
 	request.shader = "sprite";
 	request.type = ENEMY;
 }
@@ -198,7 +291,7 @@ void WorldSystem::createEnemy(vec2 position, vec2 velocity)
  * If the enemy spawn timer has elapsed, a new enemy is spawned at a random location
  * Enemies are spawned outside the window and move towards the player
  */
-void WorldSystem::handleEnemyLogic(const float elapsed_ms_since_last_update)
+void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 {
 	this->enemy_spawn_timer -= elapsed_ms_since_last_update;
 	const bool should_spawn = this->enemy_spawn_timer <= 0;
@@ -237,7 +330,7 @@ void WorldSystem::handleEnemyLogic(const float elapsed_ms_since_last_update)
 			break;
 		}
 		const vec2 position = { candidate_x, candidate_y };
-		this->createEnemy(position, { 0, 0 });
+		this->createEnemy(EnemyType::FARMER, position, { 0, 0 });
 	}
 
 	// Reorient enemies towards the player

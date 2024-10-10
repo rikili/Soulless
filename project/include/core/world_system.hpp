@@ -18,6 +18,9 @@ public:
 	void handle_projectiles(float elapsed_ms_since_last_update);
 	void handle_timers(float elapsed_ms_since_last_update);
 	void handle_movements(float elapsed_ms_since_last_update);
+	void handle_enemy_attacks(float elapsed_ms_since_last_update);
+	void create_enemy_projectile(Entity& enemy_ent);
+	void invoke_enemy_cooldown(Entity& enemy_ent);
 	void initialize();
 	Entity getPlayer();
 
@@ -27,8 +30,9 @@ public:
 private:
 	// helper functions to set the world
 	Entity createPlayer();
-	void createEnemy(vec2 position, vec2 velocity);
-	void handleEnemyLogic(float elapsed_ms_since_last_update);
+	void createEnemy(EnemyType type, vec2 position, vec2 velocity);
+	void createFarmer(vec2 position, vec2 velocity);
+	void handle_enemy_logic(float elapsed_ms_since_last_update);
 
 
 	GLFWwindow* window{};

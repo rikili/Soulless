@@ -171,8 +171,8 @@ void RenderSystem::drawFrame()
 			mat4 transform = mat4(1.0f);
 			transform = translate(transform, glm::vec3(position, 0.0f));
 
-			// Rotate the fireball sprite for all eight directions
-			if (render_request.texture == "fireball") {
+			// Rotate the sprite for all eight directions if request type is a PROJECTILE
+			if (render_request.type == PROJECTILE) {
 				// printd("Fireball angle: %f\n", motion.angle);
         transform = rotate(transform, motion.angle, glm::vec3(0.0f, 0.0f, 1.0f)); // Apply rotation
 			}
