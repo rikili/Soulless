@@ -37,9 +37,11 @@ struct Damage
 
 // Type Components
 struct Enemy {
-    bool is_ranged = false;
+    EnemyType type;
     float range = 0;
+    float cooldown = -1.f;
 };
+
 struct Player {
     DamageType right_hand;
     DamageType left_hand;
@@ -47,8 +49,10 @@ struct Player {
     unsigned int health_gauge = 0;
     SpellQueue spell_queue;
 };
+
 struct Projectile {
     DamageType type;
+    float range = 0;
 };
 
 // Timed Component
@@ -71,15 +75,29 @@ struct OnHit
 // Structure to store entities marked to die
 struct Death
 {
-    float timer = 10;
+    float timer = 2;
 };
 
-// Structure to store what entites affect/damage other entities
+// Structure to store what entities affect/damage other entities
 struct Deadly
 {
     bool to_player = false;
     bool to_enemy = false;
     bool to_projectile = false;
+};
+
+// Smooth position component to handle z-fighting
+struct SmoothPosition {
+    float render_y;
+    static constexpr float HYSTERESIS = 5.0f;
+    static constexpr float SMOOTHING_FACTOR = 0.1f;
+
+    void update(const float actual_y) {
+        const float diff = actual_y - render_y;
+        if (std::abs(diff) > HYSTERESIS) {
+            render_y += diff * SMOOTHING_FACTOR;
+        }
+    }
 };
 
 struct RenderRequest
@@ -88,4 +106,7 @@ struct RenderRequest
     AssetId texture = "";
     AssetId shader = "";
     unsigned int type = BACK;
+    SmoothPosition smooth_position;
+
 };
+

@@ -129,12 +129,13 @@ void RenderSystem::drawFrame()
 		glDrawElements(GL_TRIANGLES, bgMesh->indexCount, GL_UNSIGNED_INT, 0);
 	}
 
-
 	// Draw all entities
-	registry.render_requests.sort(typeAscending);
-	// printd("%d\n", registry.render_requests.size());
-	for (const Entity& entity : registry.render_requests.entities)
+	// registry.render_requests.sort(typeAscending);
+	this->updateRenderOrder(registry.render_requests);
+
+	for (const auto& render_index : sorted_indices)
 	{
+		Entity& entity = registry.render_requests.entities.at(render_index.index);
 		RenderRequest& render_request = registry.render_requests.get(entity);
 
 		Motion& motion = registry.motions.get(entity);
@@ -145,6 +146,7 @@ void RenderSystem::drawFrame()
 			std::cerr << "Skipping rendering of this entity" << std::endl;
 			continue;
 		}
+
 
 		if (render_request.shader != "") {
 			const Shader* shader = this->asset_manager.getShader(render_request.shader);
@@ -157,8 +159,22 @@ void RenderSystem::drawFrame()
 			const GLuint shaderProgram = shader->program;
 			glUseProgram(shaderProgram);
 
+			vec2 position;
+			if (registry.motions.has(entity)) {
+				position = registry.motions.get(entity).position;
+			} else {
+				// Fallback to render_y if no Motion component
+				position = vec2(0, render_request.smooth_position.render_y);
+			}
+
 			mat4 transform = mat4(1.0f);
-			transform = translate(transform, glm::vec3(motion.position, 0.0f));
+			transform = translate(transform, glm::vec3(position, 0.0f));
+
+			// Rotate the sprite for all eight directions if request type is a PROJECTILE
+			if (render_request.type == PROJECTILE) {
+				// printd("Fireball angle: %f\n", motion.angle);
+        transform = rotate(transform, motion.angle, glm::vec3(0.0f, 0.0f, 1.0f)); // Apply rotation
+			}
 			transform = scale(transform, vec3(motion.scale * 100.f, 1.0f));
 
 

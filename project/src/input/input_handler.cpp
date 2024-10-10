@@ -1,5 +1,6 @@
 #include "input/input_handler.hpp"
 #include "entities/general_components.hpp"
+#include "utils/angle_functions.hpp"
 #include <cstdio>
 #include <iostream>
 #include "sound/sound_manager.hpp"
@@ -60,23 +61,6 @@ void InputHandler::onKey(int key, int scancode, int action, int mods) {
     }
 }
 
-float normalizeAngle(float angle) {
-    while (angle > M_PI) {
-        angle -= 2.f * M_PI;
-    }
-
-    while (angle < -M_PI) {
-        angle += 2.f * M_PI;
-    }
-
-    return angle;
-}
-
-float angularDifference(float a, float b) {
-    float diff = normalizeAngle(a - b);
-    return std::abs(diff);
-}
-
 void InputHandler::onMouseMove(vec2 mouse_position) {
     Entity& player = registry.players.entities[0];
     Motion& playerMotion = registry.motions.get(player);
@@ -84,32 +68,7 @@ void InputHandler::onMouseMove(vec2 mouse_position) {
     float dx = mouse_position.x - playerMotion.position.x;
     float dy = mouse_position.y - playerMotion.position.y;
 
-    float angle = atan2(dy, dx);
-
-    constexpr std::array<float, 8> cardinalAngles = {
-        0.f,                  // East
-        -M_PI / 4,            // North-East
-        -M_PI / 2,            // North
-        -3 * M_PI / 4,        // North-West
-        -M_PI,                // West
-        3 * M_PI / 4,         // South-West
-        M_PI / 2,             // South
-        M_PI / 4              // South-East
-    };
-
-    float closestAngle = cardinalAngles[0];
-    float smallestDifference = angularDifference(angle, closestAngle);
-
-    for (const float& cardinalAngle : cardinalAngles) {
-        float difference = angularDifference(angle, cardinalAngle);
-
-        if (difference < smallestDifference) {
-            smallestDifference = difference;
-            closestAngle = cardinalAngle;
-        }
-    }
-
-    playerMotion.angle = closestAngle;
+    playerMotion.angle = find_closest_angle(dx, dy);
 }
 
 void create_player_projectile(Entity& player_ent, double x, double y)
@@ -121,19 +80,23 @@ void create_player_projectile(Entity& player_ent, double x, double y)
     Deadly& deadly = registry.deadlies.emplace(projectile_ent);
     Damage& damage = registry.damages.emplace(projectile_ent);
     RenderRequest& request = registry.render_requests.emplace(projectile_ent);
+    Motion& player_motion = registry.motions.get(player_ent);
 
     deadly.to_enemy = true;
 
-    Motion& player_motion = registry.motions.get(player_ent);
+    projectile_motion.scale = { 0.4f, 0.4f };
     projectile_motion.position = player_motion.position;
+    projectile_motion.angle = player_motion.angle;
 
     // TODO: change once finalization is needed
     projectile.type = DamageType::fire;
+    projectile.range = FIRE_RANGE;
     projectile_motion.velocity = vec2({ cos(player_motion.angle), sin(player_motion.angle) });
-    damage.value = 25.f;
+    damage.value = FIRE_DAMAGE;
 
-    request.mesh = "basic";
-    request.shader = "basic";
+    request.mesh = "sprite";
+    request.texture = "fireball";
+    request.shader = "sprite";
     request.type = PROJECTILE;
 }
 
