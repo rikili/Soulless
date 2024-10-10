@@ -70,7 +70,15 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 	// Update all motions
 	for (Entity entity : motions_registry.entities) {
 		Motion& motion = motions_registry.get(entity);
-		motion.position += motion.velocity * elapsed_ms_since_last_update;
+		if (registry.players.has(entity) || registry.enemies.has(entity))
+		{
+			float x_offset = motion.collider.x * motion.scale.x;
+			float y_offset = motion.collider.y * motion.scale.y;
+			motion.position = glm::clamp(motion.position + motion.velocity * elapsed_ms_since_last_update, { x_offset, y_offset }, { window_width_px - x_offset, window_height_px - y_offset });
+		}
+		else
+		{
+			motion.position += motion.velocity * elapsed_ms_since_last_update;
 
 		if (registry.enemies.has(entity))
 		{
@@ -78,6 +86,7 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 			motion.angle = atan2(player_motion.position.y - motion.position.y, player_motion.position.x - motion.position.x);
 			// printd("Enemy angle towards player: %f\n", motion.angle);
 		}	
+		}
 	}
 }
 
