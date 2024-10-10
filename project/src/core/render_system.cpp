@@ -100,7 +100,7 @@ GLFWwindow* RenderSystem::getGLWindow() const
  * This function is called every frame to draw the frame
  * @attention Skips rendering if the shader is not found
  */
-void RenderSystem::drawFrame(Camera& camera)
+void RenderSystem::drawFrame()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_BLEND);
@@ -129,7 +129,9 @@ void RenderSystem::drawFrame(Camera& camera)
 		glDrawElements(GL_TRIANGLES, bgMesh->indexCount, GL_UNSIGNED_INT, 0);
 	}
 
-	camera.updateCamera(camera, registry.players.entities[0]);
+	Entity player = registry.players.entities[0];
+	updateCameraPosition(registry.motions.get(player).position.x - window_width_px * 0.5f, 
+						 registry.motions.get(player).position.y - window_height_px * 0.5f);
 
 	// Draw all entities
 	// registry.render_requests.sort(typeAscending);
@@ -193,8 +195,8 @@ void RenderSystem::drawFrame(Camera& camera)
 				glBindTexture(GL_TEXTURE_2D, texture->handle);
 				glUniform1i(glGetUniformLocation(shader->program, "image"), 0);
 			}
-			mat4 projection = camera.getProjectionMatrix();
-			mat4 view = camera.getViewMatrix();
+			mat4 projection = glm::ortho(0.f, (float)window_width_px, (float)window_height_px, 0.f, -1.f, 1.f);
+			mat4 view = viewMatrix;
 
 			const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
 			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
@@ -229,4 +231,9 @@ void RenderSystem::drawFrame(Camera& camera)
 		// 	std::cout << "Mesh vertex count: " << mesh->vertexCount
 		// 	  << ", index count: " << mesh->indexCount << std::endl;
 	}
+}
+
+void RenderSystem::updateCameraPosition(float x, float y) {
+	cameraPosition = glm::vec2(x, y);
+	viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraPosition, 0.0f));
 }

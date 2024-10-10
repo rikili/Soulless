@@ -7,7 +7,6 @@
 #include "common.hpp"
 #include "input/input_handler.hpp"
 #include "graphics/asset_manager.hpp"
-#include "core/camera.hpp"
 
 /**
  * System responsible for setting up OpenGL and for rendering all the visual entities in the game
@@ -18,7 +17,7 @@ public:
 	bool initialize(InputHandler& input_handler, int width = 480, int height = 500, const char* title = "OpenGL Example");
 	void setUpView() const;
 	GLFWwindow* getGLWindow() const;
-	void drawFrame(Camera& camera);
+	void drawFrame();
 	void setAssetManager(AssetManager* asset_manager) { this->asset_manager = *asset_manager; }
 	// void removeRenderRequest(Entity entity);
 	InputHandler input_handler;
@@ -45,10 +44,14 @@ private:
 		RenderIndex(size_t i, float y) : index(i), render_y(y) {}
 	};
 
+	void updateCameraPosition(float x, float y);
+
 	std::vector<RenderIndex> sorted_indices;
 	GLuint frame_buffer = 0;
 	Entity screen_state_entity;
 	GLFWwindow* window = nullptr;
 	AssetManager asset_manager; // Holds all the assets
 	std::vector<RenderRequest> render_requests; // Holds all the render requests
+	glm::vec2 cameraPosition;
+	glm::mat4 viewMatrix;
 };

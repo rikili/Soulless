@@ -1,4 +1,5 @@
 #define GL3W_IMPLEMENTATION
+#define SDL_MAIN_HANDLED
 
 #include "core/render_system.hpp"
 #include "core/world_system.hpp"
@@ -13,7 +14,6 @@ int main(int argc, char* argv[])
 	AssetManager asset_manager;
 	RenderSystem renderer;
 	InputHandler input_handler;
-	Camera camera(400, 400);
 	WorldSystem world = WorldSystem(&renderer);
 
 	renderer.initialize(input_handler, window_width_px, window_height_px, "Soulless"); // must be called at the beginning of the program
@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
 
 		world.step(elapsed_ms); // Update the game state
 
-		renderer.drawFrame(camera); // Re-render the scene (where the magic happens)
+		renderer.drawFrame(); // Re-render the scene (where the magic happens)
 		glfwSwapBuffers(window); // swap front and back buffers
 		glfwPollEvents(); // poll for and process events
 	}
