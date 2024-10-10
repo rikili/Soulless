@@ -100,7 +100,7 @@ GLFWwindow* RenderSystem::getGLWindow() const
  * This function is called every frame to draw the frame
  * @attention Skips rendering if the shader is not found
  */
-void RenderSystem::drawFrame()
+void RenderSystem::drawFrame(Camera& camera)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_BLEND);
@@ -130,7 +130,7 @@ void RenderSystem::drawFrame()
 	}
 
 	Entity player = registry.players.entities[0];
-	updateCameraPosition(registry.motions.get(player).position.x - window_width_px * 0.5f, 
+	updateCameraPosition(registry.motions.get(player).position.x - window_width_px * 0.5f,
 						 registry.motions.get(player).position.y - window_height_px * 0.5f);
 
 	// Draw all entities
@@ -205,8 +205,8 @@ void RenderSystem::drawFrame()
 			const GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
 			glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 			gl_has_errors();
-		}	
-	
+		}
+
 		const Mesh* mesh = this->asset_manager.getMesh(render_request.mesh);
 
 		if (!mesh)
