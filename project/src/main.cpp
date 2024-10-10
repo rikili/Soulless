@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 	if (!soundManager->initialize()) {
 		printd("Error initializing sound manager\n");
 	}
-	soundManager->playMusic();
+	soundManager->playMusic(Song::MAIN);
 
 	GameAssets gameAssets = initializeGameAssets(asset_manager); // Initialize the asset manager
 	renderer.setAssetManager(&asset_manager);

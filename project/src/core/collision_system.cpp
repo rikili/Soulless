@@ -164,21 +164,28 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
         return;
     }
 
+    SoundManager *soundManager = SoundManager::getSoundManager();
+
     const Damage& damage = registry.damages.get(attacker);
     Health& health = registry.healths.get(victim);
     if (health.health - damage.value <= 0) {
         health.health = 0;
         Death& death = registry.deaths.emplace(victim);
-        death.timer = 10;
 
         if (registry.players.has(victim))
         {   
-            // TODO: Handle player death logic -> Check world_system.cpp logic as well
             printd("Player has died!\n");
+            // set player velocity to 0: to prevent bug where player moves after death
+            Motion &motion = registry.motions.get(victim);
+            motion.velocity = { 0.0f, 0.0f };
+            soundManager->playSound(SoundEffect::PLAYER_DEFEATED);
+            soundManager->playMusic(Song::DEFEAT);
+            death.timer = 7000;
+        } else {
+            death.timer = 10;
         }
 
     } else {
-        SoundManager *soundManager = SoundManager::getSoundManager();
         if (!registry.players.has(victim)) {
             soundManager->playSound(SoundEffect::VILLAGER_DAMAGE);
         } else if (registry.players.has(victim)) {

@@ -15,7 +15,7 @@
 
 SoundManager* SoundManager::instance = nullptr;
 
-SoundManager::SoundManager() : backgroundMusic(nullptr) {}
+SoundManager::SoundManager() {}
 
 SoundManager* SoundManager::getSoundManager() {
     if (instance == nullptr) {
@@ -35,16 +35,13 @@ bool SoundManager::initialize() {
         return false;
     }
 
-    backgroundMusic = Mix_LoadMUS(audio_path("background_music.mp3").c_str());
+    registerMusic(Song::MAIN, "background_music.mp3");
+    registerMusic(Song::DEFEAT, "player_defeated_music.mp3");
 
-    if (backgroundMusic == nullptr) {
-        printd("Failed to load background music: Mix_Error: %s\n", Mix_GetError());
-        return false;
-    }
-
-    registerSound(SoundEffect::FIRE, audio_path("fireball.mp3").c_str());
-    registerSound(SoundEffect::VILLAGER_DAMAGE, audio_path("villager_damage.mp3").c_str());
-    registerSound(SoundEffect::PITCHFORK_DAMAGE, audio_path("pitchfork_damage.mp3").c_str());
+    registerSound(SoundEffect::FIRE, "fireball.mp3");
+    registerSound(SoundEffect::VILLAGER_DAMAGE, "villager_damage.mp3");
+    registerSound(SoundEffect::PITCHFORK_DAMAGE, "pitchfork_damage.mp3");
+    registerSound(SoundEffect::PLAYER_DEFEATED, "player_defeated.mp3");
 
     return true;
 }
@@ -58,9 +55,15 @@ void SoundManager::playSound(SoundEffect effect) {
     }
 }
 
-void SoundManager::playMusic() {
-    if (backgroundMusic != nullptr) {
-        Mix_PlayMusic(backgroundMusic, -1);
+void SoundManager::playMusic(Song song) {
+    if (Mix_PlayingMusic()) {
+        Mix_HaltMusic();
+    }
+
+    if (music.find(song) != music.end()) {
+        Mix_PlayMusic(music[song], -1);
+    } else {
+        std::cerr << "Song not found!" << std::endl;
     }
 }
 
@@ -69,21 +72,33 @@ void SoundManager::removeSoundManager() {
         Mix_FreeChunk(pair.second);
     }
 
-    if (backgroundMusic != nullptr) {
-        Mix_FreeMusic(backgroundMusic);
-        backgroundMusic = nullptr;
+    soundEffects.clear();
+
+    for (auto& pair : music) {
+        Mix_FreeMusic(pair.second);
     }
 
-    soundEffects.clear();
+    music.clear();
 
     Mix_CloseAudio();
 }
 
 void SoundManager::registerSound(SoundEffect effect, const char *filePath) {
-    Mix_Chunk *chunk = Mix_LoadWAV(filePath);
+    Mix_Chunk *chunk = Mix_LoadWAV(audio_path(filePath).c_str());
+
     if (chunk == nullptr) {
         printd("Failed to load sound %s with error %s\n", filePath, Mix_GetError());
     } else {
         soundEffects[effect] = chunk;
+    }
+}
+
+void SoundManager::registerMusic(Song song, const char *filePath) {
+    Mix_Music *backgroundMusic = Mix_LoadMUS(audio_path(filePath).c_str());
+
+    if (backgroundMusic == nullptr) {
+        printd("Failed to load sound %s with error %s\n", filePath, Mix_GetError());
+    } else {
+        music[song] = backgroundMusic;
     }
 }

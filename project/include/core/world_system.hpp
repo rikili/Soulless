@@ -24,6 +24,7 @@ public:
 	void create_enemy_projectile(Entity& enemy_ent);
 	void invoke_enemy_cooldown(Entity& enemy_ent);
 	void initialize();
+	void restartGame();
 	Entity getPlayer();
 
 	// World state specific variables
