@@ -1,5 +1,6 @@
 #include "core/collision_system.hpp"
 #include "entities/ecs_registry.hpp"
+#include "sound/sound_manager.hpp"
 
 CollisionSystem::CollisionSystem(RenderSystem* renderer)
 {
@@ -154,6 +155,11 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
         Death& death = registry.deaths.emplace(victim);
         death.timer = 300;
     } else {
+        if (!registry.players.has(victim)) {
+            SoundManager *soundManager = SoundManager::getSoundManager();
+            soundManager->playSound(SoundEffect::VILLAGER_DAMAGE);
+        }
+
         health.health -= damage.value;
         OnHit& hit = registry.onHits.emplace(victim);
         if (registry.players.has(victim))

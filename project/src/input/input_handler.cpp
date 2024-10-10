@@ -2,6 +2,10 @@
 #include "entities/general_components.hpp"
 #include <cstdio>
 #include <iostream>
+#include "sound/sound_manager.hpp"
+
+#include <SDL.h>
+#include <SDL_mixer.h>
 
 /*
 - player slots for spell 1 and spell 2 (component) ? (needs to hold some spells)
@@ -70,7 +74,7 @@ float normalizeAngle(float angle) {
 
 float angularDifference(float a, float b) {
     float diff = normalizeAngle(a - b);
-    return std::abs(a - b);
+    return std::abs(diff);
 }
 
 void InputHandler::onMouseMove(vec2 mouse_position) {
@@ -146,7 +150,13 @@ void cast_player_spell(double x, double y, bool is_left)
     {
         return;
     }
+
+
     create_player_projectile(player_ent,  x, y);
+
+    SoundManager *soundManager = SoundManager::getSoundManager();
+    soundManager->playSound(SoundEffect::FIRE);
+
     invoke_player_cooldown(player, is_left);
 }
 
@@ -196,6 +206,6 @@ void InputHandler::updateVelocity() {
         playerMotion.velocity.y = 0;
     }
 
-    printd("New velocity is: %f, %f\n", playerMotion.velocity.x, playerMotion.velocity.y);
-    printd("New position is: %f, %f\n", playerMotion.position.x, playerMotion.position.y);
+    // printd("New velocity is: %f, %f\n", playerMotion.velocity.x, playerMotion.velocity.y);
+    // printd("New position is: %f, %f\n", playerMotion.position.x, playerMotion.position.y);
 }

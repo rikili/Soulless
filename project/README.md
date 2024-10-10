@@ -43,3 +43,6 @@ The source code has the following structure
 - /data: all the assets
 - /ext: external libraries
 - /shaders: shaders
+
+### Music
+- background music source: https://www.chosic.com/download-audio/29627 (Alexander Nakarada ft. Kevin MacLeod)
