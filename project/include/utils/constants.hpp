@@ -1,11 +1,11 @@
 #pragma once
 
-// Game Logic Constants
+// --- Game Logic Constants ---
+const unsigned int MAX_ENEMIES = 100;
 const float ENEMY_SPAWN_INTERVAL_MS = 5000.f;
 const unsigned int QUEUE_SIZE = 8;
 
-// Spell/Projectile Constants
-
+// --- Damage Types ---
 enum class DamageType
 {
     fire,
@@ -18,16 +18,16 @@ enum class DamageType
     elementless
 };
 
-// ENEMY
-const float ENEMY_BASIC_VELOCITY = 0.05f;
-const float ENEMY_BASIC_RANGE = 100.f;
+// --- Player Constants ---
+const float PLAYER_HEALTH = 100.f;
+const float PLAYER_MAX_HEALTH = 100.f;
 
-// FIRE
+// --- Player Spells ---
+
 const float FIRE_DAMAGE = 25.f;
 const float FIRE_VELOCITY = 1.f;
 const float FIRE_RANGE = 250.f;
 
-// ICE
 const float ICE_VELOCITY = 1.f;
 const float ICE_DEGREE_DIFFERENCE = 15.f;
 const int ICE_SHARD_COUNT = 4;
@@ -36,6 +36,26 @@ const int ICE_SHARD_COUNT = 4;
 // PLASMA
 // WATER
 // WIND
+
+// --- Enemy Types ---
+enum class EnemyType
+{
+    FARMER,
+    ARCHER,
+    CLERIC
+};
+
+// --- Enemy Constants ---
+const float ENEMY_BASIC_VELOCITY = 0.05f;
+const float ENEMY_BASIC_RANGE = 100.f;
+
+// Farmer + Pitchfork
+const float FARMER_HEALTH = 100.f;
+const float FARMER_COOLDOWN = 1000.f;
+const float FARMER_VELOCITY = 0.05f;
+const float FARMER_RANGE = 200.f;
+const float PITCHFORK_VELOCITY = 0.25f;
+const float PITCHFORK_DAMAGE = 10.f;
 
 // Draw order (largest number = frontmost)
 enum {

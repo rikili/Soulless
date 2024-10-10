@@ -43,12 +43,22 @@ GameAssets initializeGameAssets(AssetManager& assetManager) {
 
     AssetId spriteMeshId = assetManager.loadMesh("sprite", spriteVertices, indices, spriteAttributes);
 
+    // Player
     AssetId mageTextureId = assetManager.loadTexture("mage", textures_path("mage") + ".png");
     assets.textures["mage"] = mageTextureId;
-
+    
+    // Enemies
     assets.textures["archer"] = assetManager.loadTexture("archer", textures_path("archer") + ".png");
+
+    AssetId farmerTextureId = assetManager.loadTexture("farmer", textures_path("farmer") + ".png");
+    assets.textures["farmer"] = farmerTextureId;
+
+    // Projectiles
     AssetId fireballTextureId = assetManager.loadTexture("fireball", textures_path("fireball") + ".png");
     assets.textures["fireball"] = fireballTextureId;
+
+    AssetId pitchforkTextureId = assetManager.loadTexture("pitchfork", textures_path("pitchfork") + ".png");
+    assets.textures["pitchfork"] = pitchforkTextureId;
 
     // Add a new mesh for the background (full screen quad)
     const std::vector<float> bgVertices = {
