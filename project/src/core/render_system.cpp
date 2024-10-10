@@ -100,7 +100,7 @@ GLFWwindow* RenderSystem::getGLWindow() const
  * This function is called every frame to draw the frame
  * @attention Skips rendering if the shader is not found
  */
-void RenderSystem::drawFrame(Camera& camera)
+void RenderSystem::drawFrame()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_BLEND);
