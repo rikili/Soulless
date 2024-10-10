@@ -36,6 +36,14 @@ public:
 			});
 	}
 
+	mat4 getProjectionMatrix() {
+		return projectionMatrix;
+	}
+
+	mat4 getViewMatrix() {
+		return viewMatrix;
+	}
+
 private:
 	struct RenderIndex {
 		size_t index;
@@ -54,4 +62,6 @@ private:
 	std::vector<RenderRequest> render_requests; // Holds all the render requests
 	glm::vec2 cameraPosition;
 	glm::mat4 viewMatrix;
+	glm::mat4 projectionMatrix;
+	float zoomFactor = 0.5f;
 };

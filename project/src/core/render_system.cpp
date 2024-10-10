@@ -18,6 +18,8 @@
  */
 bool RenderSystem::initialize(InputHandler& input_handler, const int width, const int height, const char* title)
 {
+	projectionMatrix = glm::ortho(0.f, (float)window_width_px * zoomFactor, (float)window_height_px * zoomFactor, 0.f, -1.f, 1.f);
+
 	// Most of the code below is just boilerplate code to create a window
 	if (!glfwInit()) { 	// Initialize the window
 		exit(EXIT_FAILURE);
@@ -130,8 +132,10 @@ void RenderSystem::drawFrame()
 	}
 
 	Entity player = registry.players.entities[0];
-	updateCameraPosition(registry.motions.get(player).position.x - window_width_px * 0.5f,
-						 registry.motions.get(player).position.y - window_height_px * 0.5f);
+	float playerX = registry.motions.get(player).position.x - window_width_px / 2.0 * zoomFactor;
+	float playerY = registry.motions.get(player).position.y - window_height_px / 2.0 * zoomFactor;
+
+	updateCameraPosition(clamp(playerX, 0.f, (float)(window_width_px / 2.0)), clamp(playerY, 0.f, (float)(window_height_px / 2.0)));
 
 	// Draw all entities
 	// registry.render_requests.sort(typeAscending);
@@ -177,9 +181,9 @@ void RenderSystem::drawFrame()
 			// Rotate the sprite for all eight directions if request type is a PROJECTILE
 			if (render_request.type == PROJECTILE) {
 				// printd("Fireball angle: %f\n", motion.angle);
-        transform = rotate(transform, motion.angle, glm::vec3(0.0f, 0.0f, 1.0f)); // Apply rotation
+				transform = rotate(transform, motion.angle, glm::vec3(0.0f, 0.0f, 1.0f)); // Apply rotation
 			}
-			transform = scale(transform, vec3(motion.scale * 100.f, 1.0f));
+			transform = scale(transform, vec3(motion.scale * 100.f * zoomFactor, 1.0f));
 
 
 			if (render_request.shader == "sprite") {
@@ -195,7 +199,7 @@ void RenderSystem::drawFrame()
 				glBindTexture(GL_TEXTURE_2D, texture->handle);
 				glUniform1i(glGetUniformLocation(shader->program, "image"), 0);
 			}
-			mat4 projection = glm::ortho(0.f, (float)window_width_px, (float)window_height_px, 0.f, -1.f, 1.f);
+			mat4 projection = projectionMatrix;
 			mat4 view = viewMatrix;
 
 			const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");

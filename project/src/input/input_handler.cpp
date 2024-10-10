@@ -130,6 +130,7 @@ void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mo
                 printd("Left mouse button pressed.\n");
                 double x, y;
                 glfwGetCursorPos(window, &x, &y);
+                printd("Mouse: %f, %f\n", x, y);
                 cast_player_spell(x, y, true);
                 break;
             case GLFW_MOUSE_BUTTON_RIGHT:
@@ -169,6 +170,6 @@ void InputHandler::updateVelocity() {
         playerMotion.velocity.y = 0;
     }
 
-    // printd("New velocity is: %f, %f\n", playerMotion.velocity.x, playerMotion.velocity.y);
-    // printd("New position is: %f, %f\n", playerMotion.position.x, playerMotion.position.y);
+     printd("New velocity is: %f, %f\n", playerMotion.velocity.x, playerMotion.velocity.y);
+     printd("New position is: %f, %f\n", playerMotion.position.x, playerMotion.position.y);
 }
