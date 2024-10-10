@@ -68,6 +68,10 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 	for (Entity entity : motions_registry.entities) {
 		Motion& motion = motions_registry.get(entity);
 		motion.position += motion.velocity * elapsed_ms_since_last_update;
+		if (registry.render_requests.has(entity)) {
+			RenderRequest& render_request = registry.render_requests.get(entity);
+			render_request.smooth_position.update(motion.position.y);
+		}
 	}
 }
 

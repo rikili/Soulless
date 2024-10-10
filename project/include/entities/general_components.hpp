@@ -76,12 +76,26 @@ struct Death
     float timer = 2;
 };
 
-// Structure to store what entites affect/damage other entities
+// Structure to store what entities affect/damage other entities
 struct Deadly
 {
     bool to_player = false;
     bool to_enemy = false;
     bool to_projectile = false;
+};
+
+// Smooth position component to handle z-fighting
+struct SmoothPosition {
+    float render_y;
+    static constexpr float HYSTERESIS = 5.0f;
+    static constexpr float SMOOTHING_FACTOR = 0.1f;
+
+    void update(const float actual_y) {
+        const float diff = actual_y - render_y;
+        if (std::abs(diff) > HYSTERESIS) {
+            render_y += diff * SMOOTHING_FACTOR;
+        }
+    }
 };
 
 struct RenderRequest
@@ -90,4 +104,7 @@ struct RenderRequest
     AssetId texture = "";
     AssetId shader = "";
     unsigned int type = BACK;
+    SmoothPosition smooth_position;
+
 };
+
