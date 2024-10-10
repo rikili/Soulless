@@ -13,6 +13,7 @@ int main(int argc, char* argv[])
 	AssetManager asset_manager;
 	RenderSystem renderer;
 	InputHandler input_handler;
+	Camera camera(400, 400);
 	WorldSystem world = WorldSystem(&renderer);
 
 	renderer.initialize(input_handler, window_width_px, window_height_px, "Soulless"); // must be called at the beginning of the program
@@ -38,10 +39,11 @@ int main(int argc, char* argv[])
 		const float elapsed_ms = static_cast<float>((std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count()) / 1000.0f;
 		t = now;
 
-		world.step(elapsed_ms); // (2) Update the game state
-		renderer.drawFrame(); // (3) Re-render the scene (where the magic happens)
-		glfwSwapBuffers(window); // (4) swap front and back buffers
-		glfwPollEvents(); // (5) poll for and process events
+		world.step(elapsed_ms); // Update the game state
+
+		renderer.drawFrame(camera); // Re-render the scene (where the magic happens)
+		glfwSwapBuffers(window); // swap front and back buffers
+		glfwPollEvents(); // poll for and process events
 	}
 
 	// TODO: Add cleanup code here
