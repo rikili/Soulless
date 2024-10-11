@@ -5,6 +5,9 @@ const unsigned int MAX_ENEMIES = 100;
 const float ENEMY_SPAWN_INTERVAL_MS = 5000.f;
 const unsigned int QUEUE_SIZE = 8;
 
+const float ENEMY_INVINCIBILITY_TIMER = 800.f;
+const float PLAYER_INVINCIBILITY_TIMER = 1500.f;
+
 // --- Damage Types ---
 enum class DamageType
 {

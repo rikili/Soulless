@@ -56,7 +56,16 @@ void WorldSystem::handle_projectiles(float elapsed_ms_since_last_update)
 
 		Projectile& projectile = registry.projectiles.get(projectile_ent);
 		Motion& motion = registry.motions.get(projectile_ent);
+		Deadly& deadly = registry.deadlies.get(projectile_ent);
 		projectile.range -= sqrt(motion.velocity.x * motion.velocity.x + motion.velocity.y * motion.velocity.y) * elapsed_ms_since_last_update;
+
+		if (deadly.to_enemy && projectile.type == DamageType::fire)
+		{
+			float scale_factor = (FIRE_RANGE - projectile.range) / FIRE_RANGE;
+			motion.scale.x = 1.5 * scale_factor;
+			motion.scale.y = 1.5 * scale_factor;
+		}
+
 		if (projectile.range <= 0)
 		{
 			registry.deaths.emplace(projectile_ent);

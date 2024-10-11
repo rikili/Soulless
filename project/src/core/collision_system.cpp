@@ -198,11 +198,11 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
         if (registry.players.has(victim))
         {
             // printd("Player has been hit! Remaining health: %f\n", health.health);
-            hit.invincibility_timer = 1500;
+            hit.invincibility_timer = PLAYER_INVINCIBILITY_TIMER;
         }
         else
         {
-            hit.invincibility_timer = 1000;
+            hit.invincibility_timer = ENEMY_INVINCIBILITY_TIMER;
         }
     }
 
