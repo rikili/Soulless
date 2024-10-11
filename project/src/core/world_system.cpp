@@ -292,6 +292,9 @@ void WorldSystem::createFarmer(vec2 position, vec2 velocity)
 	Deadly& deadly = registry.deadlies.emplace(enemy);
 	deadly.to_projectile = true;
 
+	Damage& damage = registry.damages.emplace(enemy);
+	damage.value = FARMER_DAMAGE;
+
 	RenderRequest& request = registry.render_requests.emplace(enemy);
 	request.mesh = "sprite";
 	request.texture = "farmer";

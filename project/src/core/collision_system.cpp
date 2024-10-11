@@ -96,7 +96,8 @@ void CollisionSystem::handle_collisions()
                         // none are projectile and player isn't involved, skip
                         continue;
                     }
-                    // player is involved and none are projectiles, enemy/player collision case
+                    // player is involved and none are projectiles
+                    // player <-> enemy collision
                     this->applyDamage(deadly_target, other_target);
                 }
 
@@ -159,7 +160,7 @@ void CollisionSystem::handle_collisions()
 
 void CollisionSystem::applyDamage(Entity attacker, Entity victim)
 {
-    if (registry.onHits.has(victim))
+    if (registry.onHits.has(victim)) 
     {
         return;
     }
