@@ -330,7 +330,7 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 			break;
 		}
 		const vec2 position = { candidate_x, candidate_y };
-		this->createEnemy(EnemyType::FARMER, position, { 0, 0 });
+		/*this->createEnemy(EnemyType::FARMER, position, { 0, 0 });*/
 	}
 
 	// Reorient enemies towards the player

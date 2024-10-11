@@ -10,7 +10,7 @@ struct Motion {
     vec2 position = { 0, 0 };
     vec2 velocity = { 0, 0 };
     vec2 scale = { 1, 1 };
-    vec2 collider = { 100, 100 };
+    vec2 collider = { 50, 50 };
     float mass = 0;
     float speedModifier = 1.f;
     float angle = 0;
@@ -108,5 +108,10 @@ struct RenderRequest
     unsigned int type = BACK;
     SmoothPosition smooth_position;
 
+};
+
+struct Camera
+{
+    vec2 position = { 0, 0 };
 };
 

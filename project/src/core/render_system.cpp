@@ -19,6 +19,9 @@
 bool RenderSystem::initialize(InputHandler& input_handler, const int width, const int height, const char* title)
 {
 	projectionMatrix = glm::ortho(0.f, (float)window_width_px * zoomFactor, (float)window_height_px * zoomFactor, 0.f, -1.f, 1.f);
+	
+	camera = Entity();
+	registry.cameras.emplace(camera);
 
 	// Most of the code below is just boilerplate code to create a window
 	if (!glfwInit()) { 	// Initialize the window
@@ -135,8 +138,11 @@ void RenderSystem::drawFrame()
 	float playerX = registry.motions.get(player).position.x - window_width_px / 2.0 * zoomFactor;
 	float playerY = registry.motions.get(player).position.y - window_height_px / 2.0 * zoomFactor;
 
-	updateCameraPosition(clamp(playerX, 0.f, (float)(window_width_px / 2.0)), clamp(playerY, 0.f, (float)(window_height_px / 2.0)));
+	updateCameraPosition(clamp(playerX, 0.f, (float)(window_width_px / 2.0)),
+						 clamp(playerY, 0.f, (float)(window_height_px / 2.0)));
 
+	/*printd("%f, %f\n", cameraPosition.x, cameraPosition.y);*/
+	
 	// Draw all entities
 	// registry.render_requests.sort(typeAscending);
 	this->updateRenderOrder(registry.render_requests);
@@ -154,7 +160,6 @@ void RenderSystem::drawFrame()
 			std::cerr << "Skipping rendering of this entity" << std::endl;
 			continue;
 		}
-
 
 		if (render_request.shader != "") {
 			const Shader* shader = this->asset_manager.getShader(render_request.shader);
@@ -238,6 +243,9 @@ void RenderSystem::drawFrame()
 }
 
 void RenderSystem::updateCameraPosition(float x, float y) {
-	cameraPosition = glm::vec2(x, y);
-	viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraPosition, 0.0f));
+	Camera& cameraEntity = registry.cameras.get(camera);
+	cameraEntity.position.x = x;
+	cameraEntity.position.y = y;
+
+	viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraEntity.position, 0.0f));
 }

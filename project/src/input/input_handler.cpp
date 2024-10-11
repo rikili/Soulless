@@ -65,8 +65,20 @@ void InputHandler::onMouseMove(vec2 mouse_position) {
     Entity& player = registry.players.entities[0];
     Motion& playerMotion = registry.motions.get(player);
 
-    float dx = mouse_position.x - playerMotion.position.x;
-    float dy = mouse_position.y - playerMotion.position.y;
+    Entity& camera = registry.cameras.entities[0];
+    Camera& cameraEntity = registry.cameras.get(camera);
+
+    /*float scaledX = mouse_position.x / (zoomFactor * window_width_px * 2.0f);
+    float scaledY = mouse_position.y / zoomFactor;*/
+
+    float worldX = mouse_position.x + cameraEntity.position.x;
+    float worldY = mouse_position.y + cameraEntity.position.y;
+
+    float dx = worldX - playerMotion.position.x;
+    float dy = worldY - playerMotion.position.y;
+
+    printd("CAMERA: %f, %f\n", cameraEntity.position.x, cameraEntity.position.y);
+    printd("x: %f, y: %f \n", worldX, worldY);
 
     playerMotion.angle = find_closest_angle(dx, dy);
 }
@@ -154,7 +166,7 @@ void InputHandler::updateVelocity() {
     int verticalDir = activeMoveKeys.count(GLFW_KEY_S) - activeMoveKeys.count(GLFW_KEY_W);
     int horizontalDir = activeMoveKeys.count(GLFW_KEY_D) - activeMoveKeys.count(GLFW_KEY_A);
 
-    float maxSpeed = 1; // TODO: get this from component
+    float maxSpeed = 0.5; // TODO: get this from component
 
     if (horizontalDir != 0 || verticalDir != 0) {
         float normalizedSpeed = maxSpeed;

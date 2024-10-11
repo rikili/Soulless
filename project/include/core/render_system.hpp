@@ -60,8 +60,7 @@ private:
 	GLFWwindow* window = nullptr;
 	AssetManager asset_manager; // Holds all the assets
 	std::vector<RenderRequest> render_requests; // Holds all the render requests
-	glm::vec2 cameraPosition;
 	glm::mat4 viewMatrix;
 	glm::mat4 projectionMatrix;
-	float zoomFactor = 0.5f;
+	Entity camera;
 };
