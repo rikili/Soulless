@@ -19,7 +19,8 @@
 bool RenderSystem::initialize(InputHandler& input_handler, const int width, const int height, const char* title)
 {
 	projectionMatrix = glm::ortho(0.f, (float)window_width_px * zoomFactor, (float)window_height_px * zoomFactor, 0.f, -1.f, 1.f);
-	
+	registry.projectionMatrix = projectionMatrix;
+
 	camera = Entity();
 	registry.cameras.emplace(camera);
 
@@ -248,4 +249,5 @@ void RenderSystem::updateCameraPosition(float x, float y) {
 	cameraEntity.position.y = y;
 
 	viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraEntity.position, 0.0f));
+	registry.viewMatrix = viewMatrix;
 }

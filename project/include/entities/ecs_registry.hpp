@@ -24,6 +24,8 @@ public:
 	ComponentContainer<OnHit> onHits;
 	ComponentContainer<RenderRequest> render_requests;
 	ComponentContainer<Camera> cameras;
+	mat4 viewMatrix;
+	mat4 projectionMatrix;
 	bool debug = false;
 
 	// constructor that adds all containers for looping over them

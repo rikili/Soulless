@@ -70,15 +70,19 @@ void InputHandler::onMouseMove(vec2 mouse_position) {
 
     /*float scaledX = mouse_position.x / (zoomFactor * window_width_px * 2.0f);
     float scaledY = mouse_position.y / zoomFactor;*/
+    float xNDC = (2.f * mouse_position.x) / window_width_px - 1.f;
+    float yNDC = 1.f - (2.f * mouse_position.y) / window_height_px;
+    mat4 inverseView = glm::inverse(registry.projectionMatrix * registry.viewMatrix);
+    vec4 world = inverseView * vec4(xNDC, yNDC, 0.f, 1.f);
 
-    float worldX = mouse_position.x + cameraEntity.position.x;
-    float worldY = mouse_position.y + cameraEntity.position.y;
+    //float worldX = mouse_position.x + cameraEntity.position.x;
+    //float worldY = mouse_position.y + cameraEntity.position.y;
 
-    float dx = worldX - playerMotion.position.x;
-    float dy = worldY - playerMotion.position.y;
+    float dx = world.x - playerMotion.position.x;
+    float dy = world.y - playerMotion.position.y;
 
     printd("CAMERA: %f, %f\n", cameraEntity.position.x, cameraEntity.position.y);
-    printd("x: %f, y: %f \n", worldX, worldY);
+    printd("x: %f, y: %f \n", world.x, world.y);
 
     playerMotion.angle = find_closest_angle(dx, dy);
 }
@@ -159,7 +163,7 @@ void InputHandler::updateVelocity() {
     // TODO: get global player
     // Entity player = player_wizard;
     auto player = registry.players.entities[0];
-
+    
     auto& motion_registry = registry.motions;
     Motion& playerMotion = motion_registry.get(player);
 
