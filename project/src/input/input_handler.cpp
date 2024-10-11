@@ -97,7 +97,8 @@ void create_player_projectile(Entity& player_ent, double x, double y)
 
     deadly.to_enemy = true;
 
-    projectile_motion.scale = { 0.4f, 0.4f };
+    projectile_motion.scale = FIRE_SCALE;
+    projectile_motion.collider = FIRE_COLLIDER;
     projectile_motion.position = player_motion.position;
     projectile_motion.angle = player_motion.angle;
 
