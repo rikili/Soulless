@@ -54,6 +54,7 @@ const float FARMER_HEALTH = 100.f;
 const float FARMER_COOLDOWN = 1000.f;
 const float FARMER_VELOCITY = 0.05f;
 const float FARMER_RANGE = 200.f;
+const float FARMER_DAMAGE = 5.f;
 const float PITCHFORK_VELOCITY = 0.25f;
 const float PITCHFORK_DAMAGE = 10.f;
 
