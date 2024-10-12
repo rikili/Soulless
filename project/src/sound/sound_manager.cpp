@@ -35,13 +35,13 @@ bool SoundManager::initialize() {
         return false;
     }
 
-    registerMusic(Song::MAIN, "background_music.mp3");
-    registerMusic(Song::DEFEAT, "player_defeated_music.mp3");
+    registerMusic(Song::MAIN, "background_music.wav");
+    registerMusic(Song::DEFEAT, "player_defeated_music.wav");
 
-    registerSound(SoundEffect::FIRE, "fireball.mp3");
-    registerSound(SoundEffect::VILLAGER_DAMAGE, "villager_damage.mp3");
-    registerSound(SoundEffect::PITCHFORK_DAMAGE, "pitchfork_damage.mp3");
-    registerSound(SoundEffect::PLAYER_DEFEATED, "player_defeated.mp3");
+    registerSound(SoundEffect::FIRE, "fireball.wav");
+    registerSound(SoundEffect::VILLAGER_DAMAGE, "villager_damage.wav");
+    registerSound(SoundEffect::PITCHFORK_DAMAGE, "pitchfork_damage.wav");
+    registerSound(SoundEffect::PLAYER_DEFEATED, "player_defeated.wav");
 
     return true;
 }

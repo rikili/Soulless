@@ -4,8 +4,10 @@
 #include "core/common.hpp"
 #include "render_system.hpp"
 
+#define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include <SDL_mixer.h>
+
 /**
  * Container for all our entities and game logic.
  */
