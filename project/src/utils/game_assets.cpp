@@ -16,6 +16,9 @@ GameAssets initializeGameAssets(AssetManager& assetManager) {
     AssetId kingFont = assetManager.loadFont("king", font_path("kingthings") + ".ttf", 148.0f);
     assets.fonts["king"] = kingFont;
 
+    AssetId healthFont = assetManager.loadFont("healthFont", font_path("deutsch") + ".ttf", 20.0f);
+    assets.fonts["healthFont"] = healthFont;
+
     const std::vector<float> vertices = {
         // positions        // colors           // texture coords
         -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,

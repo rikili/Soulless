@@ -284,16 +284,16 @@ void RenderSystem::drawFrame()
 	}
 
 	// makes it kinda slow
-	// for (Entity entity : registry.enemies.entities) {
-	// 	if (registry.healths.has(entity) && registry.motions.has(entity)) {
-	// 		Motion &motion = registry.motions.get(entity);
-	// 		Health &health = registry.healths.get(entity);
-	//
-	// 		int percentage = static_cast<int>((health.health / health.maxHealth) * 100);
-	//
-	// 		drawText(std::to_string(percentage) + "%", motion.position.x - 50.0f, window_height_px - motion.position.y + 48.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	// 	}
-	// }
+	for (Entity entity : registry.enemies.entities) {
+		if (registry.healths.has(entity) && registry.motions.has(entity)) {
+			Motion &motion = registry.motions.get(entity);
+			Health &health = registry.healths.get(entity);
+
+			int percentage = static_cast<int>((health.health / health.maxHealth) * 100);
+
+			drawText(std::to_string(percentage) + "%", "healthFont", motion.position.x, window_height_px - motion.position.y + 55.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+		}
+	}
 }
 
 // source: inclass SimpleGL-3
