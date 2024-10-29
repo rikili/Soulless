@@ -110,3 +110,9 @@ struct RenderRequest
 
 };
 
+struct GlobalOptions {
+    bool tutorial = true;
+    int fps = 0;
+    bool showFps = false;
+};
+extern GlobalOptions globalOptions;

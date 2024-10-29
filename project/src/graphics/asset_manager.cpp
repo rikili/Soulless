@@ -199,8 +199,8 @@ Shader* AssetManager::getShader(const AssetId& name)  {
     return nullptr;
 }
 
- Mesh* AssetManager::getMesh(const AssetId& name)  {
-     const auto it = meshes.find(name);
+Mesh* AssetManager::getMesh(const AssetId& name)  {
+    const auto it = meshes.find(name);
     if (it != meshes.end()) {
         return it->second.get();
     }
@@ -211,6 +211,14 @@ Shader* AssetManager::getShader(const AssetId& name)  {
 Texture* AssetManager::getTexture(const AssetId& name)  {
     auto it = textures.find(name);
     if (it != textures.end()) {
+        return it->second.get();
+    }
+    return nullptr;
+}
+
+Text* AssetManager::getText(const AssetId& name) {
+    auto it = text.find(name);
+    if (it != text.end()) {
         return it->second.get();
     }
     return nullptr;

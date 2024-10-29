@@ -24,7 +24,18 @@ bool isPlayerDead() {
     return registry.deaths.has(player_ent);
 }
 
+bool isTutorialOn() {
+    return globalOptions.tutorial;
+}
+
 void InputHandler::onKey(int key, int scancode, int action, int mods) {
+    if (isTutorialOn()) {
+        globalOptions.tutorial = false;
+        SoundManager *soundManager = SoundManager::getSoundManager();
+	      soundManager->playMusic(Song::MAIN);
+        return;
+    }
+
     if (isPlayerDead()) {
         return;
     }
@@ -46,9 +57,11 @@ void InputHandler::onKey(int key, int scancode, int action, int mods) {
                 printd("E button pressed.\n");
                 // TODO: drop spell 2 and increase HP
                 break;
+            // TODO: NEED A NEW KEY FOR... interact with item on ground (unused for now)
             case GLFW_KEY_F:
-                printd("F button pressed.\n");
-                // TODO: interact with item on ground (unused for now)
+                if (mods & GLFW_MOD_SHIFT) {
+                    globalOptions.showFps = !globalOptions.showFps;
+                }
                 break;
             default:
                 break;
@@ -71,7 +84,7 @@ void InputHandler::onKey(int key, int scancode, int action, int mods) {
 }
 
 void InputHandler::onMouseMove(vec2 mouse_position) {
-    if (isPlayerDead()) {
+    if (isPlayerDead() || isTutorialOn()) {
         return;
     }
 
@@ -138,6 +151,13 @@ void cast_player_spell(double x, double y, bool is_left)
 }
 
 void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mods) {
+    if (isTutorialOn()) {
+        globalOptions.tutorial = false;
+        SoundManager *soundManager = SoundManager::getSoundManager();
+	      soundManager->playMusic(Song::MAIN);
+        return;
+    }
+
     if (isPlayerDead()) {
         return;
     }

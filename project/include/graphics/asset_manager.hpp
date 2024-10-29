@@ -8,7 +8,18 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <memory>
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 using AssetId = std::string;  // Using strings for more flexible identification
+
+struct Text {
+    float x;
+    float y;
+    float scale;
+    glm::vec3 color;
+    std::string text;
+};
 
 struct VertexAttribute {
     GLint size;
@@ -16,7 +27,6 @@ struct VertexAttribute {
     GLboolean normalized;
     const char* semanticName;
 };
-
 
 struct Mesh {
     GLuint vao = 0;
@@ -28,6 +38,7 @@ struct Mesh {
     std::vector<uint32_t> indices;
     std::vector<VertexAttribute> attributes;
 };
+
 struct Texture {
     GLuint handle = 0;
     glm::ivec2 dimensions{0, 0};
@@ -94,14 +105,17 @@ public:
     AssetId loadBackgroundTexture(const std::string& name, const std::string& path);
     AssetId loadShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
     AssetId createMaterial(const std::string& name, const AssetId& shader, const AssetId& texture = "");
+    AssetId loadText(const std::string& name, float x, float y, const glm::vec3 color, const std::string text);
     Shader* getShader(const AssetId& name);
     Mesh* getMesh(const AssetId& name);
     Texture* getTexture(const AssetId& name);
+    Text* getText(const AssetId& name);
 
 private:
     std::unordered_map<AssetId, std::shared_ptr<Mesh>> meshes;
     std::unordered_map<AssetId, std::shared_ptr<Texture>> textures;
     std::unordered_map<AssetId, std::shared_ptr<Shader>> shaders;
     std::unordered_map<AssetId, std::shared_ptr<Material>> materials;
+    std::unordered_map<AssetId, std::shared_ptr<Text>> text;
 };
 
