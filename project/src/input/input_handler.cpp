@@ -28,11 +28,21 @@ bool isTutorialOn() {
     return globalOptions.tutorial;
 }
 
+bool isPause() {
+    return globalOptions.pause;
+}
+
 void InputHandler::onKey(int key, int scancode, int action, int mods) {
-    if (isTutorialOn()) {
+    SoundManager *soundManager = SoundManager::getSoundManager();
+
+    if (isTutorialOn() && key == GLFW_KEY_SPACE) {
+        if (!globalOptions.pause) {
+	          soundManager->playMusic(Song::MAIN);
+        } else {
+            soundManager->toggleMusic();
+        }
         globalOptions.tutorial = false;
-        SoundManager *soundManager = SoundManager::getSoundManager();
-	      soundManager->playMusic(Song::MAIN);
+        globalOptions.pause = false;
         return;
     }
 
@@ -62,6 +72,11 @@ void InputHandler::onKey(int key, int scancode, int action, int mods) {
                 if (mods & GLFW_MOD_SHIFT) {
                     globalOptions.showFps = !globalOptions.showFps;
                 }
+                break;
+            case GLFW_KEY_T:
+                soundManager->toggleMusic();
+                globalOptions.tutorial = true;
+                globalOptions.pause = true;
                 break;
             default:
                 break;

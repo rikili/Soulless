@@ -112,6 +112,7 @@ struct RenderRequest
 
 struct GlobalOptions {
     bool tutorial = true;
+    bool pause = false;
     int fps = 0;
     bool showFps = false;
 };

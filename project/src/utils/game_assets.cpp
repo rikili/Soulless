@@ -9,6 +9,13 @@ GameAssets initializeGameAssets(AssetManager& assetManager) {
     assets.shaders["sprite"] = assetManager.loadShader("sprite", shader_path("sprite") + ".vs.glsl", shader_path("sprite") + ".fs.glsl");
     assets.shaders["font"] = assetManager.loadShader("font", shader_path("font") + ".vs.glsl", shader_path("font") + ".fs.glsl");
 
+    // fonts
+    AssetId deutschFont = assetManager.loadFont("deutsch", font_path("deutsch") + ".ttf", 48.0f);
+    assets.fonts["deutsch"] = deutschFont;
+
+    AssetId kingFont = assetManager.loadFont("king", font_path("kingthings") + ".ttf", 148.0f);
+    assets.fonts["king"] = kingFont;
+
     const std::vector<float> vertices = {
         // positions        // colors           // texture coords
         -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,

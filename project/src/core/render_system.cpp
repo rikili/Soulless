@@ -105,141 +105,6 @@ void RenderSystem::setUpView() const
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
-// source: in class simpleGL-3
-// TODO: do this in loadFont (so we can have more than one!)
-void RenderSystem::setUpFont() {
-	std::string font_filename = PROJECT_SOURCE_DIR +
-	std::string("data/fonts/Deutsch.ttf");
-	unsigned int font_default_size = 48;
-
-	std::string vertexShaderSource = readShaderFile(PROJECT_SOURCE_DIR + std::string("shaders/font.vs.glsl"));
-	std::string fragmentShaderSource = readShaderFile(PROJECT_SOURCE_DIR + std::string("shaders/font.fs.glsl"));
-	const char* vertexShaderSource_c = vertexShaderSource.c_str();
-	const char* fragmentShaderSource_c = fragmentShaderSource.c_str();
-
-	// enable blending or you will just get solid boxes instead of text
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	// font buffer setup
-	glGenVertexArrays(1, &m_font_VAO);
-	glGenBuffers(1, &m_font_VBO);
-
-	// font vertex shader
-	unsigned int font_vertexShader;
-	font_vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(font_vertexShader, 1, &vertexShaderSource_c, NULL);
-	glCompileShader(font_vertexShader);
-
-	// font fragement shader
-	unsigned int font_fragmentShader;
-	font_fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(font_fragmentShader, 1, &fragmentShaderSource_c, NULL);
-	glCompileShader(font_fragmentShader);
-
-	// font shader program
-	m_font_shaderProgram = glCreateProgram();
-	glAttachShader(m_font_shaderProgram, font_vertexShader);
-	glAttachShader(m_font_shaderProgram, font_fragmentShader);
-	glLinkProgram(m_font_shaderProgram);
-
-	// apply orthographic projection matrix for font, i.e., screen space
-	glUseProgram(m_font_shaderProgram);
-	mat4 projection = glm::ortho(0.f, (float)window_width_px, 0.0f, (float)window_height_px);
-
-	GLint project_location = glGetUniformLocation(m_font_shaderProgram, "projection");
-	assert(project_location > -1);
-	// std::cout << "project_location: " << project_location << std::endl;
-	glUniformMatrix4fv(project_location, 1, GL_FALSE, glm::value_ptr(projection));
-
-	// clean up shaders
-	glDeleteShader(font_vertexShader);
-	glDeleteShader(font_fragmentShader);
-
-	// init FreeType fonts
-	FT_Library ft;
-	if (FT_Init_FreeType(&ft))
-	{
-		std::cerr << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-		// return false;
-	}
-
-	FT_Face face;
-	if (FT_New_Face(ft, font_filename.c_str(), 0, &face))
-	{
-		std::cerr << "ERROR::FREETYPE: Failed to load font: " << font_filename << std::endl;
-		// return false;
-	}
-
-	// extract a default size
-	FT_Set_Pixel_Sizes(face, 0, font_default_size);
-
-	// disable byte-alignment restriction in OpenGL
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	// load each of the chars - note only first 128 ASCII chars
-	for (unsigned char c = (unsigned char)0; c < (unsigned char)128; c++)
-	{
-		// load character glyph 
-		if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-		{
-			std::cerr << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-			continue;
-		}
-
-		// generate texture
-		unsigned int texture;
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
-
-		// std::cout << "texture: " << c << " = " << texture << std::endl;
-
-		glTexImage2D(
-			GL_TEXTURE_2D,
-			0,
-			GL_RED,
-			face->glyph->bitmap.width,
-			face->glyph->bitmap.rows,
-			0,
-			GL_RED,
-			GL_UNSIGNED_BYTE,
-			face->glyph->bitmap.buffer
-		);
-
-		// set texture options
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		// now store character for later use
-		Character character = {
-			texture,
-			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-			static_cast<unsigned int>(face->glyph->advance.x),
-			(char)c
-		};
-		m_ftCharacters.insert(std::pair<char, Character>(c, character));
-	}
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	// clean up
-	FT_Done_Face(face);
-	FT_Done_FreeType(ft);
-
-	// bind buffers
-	glBindVertexArray(m_font_VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_font_VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-
-	// release buffers
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
 /**
  * @brief Get the GL window
  * Other systems may need to access the GL window; for example, the input system
@@ -274,20 +139,28 @@ void RenderSystem::drawFrame()
 	const Texture* bgTexture = this->asset_manager.getTexture("grass");
 
 	if (globalOptions.tutorial) {
-		// TODO: save text... ? render everything saved? idk how we want to handle this...
-		// TODO: have different font sizes?
-		// could just drawText manually whenever we need to
-		// TODO: make a method for this!
-		// TODO: make 48.0f / default size?
-		// use a different font...
-		// 
-		// maybe do init font for each type of font we want to use and add respective VBO and VAO and Character??
-		// we can then pick which font ttf to use + font size
-		// need to load shader like armin did... (not like assignment) -> maybe give each text object a shader
-		// font object wont have colour or string but will have everything else needed?
-		// OR can we change the font size manually??? idk. we may only have a few fonts to loads...
-		drawText("Welcome to Soulless!", window_width_px / 3.0f, window_height_px / 2.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-		drawText("Press any key to start", window_width_px / 3.0f, window_height_px / 2.0f - 48.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+		float titleFontSize = this->asset_manager.getFont("king")->size;
+		float tutFontSize = this->asset_manager.getFont("deutsch")->size;
+		float currentY = window_height_px - titleFontSize;
+		drawText("Soulless", "king", window_width_px / 2.0f, currentY, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+		currentY -= titleFontSize * 1.5;
+
+		vec3 color = glm::vec3(0.83f, 0.83f, 0.83f);
+		
+		drawText("Move using: W, A, S, D", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
+		currentY -= tutFontSize * 1.5;
+
+		drawText("Aim with your mouse.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
+		currentY -= tutFontSize * 1.5;
+
+		drawText("Left click to shoot.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
+		currentY -= tutFontSize * 1.5;
+
+		drawText("Press t to pause/show tutorial.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
+
+		std::string message = "Press SPACE key to ";
+		std::string start = globalOptions.pause ? "resume." : "start.";
+		drawText(message + start, "deutsch", window_width_px / 2.0f, tutFontSize * 1.5, 1.0f, color);
 		return;
 	}
 
@@ -407,7 +280,7 @@ void RenderSystem::drawFrame()
 
 	// TODO: does this work with the camera????
 	if (globalOptions.showFps) {
-		drawText(std::to_string(globalOptions.fps), window_width_px - 100.0f, window_height_px - 50.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+		drawText(std::to_string(globalOptions.fps), "deutsch", window_width_px - 100.0f, window_height_px - 50.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 	}
 
 	// makes it kinda slow
@@ -423,22 +296,30 @@ void RenderSystem::drawFrame()
 	// }
 }
 
-// insperation from in class excercise
-void RenderSystem::drawText(const std::string& text, float x, float y, float scale, const glm::vec3& color) {
-	// TODO: init, where is VAO, and VBO for font?
-	// make it so that top left is 0,0?
-	// new lines ? better formatting automation?
-	// y = (float) window_height_px - y + 50.0f;
+// source: inclass SimpleGL-3
+// the x,y values should be the position we want the center of our text to be
+void RenderSystem::drawText(const std::string& text, const std::string& fontName, float x, float y, float scale, const glm::vec3& color) {
+	Font* font = this->asset_manager.getFont(fontName);
+	float textWidth = getTextWidth(text, fontName, scale);
+
+	x = x - textWidth / 2;
+	y = y - font->size / 2;
+
 	glm::mat4 trans = glm::mat4(1.0f);
 	trans = glm::translate(trans, glm::vec3(0.0, 0, 0.0));
 	trans = glm::rotate(trans, glm::radians(0.0f), glm::vec3(0.0, 0.0, 1.0));
 	trans = glm::scale(trans, glm::vec3(1.0f, 1.0f, 1.0f));
 
-	// const Shader* fontShader = this->asset_manager.getShader("font");
-	// GLuint m_font_shaderProgram = fontShader->program;
-	// glUseProgram(fontShader->program);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	const Shader* fontShader = this->asset_manager.getShader("font");
+	GLuint m_font_shaderProgram = fontShader->program;
 	glUseProgram(m_font_shaderProgram);
+
+	mat4 projection = glm::ortho(0.f, (float)window_width_px, 0.0f, (float)window_height_px);
+	GLint projection_location = glGetUniformLocation(m_font_shaderProgram, "projection");
+	glUniformMatrix4fv(projection_location, 1, GL_FALSE, glm::value_ptr(projection));
 
 	GLint textColor_location =
 		glGetUniformLocation(m_font_shaderProgram, "textColor");
@@ -448,12 +329,11 @@ void RenderSystem::drawText(const std::string& text, float x, float y, float sca
 		glGetUniformLocation(m_font_shaderProgram, "transform");
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
-	glBindVertexArray(m_font_VAO);
+	glBindVertexArray(font->vao);
 
 	std::string::const_iterator c;
-	for (c = text.begin(); c != text.end(); c++)
-	{
-		Character ch = m_ftCharacters[*c];
+	for (c = text.begin(); c != text.end(); c++) {
+		Character ch = font->m_ftCharacters[*c];
 
 		float xpos = x + ch.Bearing.x * scale;
 		float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
@@ -472,7 +352,7 @@ void RenderSystem::drawText(const std::string& text, float x, float y, float sca
 
 		glBindTexture(GL_TEXTURE_2D, ch.TextureID);
 
-		glBindBuffer(GL_ARRAY_BUFFER, m_font_VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, font->vbo);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -482,4 +362,18 @@ void RenderSystem::drawText(const std::string& text, float x, float y, float sca
 	}
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	gl_has_errors();
+}
+
+float RenderSystem::getTextWidth(const std::string& text, const std::string& fontName, float scale) {
+    const Font* font = this->asset_manager.getFont(fontName);
+    float width = 0.0f;
+    for (char c : text) {
+        auto it = font->m_ftCharacters.find(c);
+        if (it != font->m_ftCharacters.end()) {
+            Character ch = it->second;
+            width += (ch.Advance >> 6) * scale;
+        }
+    }
+    return width;
 }

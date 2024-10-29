@@ -28,8 +28,6 @@ int main(int argc, char* argv[])
 	renderer.setAssetManager(&asset_manager);
 	world.set_renderer(&renderer);
 	world.initialize(); // Initialize the game world
-	
-	renderer.setUpFont();
 
 	auto t = std::chrono::high_resolution_clock::now();
 
