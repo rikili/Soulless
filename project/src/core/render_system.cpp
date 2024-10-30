@@ -176,8 +176,6 @@ void RenderSystem::drawFrame()
 
 	updateCameraPosition(clamp(playerX, 0.f, (float)(window_width_px / 2.0)),
 						 clamp(playerY, 0.f, (float)(window_height_px / 2.0)));
-
-	/*printd("%f, %f\n", cameraPosition.x, cameraPosition.y);*/
 	
 	// Draw all entities
 	// registry.render_requests.sort(typeAscending);
@@ -293,7 +291,7 @@ void RenderSystem::drawFrame()
 
 			int percentage = static_cast<int>((health.health / health.maxHealth) * 100);
 
-			drawText(std::to_string(percentage) + "%", "healthFont", motion.position.x, window_height_px - motion.position.y + 55.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+			drawText(std::to_string(percentage) + "%", "healthFont", motion.position.x, motion.position.y - 55.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 		}
 	}
 }
@@ -318,8 +316,26 @@ void RenderSystem::drawText(const std::string& text, const std::string& fontName
 	const Shader* fontShader = this->asset_manager.getShader("font");
 	GLuint m_font_shaderProgram = fontShader->program;
 	glUseProgram(m_font_shaderProgram);
-
-	mat4 projection = glm::ortho(0.f, (float)window_width_px, 0.0f, (float)window_height_px);
+	
+	mat4 view;
+	mat4 projection;
+	
+	GLint flipLoc = glGetUniformLocation(m_font_shaderProgram, "flip");
+	
+	if (fontName == "healthFont") {
+		view = viewMatrix;
+		projection = registry.projectionMatrix;
+		glUniform1f(flipLoc, true);
+	}
+	else {
+		view = mat4(1.0f);
+		projection = glm::ortho(0.f, (float)window_width_px, 0.0f, (float)window_height_px);
+		glUniform1f(flipLoc, false);
+	}
+	
+	GLint view_location = glGetUniformLocation(m_font_shaderProgram, "view");
+	glUniformMatrix4fv(view_location, 1, GL_FALSE, glm::value_ptr(view));
+	
 	GLint projection_location = glGetUniformLocation(m_font_shaderProgram, "projection");
 	glUniformMatrix4fv(projection_location, 1, GL_FALSE, glm::value_ptr(projection));
 
@@ -330,6 +346,8 @@ void RenderSystem::drawText(const std::string& text, const std::string& fontName
 	GLint transformLoc =
 		glGetUniformLocation(m_font_shaderProgram, "transform");
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+
+	
 
 	glBindVertexArray(font->vao);
 

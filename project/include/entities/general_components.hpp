@@ -121,4 +121,5 @@ struct GlobalOptions {
     int fps = 0;
     bool showFps = false;
 };
+
 extern GlobalOptions globalOptions;
