@@ -1,6 +1,7 @@
 #include "core/world_system.hpp"
 
 #include "entities/ecs_registry.hpp"
+#include "sound/sound_manager.hpp"
 
 WorldSystem::WorldSystem(RenderSystem* renderer)
 {
@@ -21,6 +22,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	this->handle_projectiles(elapsed_ms_since_last_update);
 	this->handle_enemy_attacks(elapsed_ms_since_last_update);
 	this->handle_timers(elapsed_ms_since_last_update);
+
+	if (!registry.players.has(player_mage)) {
+		this->restartGame();
+		return true;
+	}
+
 	this->handle_movements(elapsed_ms_since_last_update);
 	this->collision_system->handle_collisions();
 
@@ -49,7 +56,16 @@ void WorldSystem::handle_projectiles(float elapsed_ms_since_last_update)
 
 		Projectile& projectile = registry.projectiles.get(projectile_ent);
 		Motion& motion = registry.motions.get(projectile_ent);
+		Deadly& deadly = registry.deadlies.get(projectile_ent);
 		projectile.range -= sqrt(motion.velocity.x * motion.velocity.x + motion.velocity.y * motion.velocity.y) * elapsed_ms_since_last_update;
+
+		if (deadly.to_enemy && projectile.type == DamageType::fire)
+		{
+			vec2 scale_factor = FIRE_SCALE + ((FIRE_RANGE - projectile.range) / FIRE_RANGE) * (FIRE_SCALE_FACTOR * FIRE_SCALE - FIRE_SCALE);
+			motion.scale.x = scale_factor.x;
+			motion.scale.y = scale_factor.y;
+		}
+
 		if (projectile.range <= 0)
 		{
 			registry.deaths.emplace(projectile_ent);
@@ -115,10 +131,12 @@ void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 		death.timer -= elapsed_ms_since_last_update;
 		if (death.timer < 0)
 		{
-			// TODO: add custom player death
 			if (!registry.players.has(dead_ent))
 			{
 				registry.remove_all_components_of(dead_ent);
+			} else {
+				registry.clear_all_components();
+				printd("Successfully killed player!\n");
 			}
 		}
 	}
@@ -217,6 +235,12 @@ void WorldSystem::initialize()
 	player_mage = this->createPlayer();
 }
 
+void WorldSystem::restartGame() {
+  SoundManager *soundManager = SoundManager::getSoundManager();
+	soundManager->playMusic(Song::MAIN);
+	player_mage = this->createPlayer();
+}
+
 
 Entity WorldSystem::createPlayer() {
 	auto player = Entity();
@@ -276,6 +300,9 @@ void WorldSystem::createFarmer(vec2 position, vec2 velocity)
 
 	Deadly& deadly = registry.deadlies.emplace(enemy);
 	deadly.to_projectile = true;
+
+	Damage& damage = registry.damages.emplace(enemy);
+	damage.value = FARMER_DAMAGE;
 
 	RenderRequest& request = registry.render_requests.emplace(enemy);
 	request.mesh = "sprite";

@@ -6,6 +6,7 @@
 #include "utils/game_assets.hpp"
 #include "sound/sound_manager.hpp"
 #include "core/common.hpp"
+#include "entities/general_components.hpp"
 
 #define ERROR_SUCCESS 0 // For Mac OS
 
@@ -23,7 +24,6 @@ int main(int argc, char* argv[])
 	if (!soundManager->initialize()) {
 		printd("Error initializing sound manager\n");
 	}
-	soundManager->playMusic();
 
 	GameAssets gameAssets = initializeGameAssets(asset_manager); // Initialize the asset manager
 	renderer.setAssetManager(&asset_manager);
@@ -31,6 +31,10 @@ int main(int argc, char* argv[])
 	world.initialize(); // Initialize the game world
 
 	auto t = std::chrono::high_resolution_clock::now();
+
+	unsigned int frames = 0;
+	auto lastTime = std::chrono::high_resolution_clock::now();
+
 	while (!glfwWindowShouldClose(window)) { // Game loop
 		// IMPORTANT: The following lines order are CRUCIAL to the rendering process
 		renderer.setUpView(); // (1) clear the screen
@@ -39,11 +43,25 @@ int main(int argc, char* argv[])
 		const float elapsed_ms = static_cast<float>((std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count()) / 1000.0f;
 		t = now;
 
-		world.step(elapsed_ms); // Update the game state
+		if (!globalOptions.tutorial) {
+			world.step(elapsed_ms); // (2) Update the game state
+		}
 
-		renderer.drawFrame(); // Re-render the scene (where the magic happens)
-		glfwSwapBuffers(window); // swap front and back buffers
-		glfwPollEvents(); // poll for and process events
+		renderer.drawFrame(); // (3) Re-render the scene (where the magic happens)
+
+    frames++;
+
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    float timeDifference = static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count());
+
+    if (timeDifference >= 1000.0f) {
+        globalOptions.fps = frames / (timeDifference / 1000.0f);
+        frames = 0;
+        lastTime = currentTime;
+    }
+
+		glfwSwapBuffers(window); // (4) swap front and back buffers
+		glfwPollEvents(); // (5) poll for and process events
 	}
 
 	// TODO: Add cleanup code here

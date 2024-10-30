@@ -7,6 +7,8 @@
 #include <fstream>
 #include <glm/gtc/type_ptr.inl>
 #include <glm/gtc/matrix_transform.hpp>
+#include "entities/general_components.hpp"
+
 /**
  * @brief Initialize the render system
  *
@@ -108,6 +110,10 @@ GLFWwindow* RenderSystem::getGLWindow() const
  */
 void RenderSystem::drawFrame()
 {
+	if (globalOptions.tutorial) {
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	}
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -119,6 +125,35 @@ void RenderSystem::drawFrame()
 	const Shader* bgShader = this->asset_manager.getShader("background");
 	const Mesh* bgMesh = this->asset_manager.getMesh("background");
 	const Texture* bgTexture = this->asset_manager.getTexture("grass");
+
+	if (globalOptions.tutorial) {
+		float titleFontSize = this->asset_manager.getFont("king")->size;
+		float tutFontSize = this->asset_manager.getFont("deutsch")->size;
+		float currentY = window_height_px - titleFontSize;
+		drawText("Soulless", "king", window_width_px / 2.0f, currentY, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+		currentY -= titleFontSize * 1.2;
+
+		vec3 color = glm::vec3(0.83f, 0.83f, 0.83f);
+		
+		drawText("Move using: W, A, S, D", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
+		currentY -= tutFontSize * 1.5;
+
+		drawText("Aim with your mouse.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
+		currentY -= tutFontSize * 1.5;
+
+		drawText("Left click to shoot.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
+		currentY -= tutFontSize * 1.5;
+
+		drawText("Press t to pause/show tutorial.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
+		currentY -= tutFontSize * 1.5;
+
+		drawText("Survive as long as you can!", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
+
+		std::string message = "Press SPACE key to ";
+		std::string start = globalOptions.pause ? "resume." : "start.";
+		drawText(message + start, "deutsch", window_width_px / 2.0f, tutFontSize * 1.5, 1.0f, color);
+		return;
+	}
 
 	if (bgShader && bgMesh && bgTexture) {
 		glUseProgram(bgShader->program);
@@ -193,6 +228,9 @@ void RenderSystem::drawFrame()
 
 
 			if (render_request.shader == "sprite") {
+				if (registry.players.has(entity) && registry.deaths.has(entity)) {
+					transform = rotate(transform, (float) M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
+				}
 
 				const Texture* texture = this->asset_manager.getTexture(render_request.texture);
 				if (!texture)
@@ -241,6 +279,105 @@ void RenderSystem::drawFrame()
 		// 	std::cout << "Mesh vertex count: " << mesh->vertexCount
 		// 	  << ", index count: " << mesh->indexCount << std::endl;
 	}
+
+	// TODO: does this work with the camera????
+	if (globalOptions.showFps) {
+		drawText(std::to_string(globalOptions.fps), "deutsch", window_width_px - 100.0f, window_height_px - 50.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+	}
+
+	// makes it kinda slow
+	for (Entity entity : registry.enemies.entities) {
+		if (registry.healths.has(entity) && registry.motions.has(entity)) {
+			Motion &motion = registry.motions.get(entity);
+			Health &health = registry.healths.get(entity);
+
+			int percentage = static_cast<int>((health.health / health.maxHealth) * 100);
+
+			drawText(std::to_string(percentage) + "%", "healthFont", motion.position.x, window_height_px - motion.position.y + 55.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+		}
+	}
+}
+
+// source: inclass SimpleGL-3
+// the x,y values should be the position we want the center of our text to be
+void RenderSystem::drawText(const std::string& text, const std::string& fontName, float x, float y, float scale, const glm::vec3& color) {
+	Font* font = this->asset_manager.getFont(fontName);
+	float textWidth = getTextWidth(text, fontName, scale);
+
+	x = x - textWidth / 2;
+	y = y - font->size / 2;
+
+	glm::mat4 trans = glm::mat4(1.0f);
+	trans = glm::translate(trans, glm::vec3(0.0, 0, 0.0));
+	trans = glm::rotate(trans, glm::radians(0.0f), glm::vec3(0.0, 0.0, 1.0));
+	trans = glm::scale(trans, glm::vec3(1.0f, 1.0f, 1.0f));
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	const Shader* fontShader = this->asset_manager.getShader("font");
+	GLuint m_font_shaderProgram = fontShader->program;
+	glUseProgram(m_font_shaderProgram);
+
+	mat4 projection = glm::ortho(0.f, (float)window_width_px, 0.0f, (float)window_height_px);
+	GLint projection_location = glGetUniformLocation(m_font_shaderProgram, "projection");
+	glUniformMatrix4fv(projection_location, 1, GL_FALSE, glm::value_ptr(projection));
+
+	GLint textColor_location =
+		glGetUniformLocation(m_font_shaderProgram, "textColor");
+	glUniform3f(textColor_location, color.x, color.y, color.z);
+
+	GLint transformLoc =
+		glGetUniformLocation(m_font_shaderProgram, "transform");
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+
+	glBindVertexArray(font->vao);
+
+	std::string::const_iterator c;
+	for (c = text.begin(); c != text.end(); c++) {
+		Character ch = font->m_ftCharacters[*c];
+
+		float xpos = x + ch.Bearing.x * scale;
+		float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+
+		float w = ch.Size.x * scale;
+		float h = ch.Size.y * scale;
+		float vertices[6][4] = {
+			{ xpos,     ypos + h,   0.0f, 0.0f },
+			{ xpos,     ypos,       0.0f, 1.0f },
+			{ xpos + w, ypos,       1.0f, 1.0f },
+
+			{ xpos,     ypos + h,   0.0f, 0.0f },
+			{ xpos + w, ypos,       1.0f, 1.0f },
+			{ xpos + w, ypos + h,   1.0f, 0.0f }
+		};
+
+		glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+
+		glBindBuffer(GL_ARRAY_BUFFER, font->vbo);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		x += (ch.Advance >> 6) * scale;
+	}
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	gl_has_errors();
+}
+
+float RenderSystem::getTextWidth(const std::string& text, const std::string& fontName, float scale) {
+    const Font* font = this->asset_manager.getFont(fontName);
+    float width = 0.0f;
+    for (char c : text) {
+        auto it = font->m_ftCharacters.find(c);
+        if (it != font->m_ftCharacters.end()) {
+            Character ch = it->second;
+            width += (ch.Advance >> 6) * scale;
+        }
+    }
+    return width;
 }
 
 void RenderSystem::updateCameraPosition(float x, float y) {

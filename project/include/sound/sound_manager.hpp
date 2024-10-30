@@ -9,7 +9,13 @@
 enum class SoundEffect {
     FIRE,
     VILLAGER_DAMAGE,
-    PITCHFORK_DAMAGE
+    PITCHFORK_DAMAGE,
+    PLAYER_DEFEATED
+};
+
+enum class Song {
+    MAIN,
+    DEFEAT
 };
 
 class SoundManager {
@@ -20,18 +26,22 @@ public:
 
     void playSound(SoundEffect effect);
 
-    void playMusic();
+    void playMusic(Song song);
+
+    void toggleMusic();
 
     void removeSoundManager();
 
 private:
     SoundManager();
 
+    bool musicPlaying;
+
     static SoundManager* instance;
 
     std::map<SoundEffect, Mix_Chunk*> soundEffects;
-
-    Mix_Music* backgroundMusic;
+    std::map<Song, Mix_Music*> music;
 
     void registerSound(SoundEffect effect, const char* filePath);
+    void registerMusic(Song song, const char* filePath);
 };

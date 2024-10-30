@@ -5,6 +5,9 @@ const unsigned int MAX_ENEMIES = 100;
 const float ENEMY_SPAWN_INTERVAL_MS = 5000.f;
 const unsigned int QUEUE_SIZE = 8;
 
+const float ENEMY_INVINCIBILITY_TIMER = 800.f;
+const float PLAYER_INVINCIBILITY_TIMER = 1500.f;
+
 // --- Damage Types ---
 enum class DamageType
 {
@@ -27,6 +30,9 @@ const float PLAYER_MAX_HEALTH = 100.f;
 const float FIRE_DAMAGE = 25.f;
 const float FIRE_VELOCITY = 1.f;
 const float FIRE_RANGE = 250.f;
+const vec2 FIRE_SCALE = { 0.4, 0.4 };
+const float FIRE_SCALE_FACTOR = 3.f;
+const vec2 FIRE_COLLIDER = { 150, 150 };
 
 const float ICE_VELOCITY = 1.f;
 const float ICE_DEGREE_DIFFERENCE = 15.f;
@@ -54,6 +60,7 @@ const float FARMER_HEALTH = 100.f;
 const float FARMER_COOLDOWN = 1000.f;
 const float FARMER_VELOCITY = 0.05f;
 const float FARMER_RANGE = 200.f;
+const float FARMER_DAMAGE = 5.f;
 const float PITCHFORK_VELOCITY = 0.25f;
 const float PITCHFORK_DAMAGE = 10.f;
 

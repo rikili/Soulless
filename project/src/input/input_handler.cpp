@@ -19,7 +19,37 @@ Mergekk
 
 InputHandler::InputHandler() { }
 
+bool isPlayerDead() {
+    Entity& player_ent = registry.players.entities[0];
+    return registry.deaths.has(player_ent);
+}
+
+bool isTutorialOn() {
+    return globalOptions.tutorial;
+}
+
+bool isPause() {
+    return globalOptions.pause;
+}
+
 void InputHandler::onKey(int key, int scancode, int action, int mods) {
+    SoundManager *soundManager = SoundManager::getSoundManager();
+
+    if (isTutorialOn() && key == GLFW_KEY_SPACE) {
+        if (!globalOptions.pause) {
+	          soundManager->playMusic(Song::MAIN);
+        } else {
+            soundManager->toggleMusic();
+        }
+        globalOptions.tutorial = false;
+        globalOptions.pause = false;
+        return;
+    }
+
+    if (isPlayerDead()) {
+        return;
+    }
+
     if (action == GLFW_PRESS) {
         switch (key) {
             case GLFW_KEY_W:
@@ -37,9 +67,16 @@ void InputHandler::onKey(int key, int scancode, int action, int mods) {
                 printd("E button pressed.\n");
                 // TODO: drop spell 2 and increase HP
                 break;
+            // TODO: NEED A NEW KEY FOR... interact with item on ground (unused for now)
             case GLFW_KEY_F:
-                printd("F button pressed.\n");
-                // TODO: interact with item on ground (unused for now)
+                if (mods & GLFW_MOD_SHIFT) {
+                    globalOptions.showFps = !globalOptions.showFps;
+                }
+                break;
+            case GLFW_KEY_T:
+                soundManager->toggleMusic();
+                globalOptions.tutorial = true;
+                globalOptions.pause = true;
                 break;
             default:
                 break;
@@ -62,6 +99,10 @@ void InputHandler::onKey(int key, int scancode, int action, int mods) {
 }
 
 void InputHandler::onMouseMove(vec2 mouse_position) {
+    if (isPlayerDead() || isTutorialOn()) {
+        return;
+    }
+
     Entity& player = registry.players.entities[0];
     Motion& playerMotion = registry.motions.get(player);
 
@@ -100,7 +141,8 @@ void create_player_projectile(Entity& player_ent, double x, double y)
 
     deadly.to_enemy = true;
 
-    projectile_motion.scale = { 0.4f, 0.4f };
+    projectile_motion.scale = FIRE_SCALE;
+    projectile_motion.collider = FIRE_COLLIDER;
     projectile_motion.position = player_motion.position;
     projectile_motion.angle = player_motion.angle;
 
@@ -140,6 +182,17 @@ void cast_player_spell(double x, double y, bool is_left)
 }
 
 void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mods) {
+    if (isTutorialOn()) {
+        globalOptions.tutorial = false;
+        SoundManager *soundManager = SoundManager::getSoundManager();
+	      soundManager->playMusic(Song::MAIN);
+        return;
+    }
+
+    if (isPlayerDead()) {
+        return;
+    }
+
     if (action == GLFW_PRESS) {
         switch (button) {
             case GLFW_MOUSE_BUTTON_LEFT:

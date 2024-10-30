@@ -96,7 +96,8 @@ void CollisionSystem::handle_collisions()
                         // none are projectile and player isn't involved, skip
                         continue;
                     }
-                    // player is involved and none are projectiles, enemy/player collision case
+                    // player is involved and none are projectiles
+                    // player <-> enemy collision
                     this->applyDamage(deadly_target, other_target);
                 }
 
@@ -159,26 +160,33 @@ void CollisionSystem::handle_collisions()
 
 void CollisionSystem::applyDamage(Entity attacker, Entity victim)
 {
-    if (registry.onHits.has(victim))
+    if (registry.onHits.has(victim)) 
     {
         return;
     }
+
+    SoundManager *soundManager = SoundManager::getSoundManager();
 
     const Damage& damage = registry.damages.get(attacker);
     Health& health = registry.healths.get(victim);
     if (health.health - damage.value <= 0) {
         health.health = 0;
         Death& death = registry.deaths.emplace(victim);
-        death.timer = 10;
 
         if (registry.players.has(victim))
         {   
-            // TODO: Handle player death logic -> Check world_system.cpp logic as well
             printd("Player has died!\n");
+            // set player velocity to 0: to prevent bug where player moves after death
+            Motion &motion = registry.motions.get(victim);
+            motion.velocity = { 0.0f, 0.0f };
+            soundManager->playSound(SoundEffect::PLAYER_DEFEATED);
+            soundManager->playMusic(Song::DEFEAT);
+            death.timer = 7000;
+        } else {
+            death.timer = 10;
         }
 
     } else {
-        SoundManager *soundManager = SoundManager::getSoundManager();
         if (!registry.players.has(victim)) {
             soundManager->playSound(SoundEffect::VILLAGER_DAMAGE);
         } else if (registry.players.has(victim)) {
@@ -190,11 +198,11 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
         if (registry.players.has(victim))
         {
             // printd("Player has been hit! Remaining health: %f\n", health.health);
-            hit.invincibility_timer = 1500;
+            hit.invincibility_timer = PLAYER_INVINCIBILITY_TIMER;
         }
         else
         {
-            hit.invincibility_timer = 1000;
+            hit.invincibility_timer = ENEMY_INVINCIBILITY_TIMER;
         }
     }
 

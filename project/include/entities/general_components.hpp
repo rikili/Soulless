@@ -1,7 +1,7 @@
 #pragma once
 
 #include <core/common.hpp>
-#include <utils/constants.hpp> 
+#include <utils/constants.hpp>
 #include <utils/spell_queue.hpp>
 #include <graphics/asset_manager.hpp>
 
@@ -115,3 +115,10 @@ struct Camera
     vec2 position = { 0, 0 };
 };
 
+struct GlobalOptions {
+    bool tutorial = true;
+    bool pause = false;
+    int fps = 0;
+    bool showFps = false;
+};
+extern GlobalOptions globalOptions;

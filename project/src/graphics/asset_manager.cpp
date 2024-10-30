@@ -182,6 +182,95 @@ AssetId AssetManager::loadShader(const std::string& name, const std::string& ver
     return name;
 }
 
+AssetId AssetManager::loadFont(const std::string& name, const std::string& path, float size) {
+    auto font = std::make_shared<Font>();
+    font->size = size;
+
+    const Shader* fontShader = getShader(name);
+
+    glGenVertexArrays(1, &font->vao);
+    glGenBuffers(1, &font->vbo);
+
+    FT_Library ft;
+    if (FT_Init_FreeType(&ft))
+    {
+        std::cerr << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+    }
+
+    FT_Face face;
+    if (FT_New_Face(ft, path.c_str(), 0, &face))
+    {
+        std::cerr << "ERROR::FREETYPE: Failed to load font: " << path << std::endl;
+    }
+
+    FT_Set_Pixel_Sizes(face, 0, size);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    for (unsigned char c = (unsigned char)0; c < (unsigned char)128; c++) {
+        // load character glyph 
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+          std::cerr << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+          continue;
+        }
+
+        // generate texture
+        unsigned int texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        // std::cout << "texture: " << c << " = " << texture << std::endl;
+
+        glTexImage2D(
+          GL_TEXTURE_2D,
+          0,
+          GL_RED,
+          face->glyph->bitmap.width,
+          face->glyph->bitmap.rows,
+          0,
+          GL_RED,
+          GL_UNSIGNED_BYTE,
+          face->glyph->bitmap.buffer
+        );
+
+        // set texture options
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        // now store character for later use
+        Character character = {
+          texture,
+          glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+          glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+          static_cast<unsigned int>(face->glyph->advance.x),
+          (char)c
+        };
+        font->m_ftCharacters.insert(std::pair<char, Character>(c, character));
+    }
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // clean up
+    FT_Done_Face(face);
+    FT_Done_FreeType(ft);
+
+    // bind buffers
+    glBindVertexArray(font->vao);
+    glBindBuffer(GL_ARRAY_BUFFER, font->vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+
+    // release buffers
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    fonts[name] = std::move(font);
+    return name;
+}
+
+
 AssetId AssetManager::createMaterial(const std::string& name, const AssetId& shader, const AssetId& texture) {
     auto material = std::make_shared<Material>();
     material->shader = shader;
@@ -199,8 +288,8 @@ Shader* AssetManager::getShader(const AssetId& name)  {
     return nullptr;
 }
 
- Mesh* AssetManager::getMesh(const AssetId& name)  {
-     const auto it = meshes.find(name);
+Mesh* AssetManager::getMesh(const AssetId& name)  {
+    const auto it = meshes.find(name);
     if (it != meshes.end()) {
         return it->second.get();
     }
@@ -211,6 +300,14 @@ Shader* AssetManager::getShader(const AssetId& name)  {
 Texture* AssetManager::getTexture(const AssetId& name)  {
     auto it = textures.find(name);
     if (it != textures.end()) {
+        return it->second.get();
+    }
+    return nullptr;
+}
+
+Font* AssetManager::getFont(const AssetId& name) {
+    auto it = fonts.find(name);
+    if (it != fonts.end()) {
         return it->second.get();
     }
     return nullptr;
