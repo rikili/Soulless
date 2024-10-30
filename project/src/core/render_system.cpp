@@ -143,7 +143,7 @@ void RenderSystem::drawFrame()
 		float tutFontSize = this->asset_manager.getFont("deutsch")->size;
 		float currentY = window_height_px - titleFontSize;
 		drawText("Soulless", "king", window_width_px / 2.0f, currentY, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-		currentY -= titleFontSize * 1.5;
+		currentY -= titleFontSize * 1.2;
 
 		vec3 color = glm::vec3(0.83f, 0.83f, 0.83f);
 		
@@ -157,6 +157,9 @@ void RenderSystem::drawFrame()
 		currentY -= tutFontSize * 1.5;
 
 		drawText("Press t to pause/show tutorial.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
+		currentY -= tutFontSize * 1.5;
+
+		drawText("Survive as long as you can!", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
 
 		std::string message = "Press SPACE key to ";
 		std::string start = globalOptions.pause ? "resume." : "start.";
