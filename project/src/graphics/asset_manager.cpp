@@ -182,7 +182,6 @@ AssetId AssetManager::loadShader(const std::string& name, const std::string& ver
     return name;
 }
 
-// TODO: may need to use different shader file per font ???
 AssetId AssetManager::loadFont(const std::string& name, const std::string& path, float size) {
     auto font = std::make_shared<Font>();
     font->size = size;

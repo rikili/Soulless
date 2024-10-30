@@ -9,24 +9,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "entities/general_components.hpp"
 
-std::string readShaderFile(const std::string& filename)
-{
-	// std::cout << "Loading shader filename: " << filename << std::endl;
-
-	std::ifstream ifs(filename);
-
-	if (!ifs.good())
-	{
-		std::cerr << "ERROR: invalid filename loading shader from file: " << filename << std::endl;
-		return "";
-	}
-
-	std::ostringstream oss;
-	oss << ifs.rdbuf();
-	// std::cout << oss.str() << std::endl;
-	return oss.str();
-}
-
 /**
  * @brief Initialize the render system
  *
