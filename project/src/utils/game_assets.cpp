@@ -44,13 +44,13 @@ GameAssets initializeGameAssets(AssetManager& assetManager) {
     AssetId spriteMeshId = assetManager.loadMesh("sprite", spriteVertices, indices, spriteAttributes);
 
     // Player
-    AssetId mageTextureId = assetManager.loadTexture("mage", textures_path("mage") + ".png");
+    AssetId mageTextureId = assetManager.loadTexture("mage", textures_path("mage3") + ".png");
     assets.textures["mage"] = mageTextureId;
     
     // Enemies
     assets.textures["archer"] = assetManager.loadTexture("archer", textures_path("archer") + ".png");
 
-    AssetId farmerTextureId = assetManager.loadTexture("farmer", textures_path("farmer") + ".png");
+    AssetId farmerTextureId = assetManager.loadTexture("farmer", textures_path("tree1") + ".png");
     assets.textures["farmer"] = farmerTextureId;
 
     // Projectiles
