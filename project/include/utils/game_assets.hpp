@@ -12,6 +12,7 @@ struct GameAssets {
     std::unordered_map<std::string, AssetId> textures;
     std::unordered_map<std::string, AssetId> shaders;
     std::unordered_map<std::string, AssetId> materials;
+    std::unordered_map<std::string, AssetId> fonts;
 };
 
 // Function to initialize all game assets

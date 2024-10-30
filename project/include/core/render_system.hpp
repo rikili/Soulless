@@ -8,6 +8,9 @@
 #include "input/input_handler.hpp"
 #include "graphics/asset_manager.hpp"
 
+#include <map>
+#include "../ext/project_path.hpp"		// built by CMake, contains project path
+
 /**
  * System responsible for setting up OpenGL and for rendering all the visual entities in the game
  */
@@ -16,8 +19,11 @@ class RenderSystem {
 public:
 	bool initialize(InputHandler& input_handler, int width = 480, int height = 500, const char* title = "OpenGL Example");
 	void setUpView() const;
+	// void setUpFont();
 	GLFWwindow* getGLWindow() const;
 	void drawFrame();
+	void drawText(const std::string& text, const std::string& fontName, float x, float y, float scale, const glm::vec3& color);
+	float getTextWidth(const std::string& text, const std::string& fontName, float scale);
 	void setAssetManager(AssetManager* asset_manager) { this->asset_manager = *asset_manager; }
 	// void removeRenderRequest(Entity entity);
 	InputHandler input_handler;
