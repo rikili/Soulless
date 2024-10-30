@@ -1,7 +1,7 @@
 #pragma once
 
 #include <core/common.hpp>
-#include <utils/constants.hpp> 
+#include <utils/constants.hpp>
 #include <utils/spell_queue.hpp>
 #include <graphics/asset_manager.hpp>
 
@@ -10,7 +10,7 @@ struct Motion {
     vec2 position = { 0, 0 };
     vec2 velocity = { 0, 0 };
     vec2 scale = { 1, 1 };
-    vec2 collider = { 100, 100 };
+    vec2 collider = { 50, 50 };
     float mass = 0;
     float speedModifier = 1.f;
     float angle = 0;
@@ -110,10 +110,16 @@ struct RenderRequest
 
 };
 
+struct Camera
+{
+    vec2 position = { 0, 0 };
+};
+
 struct GlobalOptions {
     bool tutorial = true;
     bool pause = false;
     int fps = 0;
     bool showFps = false;
 };
+
 extern GlobalOptions globalOptions;

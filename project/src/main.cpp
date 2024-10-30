@@ -1,4 +1,5 @@
 #define GL3W_IMPLEMENTATION
+#define SDL_MAIN_HANDLED
 
 #include "core/render_system.hpp"
 #include "core/world_system.hpp"
@@ -47,7 +48,7 @@ int main(int argc, char* argv[])
 		}
 
 		renderer.drawFrame(); // (3) Re-render the scene (where the magic happens)
-		
+
     frames++;
 
     auto currentTime = std::chrono::high_resolution_clock::now();

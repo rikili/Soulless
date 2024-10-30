@@ -35,6 +35,7 @@ inline std::string font_path(const std::string& name) {return data_path() + "/fo
 
 const int window_width_px = 1200;
 const int window_height_px = 800;
+const float zoomFactor = 0.5f;
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f

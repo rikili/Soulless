@@ -42,6 +42,14 @@ public:
 			});
 	}
 
+	mat4 getProjectionMatrix() {
+		return projectionMatrix;
+	}
+
+	mat4 getViewMatrix() {
+		return viewMatrix;
+	}
+
 private:
 	struct RenderIndex {
 		size_t index;
@@ -50,10 +58,15 @@ private:
 		RenderIndex(size_t i, float y) : index(i), render_y(y) {}
 	};
 
+	void updateCameraPosition(float x, float y);
+
 	std::vector<RenderIndex> sorted_indices;
 	GLuint frame_buffer = 0;
 	Entity screen_state_entity;
 	GLFWwindow* window = nullptr;
 	AssetManager asset_manager; // Holds all the assets
 	std::vector<RenderRequest> render_requests; // Holds all the render requests
+	glm::mat4 viewMatrix;
+	glm::mat4 projectionMatrix;
+	Entity camera;
 };
