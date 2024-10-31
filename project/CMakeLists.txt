@@ -12,8 +12,48 @@ set (CMAKE_CXX_STANDARD 14)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 #Find OS
+# Find OS
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(IS_OS_MAC 1)
+  
+  # Check for Apple Silicon
+  execute_process(
+    COMMAND uname -m
+    OUTPUT_VARIABLE ARCH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  
+  if(ARCH MATCHES "arm64")
+    message(STATUS "Configuring for Apple Silicon with Homebrew LLVM")
+    
+    # Set LLVM paths explicitly
+    set(LLVM_PATH "/opt/homebrew/opt/llvm")
+    
+    # Set compilers explicitly
+    set(CMAKE_C_COMPILER "${LLVM_PATH}/bin/clang")
+    set(CMAKE_CXX_COMPILER "${LLVM_PATH}/bin/clang++")
+    
+    # Add include paths
+    include_directories(SYSTEM "${LLVM_PATH}/include")
+    include_directories(SYSTEM "${LLVM_PATH}/include/c++/v1")
+    
+    # Add library path
+    link_directories("${LLVM_PATH}/lib")
+    link_directories("${LLVM_PATH}/lib/c++")
+    
+    # Set compiler and linker flags
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${LLVM_PATH}/lib -Wl,-rpath,${LLVM_PATH}/lib")
+  endif()
+  
+  # Regular Mac paths (keep these for compatibility)
+  include_directories(/usr/local/include)
+  link_directories(/usr/local/lib)
+  
+  # Standard Homebrew paths
+  include_directories(/opt/homebrew/include)
+  link_directories(/opt/homebrew/lib)
+  
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set(IS_OS_LINUX 1)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
