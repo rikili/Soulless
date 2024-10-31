@@ -28,10 +28,14 @@ public:
 
     void playMusic(Song song);
 
+    void toggleMusic();
+
     void removeSoundManager();
 
 private:
     SoundManager();
+
+    bool musicPlaying;
 
     static SoundManager* instance;
 

@@ -15,7 +15,7 @@
 
 SoundManager* SoundManager::instance = nullptr;
 
-SoundManager::SoundManager() {}
+SoundManager::SoundManager() : musicPlaying(false) {}
 
 SoundManager* SoundManager::getSoundManager() {
     if (instance == nullptr) {
@@ -62,8 +62,19 @@ void SoundManager::playMusic(Song song) {
 
     if (music.find(song) != music.end()) {
         Mix_PlayMusic(music[song], -1);
+        musicPlaying = true;
     } else {
         std::cerr << "Song not found!" << std::endl;
+    }
+}
+
+void SoundManager::toggleMusic() {
+    if (musicPlaying) {
+        Mix_PauseMusic();
+        musicPlaying = false;
+    } else {
+        Mix_ResumeMusic();
+        musicPlaying = true;
     }
 }
 

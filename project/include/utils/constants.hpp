@@ -29,10 +29,10 @@ const float PLAYER_MAX_HEALTH = 100.f;
 
 const float FIRE_DAMAGE = 25.f;
 const float FIRE_VELOCITY = 1.f;
-const float FIRE_RANGE = 250.f;
-const vec2 FIRE_SCALE = { 0.4, 0.4 };
+const float FIRE_RANGE = 400.f;
+const vec2 FIRE_SCALE = {0.2, 0.2};
 const float FIRE_SCALE_FACTOR = 3.f;
-const vec2 FIRE_COLLIDER = { 150, 150 };
+const vec2 FIRE_COLLIDER = {150, 150};
 
 const float ICE_VELOCITY = 1.f;
 const float ICE_DEGREE_DIFFERENCE = 15.f;
@@ -65,7 +65,8 @@ const float PITCHFORK_VELOCITY = 0.25f;
 const float PITCHFORK_DAMAGE = 10.f;
 
 // Draw order (largest number = frontmost)
-enum {
+enum
+{
     BACK = 0,
     PROJECTILE = 1,
     ENEMY = 2,

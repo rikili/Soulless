@@ -8,7 +8,27 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <memory>
 
+#include <map>
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 using AssetId = std::string;  // Using strings for more flexible identification
+
+// source: inclass simpleGL-3
+struct Character {
+    unsigned int TextureID;  // ID handle of the glyph texture
+    glm::ivec2 Size;         // Size of glyph
+    glm::ivec2 Bearing;      // Offset from baseline to left/top of glyph
+    unsigned int Advance;    // Offset to advance to next glyph
+    char character;          // The character represented by this glyph
+};
+
+struct Font {
+    std::map<char, Character> m_ftCharacters;
+    float size;
+    GLuint vao = 0;
+    GLuint vbo = 0;
+};
 
 struct VertexAttribute {
     GLint size;
@@ -16,7 +36,6 @@ struct VertexAttribute {
     GLboolean normalized;
     const char* semanticName;
 };
-
 
 struct Mesh {
     GLuint vao = 0;
@@ -28,6 +47,7 @@ struct Mesh {
     std::vector<uint32_t> indices;
     std::vector<VertexAttribute> attributes;
 };
+
 struct Texture {
     GLuint handle = 0;
     glm::ivec2 dimensions{0, 0};
@@ -94,14 +114,17 @@ public:
     AssetId loadBackgroundTexture(const std::string& name, const std::string& path);
     AssetId loadShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
     AssetId createMaterial(const std::string& name, const AssetId& shader, const AssetId& texture = "");
+    AssetId loadFont(const std::string& name, const std::string& path, float size);
     Shader* getShader(const AssetId& name);
     Mesh* getMesh(const AssetId& name);
     Texture* getTexture(const AssetId& name);
+    Font* getFont(const AssetId& name);
 
 private:
     std::unordered_map<AssetId, std::shared_ptr<Mesh>> meshes;
     std::unordered_map<AssetId, std::shared_ptr<Texture>> textures;
     std::unordered_map<AssetId, std::shared_ptr<Shader>> shaders;
     std::unordered_map<AssetId, std::shared_ptr<Material>> materials;
+    std::unordered_map<AssetId, std::shared_ptr<Font>> fonts;
 };
 

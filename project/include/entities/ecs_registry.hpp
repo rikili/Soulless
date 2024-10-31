@@ -24,6 +24,10 @@ public:
 	ComponentContainer<OnHit> onHits;
 	ComponentContainer<RenderRequest> render_requests;
 	ComponentContainer<Animation> animations;
+	ComponentContainer<Camera> cameras;
+	mat4 viewMatrix;
+	mat4 projectionMatrix;
+
 	bool debug = false;
 
 	// constructor that adds all containers for looping over them
@@ -43,6 +47,7 @@ public:
 		registry_list.push_back(&onHits);
 		registry_list.push_back(&render_requests);
 		registry_list.push_back(&animations);
+		registry_list.push_back(&cameras);
 	}
 
 	void clear_all_components() const
