@@ -229,16 +229,16 @@ void WorldSystem::invoke_enemy_cooldown(Entity& enemy_ent) {
 /**
  * Initialize the game world
  */
-void WorldSystem::initialize()
-{
-	// Create a player
-	player_mage = this->createPlayer();
+void WorldSystem::initialize() {
+	restartGame();
 }
 
 void WorldSystem::restartGame() {
-  SoundManager *soundManager = SoundManager::getSoundManager();
+	SoundManager *soundManager = SoundManager::getSoundManager();
+	
 	soundManager->playMusic(Song::MAIN);
 	player_mage = this->createPlayer();
+	loadBackgroundObjects();
 }
 
 
@@ -311,6 +311,37 @@ void WorldSystem::createFarmer(vec2 position, vec2 velocity)
 	request.texture = "farmer";
 	request.shader = "sprite";
 	request.type = ENEMY;
+}
+
+void WorldSystem::loadBackgroundObjects() {
+	createBackgroundObject({ window_width_px / 4, window_height_px / 4 }, { 0.75, 0.75 }, "tree", false);
+	Entity campfire = createBackgroundObject({ window_width_px / 2, window_height_px / 2 + 50.f }, { 0.5, 0.5 }, "campfire", true);
+	Animation& campfireAnimation = registry.animations.emplace(campfire);
+	campfireAnimation.spriteCols = 6;
+	campfireAnimation.spriteRows = 1;
+	campfireAnimation.frameCount = 6;
+}
+
+Entity WorldSystem::createBackgroundObject(vec2 position, vec2 scale, AssetId texture, bool animate)
+{
+	Entity object;
+
+	Motion& motion = registry.motions.emplace(object);
+	motion.position = position;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = scale;
+
+	RenderRequest& request = registry.render_requests.emplace(object);
+	request.mesh = "sprite";
+	request.texture = texture;
+	if (animate) {
+		request.shader = "animatedsprite";
+	}
+	else {
+		request.shader = "sprite";
+	}
+
+	return object;
 }
 
 /**

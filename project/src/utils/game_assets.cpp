@@ -61,6 +61,12 @@ GameAssets initializeGameAssets(AssetManager& assetManager) {
     AssetId pitchforkTextureId = assetManager.loadTexture("pitchfork", textures_path("pitchfork") + ".png");
     assets.textures["pitchfork"] = pitchforkTextureId;
 
+    // Background Objects
+    AssetId treeTextureId = assetManager.loadTexture("tree", textures_path("tree1") + ".png");
+    AssetId campfireTextureId = assetManager.loadTexture("campfire", textures_path("campfire-sheet") + ".png");
+    assets.textures["campfire"] = campfireTextureId;
+    assets.textures["tree"] = treeTextureId;
+
     // Add a new mesh for the background (full screen quad)
     const std::vector<float> bgVertices = {
         // positions        // texture coords

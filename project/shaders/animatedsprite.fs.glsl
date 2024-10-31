@@ -5,9 +5,9 @@ out vec4 color;
 uniform sampler2D image;
 uniform float frame;
 
-const int SPRITE_COLS = 4;
-const int SPRITE_ROWS = 1;
-const int NUM_SPRITES = 4;
+uniform int SPRITE_COLS;
+uniform int SPRITE_ROWS;
+uniform int NUM_SPRITES;
 
 void main()
 {    

@@ -116,6 +116,8 @@ struct Animation
     float frameTime = 100.f;
     float elapsedTime = 0.f;
 
+    int spriteCols = 4;
+    int spriteRows = 1;
     int frameCount = 4;
 };
 

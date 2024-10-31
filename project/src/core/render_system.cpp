@@ -206,8 +206,10 @@ void RenderSystem::drawFrame(float elapsed_ms)
 						}
 					}
 
-					const GLint frameLoc = glGetUniformLocation(shaderProgram, "frame");
-					glUniform1f(frameLoc, animation.currentFrame);
+					glUniform1f(glGetUniformLocation(shaderProgram, "frame"), animation.currentFrame);
+					glUniform1i(glGetUniformLocation(shaderProgram, "SPRITE_COLS"), animation.spriteCols);
+					glUniform1i(glGetUniformLocation(shaderProgram, "SPRITE_ROWS"), animation.spriteRows);
+					glUniform1i(glGetUniformLocation(shaderProgram, "NUM_SPRITES"), animation.frameCount);	
 				}
 			}
 			mat4 projection = glm::ortho(0.f, (float)window_width_px, (float)window_height_px, 0.f, -1.f, 1.f);
