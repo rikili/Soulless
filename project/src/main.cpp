@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 	if (!soundManager->initialize()) {
 		printd("Error initializing sound manager\n");
 	}
-	soundManager->playMusic(Song::MAIN);
+	// soundManager->playMusic(Song::MAIN);
 
 	GameAssets gameAssets = initializeGameAssets(asset_manager); // Initialize the asset manager
 	renderer.setAssetManager(&asset_manager);
@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
 		t = now;
 
 		world.step(elapsed_ms); // (2) Update the game state
-		renderer.drawFrame(); // (3) Re-render the scene (where the magic happens)
+		renderer.drawFrame(elapsed_ms); // (3) Re-render the scene (where the magic happens)
 		glfwSwapBuffers(window); // (4) swap front and back buffers
 		glfwPollEvents(); // (5) poll for and process events
 	}

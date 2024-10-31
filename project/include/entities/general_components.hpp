@@ -110,3 +110,12 @@ struct RenderRequest
 
 };
 
+struct Animation
+{
+    float currentFrame = 0.f;
+    float frameTime = 100.f;
+    float elapsedTime = 0.f;
+
+    int frameCount = 4;
+};
+

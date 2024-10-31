@@ -23,6 +23,7 @@ public:
 	ComponentContainer<Damage> damages;
 	ComponentContainer<OnHit> onHits;
 	ComponentContainer<RenderRequest> render_requests;
+	ComponentContainer<Animation> animations;
 	bool debug = false;
 
 	// constructor that adds all containers for looping over them
@@ -41,6 +42,7 @@ public:
 		registry_list.push_back(&damages);
 		registry_list.push_back(&onHits);
 		registry_list.push_back(&render_requests);
+		registry_list.push_back(&animations);
 	}
 
 	void clear_all_components() const

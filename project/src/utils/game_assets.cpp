@@ -7,6 +7,7 @@ GameAssets initializeGameAssets(AssetManager& assetManager) {
     assets.shaders["basic"] = assetManager.loadShader("basic", shader_path("basic") + ".vs.glsl", shader_path("basic") + ".fs.glsl");
     assets.shaders["background"] = assetManager.loadShader("background", shader_path("background") + ".vs.glsl", shader_path("background") + ".fs.glsl");
     assets.shaders["sprite"] = assetManager.loadShader("sprite", shader_path("sprite") + ".vs.glsl", shader_path("sprite") + ".fs.glsl");
+    assets.shaders["animatedsprite"] = assetManager.loadShader("animatedsprite", shader_path("animatedsprite") + ".vs.glsl", shader_path("animatedsprite") + ".fs.glsl");
 
     const std::vector<float> vertices = {
         // positions        // colors           // texture coords
@@ -44,13 +45,13 @@ GameAssets initializeGameAssets(AssetManager& assetManager) {
     AssetId spriteMeshId = assetManager.loadMesh("sprite", spriteVertices, indices, spriteAttributes);
 
     // Player
-    AssetId mageTextureId = assetManager.loadTexture("mage", textures_path("mage3") + ".png");
+    AssetId mageTextureId = assetManager.loadTexture("mage", textures_path("Idle-sheet") + ".png");
     assets.textures["mage"] = mageTextureId;
     
     // Enemies
     assets.textures["archer"] = assetManager.loadTexture("archer", textures_path("archer") + ".png");
 
-    AssetId farmerTextureId = assetManager.loadTexture("farmer", textures_path("tree1") + ".png");
+    AssetId farmerTextureId = assetManager.loadTexture("farmer", textures_path("farmer") + ".png");
     assets.textures["farmer"] = farmerTextureId;
 
     // Projectiles

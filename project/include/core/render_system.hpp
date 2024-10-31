@@ -17,7 +17,7 @@ public:
 	bool initialize(InputHandler& input_handler, int width = 480, int height = 500, const char* title = "OpenGL Example");
 	void setUpView() const;
 	GLFWwindow* getGLWindow() const;
-	void drawFrame();
+	void drawFrame(float elapsed_ms);
 	void setAssetManager(AssetManager* asset_manager) { this->asset_manager = *asset_manager; }
 	// void removeRenderRequest(Entity entity);
 	InputHandler input_handler;

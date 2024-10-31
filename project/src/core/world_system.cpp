@@ -259,10 +259,12 @@ Entity WorldSystem::createPlayer() {
 	// Player& player_component = registry.players.emplace(player);
 	// // TODO: Add player initialization code here!
 
+	Animation& animation = registry.animations.emplace(player);
+
 	RenderRequest& request = registry.render_requests.emplace(player);
 	request.mesh = "sprite";
 	request.texture = "mage";
-	request.shader = "sprite";
+	request.shader = "animatedsprite";
 	request.type = PLAYER;
 
 	return player;

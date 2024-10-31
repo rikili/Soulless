@@ -100,7 +100,7 @@ GLFWwindow* RenderSystem::getGLWindow() const
  * This function is called every frame to draw the frame
  * @attention Skips rendering if the shader is not found
  */
-void RenderSystem::drawFrame()
+void RenderSystem::drawFrame(float elapsed_ms)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_BLEND);
@@ -178,7 +178,7 @@ void RenderSystem::drawFrame()
 			transform = scale(transform, vec3(motion.scale * 100.f, 1.0f));
 
 
-			if (render_request.shader == "sprite") {
+			if (render_request.shader == "sprite" || render_request.shader == "animatedsprite") {
 				if (registry.players.has(entity) && registry.deaths.has(entity)) {
 					transform = rotate(transform, (float) M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
 				}
@@ -193,6 +193,22 @@ void RenderSystem::drawFrame()
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, texture->handle);
 				glUniform1i(glGetUniformLocation(shader->program, "image"), 0);
+
+				if (render_request.shader == "animatedsprite") {
+					Animation& animation = registry.animations.get(entity);
+					animation.elapsedTime += elapsed_ms;
+					
+					if (animation.elapsedTime > animation.frameTime) {
+						animation.elapsedTime = 0;
+						animation.currentFrame++;
+						if (animation.currentFrame >= animation.frameCount) {
+							animation.currentFrame = 0;
+						}
+					}
+
+					const GLint frameLoc = glGetUniformLocation(shaderProgram, "frame");
+					glUniform1f(frameLoc, animation.currentFrame);
+				}
 			}
 			mat4 projection = glm::ortho(0.f, (float)window_width_px, (float)window_height_px, 0.f, -1.f, 1.f);
 
