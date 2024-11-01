@@ -23,8 +23,7 @@ bool RenderSystem::initialize(InputHandler& input_handler, const int width, cons
 	projectionMatrix = glm::ortho(0.f, (float)window_width_px * zoomFactor, (float)window_height_px * zoomFactor, 0.f, -1.f, 1.f);
 	registry.projectionMatrix = projectionMatrix;
 
-	camera = Entity();
-	registry.cameras.emplace(camera);
+	initializeCamera();
 
 	// Most of the code below is just boilerplate code to create a window
 	if (!glfwInit()) { 	// Initialize the window
@@ -93,6 +92,10 @@ void RenderSystem::setUpView() const
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
+void RenderSystem::initializeCamera() {
+	camera = Entity();
+	registry.cameras.emplace(camera);
+}
 /**
  * @brief Get the GL window
  * Other systems may need to access the GL window; for example, the input system

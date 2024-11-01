@@ -19,6 +19,7 @@ class RenderSystem {
 public:
 	bool initialize(InputHandler& input_handler, int width = 480, int height = 500, const char* title = "OpenGL Example");
 	void setUpView() const;
+	void initializeCamera();
 	// void setUpFont();
 	GLFWwindow* getGLWindow() const;
 	void drawFrame(float elapsed_ms);

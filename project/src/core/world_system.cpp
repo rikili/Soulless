@@ -24,6 +24,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	if (!registry.players.has(player_mage)) {
 		this->restartGame();
+		this->renderer->initializeCamera();
 		return true;
 	}
 
@@ -275,8 +276,10 @@ void WorldSystem::initialize() {
 }
 
 void WorldSystem::restartGame() {
-	SoundManager* soundManager = SoundManager::getSoundManager();
-	soundManager->playMusic(Song::MAIN);
+	if (!globalOptions.tutorial) {
+		SoundManager* soundManager = SoundManager::getSoundManager();
+		soundManager->playMusic(Song::MAIN);
+	}
 	player_mage = this->createPlayer();
 	loadBackgroundObjects();
 }
