@@ -36,11 +36,14 @@ public:
 
 private:
 	// helper functions to set the world
+	void loadBackgroundObjects();
+
 	Entity createPlayer();
 	void createEnemy(EnemyType type, vec2 position, vec2 velocity);
 	void createFarmer(vec2 position, vec2 velocity);
 	void createArcher(vec2 position, vec2 velocity);
 	void createKnight(vec2 position, vec2 velocity);
+	Entity createBackgroundObject(vec2 position, vec2 scale, AssetId texture, bool animate);
 	void handle_enemy_logic(float elapsed_ms_since_last_update);
 
 	Mix_Music* background_music;

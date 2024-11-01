@@ -21,7 +21,7 @@ public:
 	void setUpView() const;
 	// void setUpFont();
 	GLFWwindow* getGLWindow() const;
-	void drawFrame();
+	void drawFrame(float elapsed_ms);
 	void drawText(const std::string& text, const std::string& fontName, float x, float y, float scale, const glm::vec3& color);
 	float getTextWidth(const std::string& text, const std::string& fontName, float scale);
 	void setAssetManager(AssetManager* asset_manager) { this->asset_manager = *asset_manager; }
