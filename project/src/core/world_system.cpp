@@ -304,6 +304,8 @@ Entity WorldSystem::createPlayer()
 	// // TODO: Add player initialization code here!
 
 	Animation& animation = registry.animations.emplace(player);
+	animation.spriteRows = 3;
+	animation.initializeAtFrame(0.0f);
 
 	RenderRequest& request = registry.render_requests.emplace(player);
 	request.mesh = "sprite";

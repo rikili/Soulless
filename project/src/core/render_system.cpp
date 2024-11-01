@@ -251,15 +251,18 @@ void RenderSystem::drawFrame(float elapsed_ms)
 					if (animation.elapsedTime > animation.frameTime) {
 						animation.elapsedTime = 0;
 						animation.currentFrame++;
-						if (animation.currentFrame >= animation.frameCount) {
-							animation.currentFrame = 0;
+						if (registry.players.has(entity)) {
+							printd("Frame: %f\n", animation.currentFrame);
+						}
+						if (animation.currentFrame - animation.startFrame >= animation.frameCount) {
+							animation.currentFrame = animation.startFrame;
 						}
 					}
 
 					glUniform1f(glGetUniformLocation(shaderProgram, "frame"), animation.currentFrame);
 					glUniform1i(glGetUniformLocation(shaderProgram, "SPRITE_COLS"), animation.spriteCols);
 					glUniform1i(glGetUniformLocation(shaderProgram, "SPRITE_ROWS"), animation.spriteRows);
-					glUniform1i(glGetUniformLocation(shaderProgram, "NUM_SPRITES"), animation.frameCount);	
+					glUniform1i(glGetUniformLocation(shaderProgram, "NUM_SPRITES"), animation.spriteCount);	
 				}
 			}
 			mat4 projection = projectionMatrix;

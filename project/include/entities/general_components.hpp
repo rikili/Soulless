@@ -112,13 +112,22 @@ struct RenderRequest
 
 struct Animation
 {
-    float currentFrame = 0.f;
+    float startFrame = 0.0f;
+    float currentFrame;
+
     float frameTime = 100.f;
     float elapsedTime = 0.f;
 
     int spriteCols = 4;
     int spriteRows = 1;
+    int spriteCount = 12;
+
     int frameCount = 4;
+
+    void initializeAtFrame(float frame) {
+        startFrame = frame;
+        currentFrame = startFrame;
+    }
 };
 
 struct Camera
