@@ -32,7 +32,7 @@ public:
 	// World state specific variables
 	float farmer_spawn_timer = 0.0f;
 	float archer_spawn_timer = 60000.0f; // Spawns in at 1 minute
-	float knight_spawn_timer = 180000.0f; // Spawns in at 3 minutes
+	float knight_spawn_timer = 120000.0f; // Spawns in at 2 minutes
 
 private:
 	// helper functions to set the world
