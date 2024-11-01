@@ -43,7 +43,7 @@ void WorldSystem::set_renderer(RenderSystem* renderer)
 
 /**
  * @brief Handle projectiles to reduce their range at each step and mark for deletion if they are out of range
- * @param 
+ * @param
  */
 void WorldSystem::handle_projectiles(float elapsed_ms_since_last_update)
 {
@@ -80,17 +80,22 @@ void WorldSystem::handle_projectiles(float elapsed_ms_since_last_update)
  */
 void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 {
-	ComponentContainer<Motion> &motions_registry = registry.motions;
+	ComponentContainer<Motion>& motions_registry = registry.motions;
 	Motion& player_motion = motions_registry.get(player_mage);
 
 	// Update all motions
 	for (Entity entity : motions_registry.entities) {
 		Motion& motion = motions_registry.get(entity);
+
 		if (registry.players.has(entity) || registry.enemies.has(entity))
 		{
 			float x_offset = motion.collider.x * motion.scale.x;
 			float y_offset = motion.collider.y * motion.scale.y;
 			motion.position = glm::clamp(motion.position + motion.velocity * elapsed_ms_since_last_update, { x_offset, y_offset }, { window_width_px - x_offset, window_height_px - y_offset });
+		}
+		// Water barrier follows player
+		else if (registry.projectiles.has(entity) && registry.projectiles.get(entity).type == DamageType::water) {
+			motion = player_motion;
 		}
 		else
 		{
@@ -102,7 +107,7 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 			Enemy& enemy = registry.enemies.get(entity);
 			motion.angle = atan2(player_motion.position.y - motion.position.y, player_motion.position.x - motion.position.x);
 			// printd("Enemy angle towards player: %f\n", motion.angle);
-		}	
+		}
 
 		RenderRequest& render_request = registry.render_requests.get(entity);
 		render_request.smooth_position.update(motion.position.y);
@@ -134,7 +139,8 @@ void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 			if (!registry.players.has(dead_ent))
 			{
 				registry.remove_all_components_of(dead_ent);
-			} else {
+			}
+			else {
 				registry.clear_all_components();
 				printd("Successfully killed player!\n");
 			}
@@ -214,13 +220,15 @@ void WorldSystem::create_enemy_projectile(Entity& enemy_ent)
 }
 
 void WorldSystem::invoke_enemy_cooldown(Entity& enemy_ent) {
-		Enemy& enemy = registry.enemies.get(enemy_ent);
+	Enemy& enemy = registry.enemies.get(enemy_ent);
 
 	if (enemy.type == EnemyType::FARMER) {
 		enemy.cooldown = FARMER_COOLDOWN;
-	} else if (enemy.type == EnemyType::ARCHER) {
+	}
+	else if (enemy.type == EnemyType::ARCHER) {
 		// TODO
-	} else if (enemy.type == EnemyType::CLERIC) {
+	}
+	else if (enemy.type == EnemyType::CLERIC) {
 		// TODO
 	}
 
@@ -234,8 +242,8 @@ void WorldSystem::initialize() {
 }
 
 void WorldSystem::restartGame() {
-	SoundManager *soundManager = SoundManager::getSoundManager();
-	
+	SoundManager* soundManager = SoundManager::getSoundManager();
+
 	soundManager->playMusic(Song::MAIN);
 	player_mage = this->createPlayer();
 	loadBackgroundObjects();
@@ -245,7 +253,10 @@ void WorldSystem::restartGame() {
 Entity WorldSystem::createPlayer() {
 	auto player = Entity();
 
-	registry.players.emplace(player);
+	Player& player_component = registry.players.emplace(player);
+	player_component.spell_queue = SpellQueue();
+	// TODO: Add player initialization code here!
+
 	Motion& motion = registry.motions.emplace(player);
 	motion.position = { window_width_px / 2.0f, window_height_px / 2.0f };  // Center of the screen
 	motion.velocity = { 0.0f, 0.0f };
@@ -255,9 +266,6 @@ Entity WorldSystem::createPlayer() {
 	health.health = PLAYER_HEALTH;
 	health.maxHealth = PLAYER_MAX_HEALTH;
 	// TODO: Add resistances here!
-
-	// Player& player_component = registry.players.emplace(player);
-	// // TODO: Add player initialization code here!
 
 	Animation& animation = registry.animations.emplace(player);
 
@@ -275,9 +283,11 @@ void WorldSystem::createEnemy(EnemyType type, vec2 position, vec2 velocity)
 {
 	if (type == EnemyType::FARMER) {
 		createFarmer(position, velocity);
-	} else if (type == EnemyType::ARCHER) {
+	}
+	else if (type == EnemyType::ARCHER) {
 		// TODO: Implement archer enemy (can be changed)
-	} else if (type == EnemyType::CLERIC) {
+	}
+	else if (type == EnemyType::CLERIC) {
 		// TODO: Implement cleric enemy (can be changed)
 	}
 }
@@ -370,7 +380,7 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 		constexpr float offset_x = window_width_px / 10.f;
 		constexpr float offset_y = window_height_px / 10.f;
 
-		switch(side) {
+		switch (side) {
 		case TOP:
 			candidate_x = dis(gen) * window_width_px;
 			candidate_y = -offset_y;
@@ -405,7 +415,8 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 		{
 			const vec2 velocity = glm::normalize(distance) * ENEMY_BASIC_VELOCITY;
 			motion.velocity = velocity;
-		} else {
+		}
+		else {
 			motion.velocity = { 0, 0 };
 		}
 

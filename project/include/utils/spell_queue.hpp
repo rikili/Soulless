@@ -1,39 +1,34 @@
 #pragma once
 
 #include <random>
-#include <array>
+#include <deque>
+#include <unordered_map>
 #include <utils/constants.hpp>
+
+// hash function for unordered map of SpellType
+struct SpellTypeHash {
+	std::size_t operator()(const SpellType& spell) const {
+		std::hash<int> hasher; 	// create hash function 
+		int spellInt = static_cast<int>(spell); // convert enum to int
+		return hasher(spellInt);	// return hash of int
+	}
+};
 
 class SpellQueue
 {
-private:
-	unsigned int index = 0;
-	std::array<DamageType, QUEUE_SIZE> queue;
-
 public:
-	SpellQueue()
-	{
-		// TODO
-	}
+	SpellQueue();
+	~SpellQueue();
+	void collectSpell(SpellType spell);
+	SpellType useSpell(bool is_first);
+	void discardSpell(bool is_first);
+	const std::deque<SpellType>& getQueue() const;
 
-	~SpellQueue()
-	{
-		// TODO
-	}
+private:
+	void addSpell();
+	SpellType getRandomSpell();
 
-	DamageType dequeue()
-	{
-		// TODO: Implement + remove placeholder
-
-		// Placeholder return
-		return DamageType::fire;
-	}
-
-	const std::array<DamageType, QUEUE_SIZE>& getQueue() const
-	{
-		// TODO: Implement + remove placeholder
-
-		// Placeholder return
-		return queue;
-	}
+	std::deque<SpellType> queue;
+	std::unordered_map<SpellType, int, SpellTypeHash> collectedSpells;
+	std::mt19937 rng;
 };

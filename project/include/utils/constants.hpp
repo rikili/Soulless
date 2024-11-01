@@ -1,5 +1,9 @@
 #pragma once
 
+#include <glm/vec2.hpp>
+
+using namespace glm;
+
 // --- Game Logic Constants ---
 const unsigned int MAX_ENEMIES = 100;
 const float ENEMY_SPAWN_INTERVAL_MS = 5000.f;
@@ -12,9 +16,9 @@ const float PLAYER_INVINCIBILITY_TIMER = 1500.f;
 enum class DamageType
 {
     fire,
-    ice,
-    lightning,
     water,
+    lightning,
+    ice,
     plasma,
     wind,
     enemy,
@@ -27,12 +31,29 @@ const float PLAYER_MAX_HEALTH = 100.f;
 
 // --- Player Spells ---
 
+enum class SpellType
+{
+    FIRE = 0,
+    WATER = 1,
+    LIGHTNING = 2,
+    ICE = 3,
+    // Add any new spells here
+    COUNT // Used to track how many spell types we have
+};
+
 const float FIRE_DAMAGE = 25.f;
 const float FIRE_VELOCITY = 1.f;
 const float FIRE_RANGE = 400.f;
-const vec2 FIRE_SCALE = {0.2, 0.2};
+const vec2 FIRE_SCALE = { 0.2, 0.2 };
 const float FIRE_SCALE_FACTOR = 3.f;
-const vec2 FIRE_COLLIDER = {150, 150};
+const vec2 FIRE_COLLIDER = { 150, 150 };
+
+const float WATER_DAMAGE = 0.f;
+const float WATER_VELOCITY = 0.f;
+const float WATER_RANGE = 300.f; // Range acts as a timer for the spell
+const vec2 WATER_SCALE = { 0.85f, 0.85f };
+const float WATER_SCALE_FACTOR = 1.f;
+const vec2 WATER_COLLIDER = { 250, 250 };
 
 const float ICE_VELOCITY = 1.f;
 const float ICE_DEGREE_DIFFERENCE = 15.f;

@@ -65,9 +65,12 @@ GameAssets initializeGameAssets(AssetManager& assetManager) {
     AssetId farmerTextureId = assetManager.loadTexture("farmer", textures_path("farmer") + ".png");
     assets.textures["farmer"] = farmerTextureId;
 
-    // Projectiles
+    // Projectiles / Spells
     AssetId fireballTextureId = assetManager.loadTexture("fireball", textures_path("fireball") + ".png");
     assets.textures["fireball"] = fireballTextureId;
+
+    AssetId barrierTextureId = assetManager.loadTexture("barrier", textures_path("barrier") + ".png");
+    assets.textures["barrier"] = barrierTextureId;
 
     AssetId pitchforkTextureId = assetManager.loadTexture("pitchfork", textures_path("pitchfork") + ".png");
     assets.textures["pitchfork"] = pitchforkTextureId;
@@ -93,7 +96,7 @@ GameAssets initializeGameAssets(AssetManager& assetManager) {
     };
     AssetId bgMeshId = assetManager.loadMesh("background", bgVertices, indices, bgAttributes);
 
-    AssetId grassTextureId  = assetManager.loadBackgroundTexture("grass", textures_path("grass") + ".jpg");
+    AssetId grassTextureId = assetManager.loadBackgroundTexture("grass", textures_path("grass") + ".jpg");
     assets.textures["grass"] = grassTextureId;
 
     // Set texture parameters for repeating
