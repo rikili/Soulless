@@ -27,7 +27,7 @@ bool check_collision(Entity& entity, Entity& other_entity)
         // Vertical intersection tests
         motion.position.y < other_motion.position.y + other_bounding_box.y &&
         other_motion.position.y < motion.position.y + bounding_box.y
-    );
+        );
 }
 
 void CollisionSystem::handle_collisions()
@@ -111,7 +111,7 @@ void CollisionSystem::handle_collisions()
                 }
 
                 Deadly& deadly = registry.deadlies.get(deadly_target);
-                    
+
                 // DEBUG: Collisions
                 if (registry.debug)
                 {
@@ -135,7 +135,7 @@ void CollisionSystem::handle_collisions()
                     }
                     else
                     {
-                            
+
                     }
                     // TODO: possible feature
                     /*else if (deadly.to_projectile && registry.projectiles.has(other_target))
@@ -160,12 +160,12 @@ void CollisionSystem::handle_collisions()
 
 void CollisionSystem::applyDamage(Entity attacker, Entity victim)
 {
-    if (registry.onHits.has(victim)) 
+    if (registry.onHits.has(victim))
     {
         return;
     }
 
-    SoundManager *soundManager = SoundManager::getSoundManager();
+    SoundManager* soundManager = SoundManager::getSoundManager();
 
     const Damage& damage = registry.damages.get(attacker);
     Health& health = registry.healths.get(victim);
@@ -174,22 +174,25 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
         Death& death = registry.deaths.emplace(victim);
 
         if (registry.players.has(victim))
-        {   
+        {
             printd("Player has died!\n");
             // set player velocity to 0: to prevent bug where player moves after death
-            Motion &motion = registry.motions.get(victim);
+            Motion& motion = registry.motions.get(victim);
             motion.velocity = { 0.0f, 0.0f };
             soundManager->playSound(SoundEffect::PLAYER_DEFEATED);
             soundManager->playMusic(Song::DEFEAT);
             death.timer = 7000;
-        } else {
+        }
+        else {
             death.timer = 10;
         }
 
-    } else {
+    }
+    else {
         if (!registry.players.has(victim)) {
             soundManager->playSound(SoundEffect::VILLAGER_DAMAGE);
-        } else if (registry.players.has(victim)) {
+        }
+        else if (registry.players.has(victim)) {
             soundManager->playSound(SoundEffect::PITCHFORK_DAMAGE);
         }
 
@@ -197,7 +200,7 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
         OnHit& hit = registry.onHits.emplace(victim);
         if (registry.players.has(victim))
         {
-            // printd("Player has been hit! Remaining health: %f\n", health.health);
+            printd("Player has been hit! Remaining health: %f\n", health.health);
             hit.invincibility_timer = PLAYER_INVINCIBILITY_TIMER;
         }
         else
