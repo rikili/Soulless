@@ -7,6 +7,7 @@ GameAssets initializeGameAssets(AssetManager& assetManager) {
     assets.shaders["basic"] = assetManager.loadShader("basic", shader_path("basic") + ".vs.glsl", shader_path("basic") + ".fs.glsl");
     assets.shaders["background"] = assetManager.loadShader("background", shader_path("background") + ".vs.glsl", shader_path("background") + ".fs.glsl");
     assets.shaders["sprite"] = assetManager.loadShader("sprite", shader_path("sprite") + ".vs.glsl", shader_path("sprite") + ".fs.glsl");
+    assets.shaders["animatedsprite"] = assetManager.loadShader("animatedsprite", shader_path("animatedsprite") + ".vs.glsl", shader_path("animatedsprite") + ".fs.glsl");
     assets.shaders["font"] = assetManager.loadShader("font", shader_path("font") + ".vs.glsl", shader_path("font") + ".fs.glsl");
 
     // fonts
@@ -55,9 +56,9 @@ GameAssets initializeGameAssets(AssetManager& assetManager) {
     AssetId spriteMeshId = assetManager.loadMesh("sprite", spriteVertices, indices, spriteAttributes);
 
     // Player
-    AssetId mageTextureId = assetManager.loadTexture("mage", textures_path("mage") + ".png");
+    AssetId mageTextureId = assetManager.loadTexture("mage", textures_path("Idle-sheet") + ".png");
     assets.textures["mage"] = mageTextureId;
-    
+
     // Enemies
     assets.textures["archer"] = assetManager.loadTexture("archer", textures_path("archer") + ".png");
 
@@ -70,6 +71,12 @@ GameAssets initializeGameAssets(AssetManager& assetManager) {
 
     AssetId pitchforkTextureId = assetManager.loadTexture("pitchfork", textures_path("pitchfork") + ".png");
     assets.textures["pitchfork"] = pitchforkTextureId;
+
+    // Background Objects
+    AssetId treeTextureId = assetManager.loadTexture("tree", textures_path("tree1") + ".png");
+    AssetId campfireTextureId = assetManager.loadTexture("campfire", textures_path("campfire-sheet") + ".png");
+    assets.textures["campfire"] = campfireTextureId;
+    assets.textures["tree"] = treeTextureId;
 
     // Add a new mesh for the background (full screen quad)
     const std::vector<float> bgVertices = {

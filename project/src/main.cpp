@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 			world.step(elapsed_ms); // (2) Update the game state
 		}
 
-		renderer.drawFrame(); // (3) Re-render the scene (where the magic happens)
+		renderer.drawFrame(elapsed_ms); // (3) Re-render the scene (where the magic happens)
 
     frames++;
 

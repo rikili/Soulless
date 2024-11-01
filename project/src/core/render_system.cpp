@@ -108,7 +108,7 @@ GLFWwindow* RenderSystem::getGLWindow() const
  * This function is called every frame to draw the frame
  * @attention Skips rendering if the shader is not found
  */
-void RenderSystem::drawFrame()
+void RenderSystem::drawFrame(float elapsed_ms)
 {
 	if (globalOptions.tutorial) {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -225,7 +225,7 @@ void RenderSystem::drawFrame()
 			transform = scale(transform, vec3(motion.scale * 100.f * zoomFactor, 1.0f));
 
 
-			if (render_request.shader == "sprite") {
+			if (render_request.shader == "sprite" || render_request.shader == "animatedsprite") {
 				if (registry.players.has(entity) && registry.deaths.has(entity)) {
 					transform = rotate(transform, (float) M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
 				}
@@ -240,6 +240,24 @@ void RenderSystem::drawFrame()
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, texture->handle);
 				glUniform1i(glGetUniformLocation(shader->program, "image"), 0);
+
+				if (render_request.shader == "animatedsprite") {
+					Animation& animation = registry.animations.get(entity);
+					animation.elapsedTime += elapsed_ms;
+					
+					if (animation.elapsedTime > animation.frameTime) {
+						animation.elapsedTime = 0;
+						animation.currentFrame++;
+						if (animation.currentFrame >= animation.frameCount) {
+							animation.currentFrame = 0;
+						}
+					}
+
+					glUniform1f(glGetUniformLocation(shaderProgram, "frame"), animation.currentFrame);
+					glUniform1i(glGetUniformLocation(shaderProgram, "SPRITE_COLS"), animation.spriteCols);
+					glUniform1i(glGetUniformLocation(shaderProgram, "SPRITE_ROWS"), animation.spriteRows);
+					glUniform1i(glGetUniformLocation(shaderProgram, "NUM_SPRITES"), animation.frameCount);	
+				}
 			}
 			mat4 projection = projectionMatrix;
 			mat4 view = viewMatrix;
