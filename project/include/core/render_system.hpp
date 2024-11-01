@@ -61,7 +61,7 @@ private:
 	void updateCameraPosition(float x, float y);
 
 	std::vector<RenderIndex> sorted_indices;
-	GLuint frame_buffer = 0;
+	// GLuint frame_buffer = 0;
 	Entity screen_state_entity;
 	GLFWwindow* window = nullptr;
 	AssetManager asset_manager; // Holds all the assets

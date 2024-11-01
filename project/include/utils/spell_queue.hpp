@@ -7,7 +7,7 @@
 class SpellQueue
 {
 private:
-	unsigned int index = 0;
+	// unsigned int index = 0;
 	std::array<DamageType, QUEUE_SIZE> queue;
 
 public:
