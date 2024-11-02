@@ -49,4 +49,11 @@ public:
     static bool isInBounds(int col, int row, int maxCols, int maxRows) {
         return col >= 0 && col < maxCols && row >= 0 && row < maxRows;
     }
+
+    static vec2 convertToIsometric(vec2 cartesianPos) {
+    // Standard isometric projection with 2:1 ratio
+        float isoX = (cartesianPos.x - cartesianPos.y) * (1);
+        float isoY = (cartesianPos.x + cartesianPos.y) * (1);
+        return {isoX, isoY};
+    }
 };

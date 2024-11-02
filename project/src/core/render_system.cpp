@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.inl>
 #include <glm/gtc/matrix_transform.hpp>
 #include "entities/general_components.hpp"
+#include "utils/isometric_helper.hpp"
 
 /**
  * @brief Initialize the render system
@@ -223,7 +224,8 @@ void RenderSystem::drawFrame(float elapsed_ms)
 			}
 
 			mat4 transform = mat4(1.0f);
-			transform = translate(transform, glm::vec3(position, 0.0f));
+			vec2 isoPos = IsometricGrid::convertToIsometric(position);
+			transform = translate(transform, glm::vec3(isoPos, 0.0f));
 
 			// Rotate the sprite for all eight directions if request type is a PROJECTILE
 			if (render_request.type == PROJECTILE) {
