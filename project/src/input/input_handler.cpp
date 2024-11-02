@@ -143,56 +143,9 @@ void InputHandler::onMouseMove(vec2 mouse_position)
     playerMotion.angle = find_closest_angle(dx, dy);
 }
 
-void create_player_projectile(Entity& player_ent, double x, double y)
-{
-
-    Entity projectile_ent;
-    Projectile& projectile = registry.projectiles.emplace(projectile_ent);
-    Motion& projectile_motion = registry.motions.emplace(projectile_ent);
-    Deadly& deadly = registry.deadlies.emplace(projectile_ent);
-    Damage& damage = registry.damages.emplace(projectile_ent);
-    RenderRequest& request = registry.render_requests.emplace(projectile_ent);
-    Motion& player_motion = registry.motions.get(player_ent);
-
-    deadly.to_enemy = true;
-
-    projectile_motion.scale = FIRE_SCALE;
-    projectile_motion.collider = FIRE_COLLIDER;
-    projectile_motion.position = player_motion.position;
-    projectile_motion.angle = player_motion.angle;
-
-    // TODO: change once finalization is needed
-    projectile.type = DamageType::fire;
-    projectile.range = FIRE_RANGE;
-    projectile_motion.velocity = vec2({ cos(player_motion.angle), sin(player_motion.angle) });
-    damage.value = FIRE_DAMAGE;
-
-    request.mesh = "sprite";
-    request.texture = "fireball";
-    request.shader = "sprite";
-    request.type = PROJECTILE;
-}
-
 void invoke_player_cooldown(Player& player, bool is_left)
 {
     player.cooldown = 700;
-}
-
-void cast_player_spell(double x, double y, bool is_left)
-{
-    Entity& player_ent = registry.players.entities[0];
-    Player& player = registry.players.get(player_ent);
-    if (player.cooldown > 0)
-    {
-        return;
-    }
-
-    create_player_projectile(player_ent, x, y);
-
-    SoundManager* soundManager = SoundManager::getSoundManager();
-    soundManager->playSound(SoundEffect::FIRE);
-
-    invoke_player_cooldown(player, is_left);
 }
 
 void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mods)
