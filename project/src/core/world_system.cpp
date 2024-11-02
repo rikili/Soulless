@@ -149,7 +149,6 @@ void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 		{
 			if (!registry.players.has(dead_ent))
 			{
-				printd("Removing all components of entity %u\n", static_cast<unsigned>(dead_ent));
 				registry.remove_all_components_of(dead_ent);
 			}
 			else {

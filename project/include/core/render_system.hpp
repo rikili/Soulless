@@ -31,8 +31,13 @@ public:
 	void updateRenderOrder(ComponentContainer<RenderRequest>& render_requests) {
 		// Clear and repopulate the sorted_indices
 		sorted_indices.clear();
+
 		for (size_t i = 0; i < render_requests.components.size(); ++i) {
-			sorted_indices.emplace_back(i, render_requests.components[i].smooth_position.render_y);
+			RenderRequest& request = render_requests.components[i];
+
+			// sort by using request type and render_y
+			float combined_value = request.type * 10000.0f + request.smooth_position.render_y;
+			sorted_indices.emplace_back(i, combined_value);
 		}
 
 		// Sort the indices based on render_y
