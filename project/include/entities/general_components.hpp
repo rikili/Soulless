@@ -11,9 +11,13 @@ struct Motion {
     vec2 velocity = { 0, 0 };
     vec2 scale = { 1, 1 };
     vec2 collider = { 50, 50 };
+    
     float mass = 0;
     float speedModifier = 1.f;
     float angle = 0;
+
+    Direction currentDirection = Direction::E;
+    Direction oldDirection = Direction::E;
 };
 
 // Resistance Modifier
@@ -70,6 +74,7 @@ struct Collision
 struct OnHit
 {
     float invincibility_timer = 0;
+    bool invicibilityShader = false;
 };
 
 // Structure to store entities marked to die
@@ -126,6 +131,11 @@ struct Animation
 
     void initializeAtFrame(float frame) {
         startFrame = frame;
+        currentFrame = startFrame;
+    }
+
+    void initializeAtRow(int row) {
+        startFrame = row * spriteCols * 1.0;
         currentFrame = startFrame;
     }
 };

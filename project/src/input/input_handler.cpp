@@ -35,16 +35,6 @@ bool isPause()
     return globalOptions.pause;
 }
 
-void handleAnimation(int key, Animation& animation) {
-
-    if (key == GLFW_KEY_A) {
-        animation.initializeAtFrame(8.0f);
-    }
-    else if (key == GLFW_KEY_D || key == GLFW_KEY_S || key == GLFW_KEY_W) {
-        animation.initializeAtFrame(4.0f);
-    }
-}
-
 void InputHandler::onKey(int key, int scancode, int action, int mods)
 {
     SoundManager* soundManager = SoundManager::getSoundManager();
@@ -80,7 +70,6 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
         case GLFW_KEY_D:
             activeMoveKeys.insert(key);
             updateVelocity();
-            handleAnimation(key, playerAnimation);
             break;
         case GLFW_KEY_Q:
             printd("Q button pressed.\n");
@@ -114,7 +103,6 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
         case GLFW_KEY_S:
         case GLFW_KEY_A:
         case GLFW_KEY_D:
-            playerAnimation.initializeAtFrame(0.0f);
             activeMoveKeys.erase(key);
             updateVelocity();
             break;
@@ -272,6 +260,6 @@ void InputHandler::updateVelocity()
         playerMotion.velocity.y = 0;
     }
 
-    //  printd("New velocity is: %f, %f\n", playerMotion.velocity.x, playerMotion.velocity.y);
+    printd("New velocity is: %f, %f\n", playerMotion.velocity.x, playerMotion.velocity.y);
     //  printd("New position is: %f, %f\n", playerMotion.position.x, playerMotion.position.y);
 }

@@ -251,14 +251,25 @@ void RenderSystem::drawFrame(float elapsed_ms)
 					if (animation.elapsedTime > animation.frameTime) {
 						animation.elapsedTime = 0;
 						animation.currentFrame++;
-						if (registry.players.has(entity)) {
+						/*if (registry.players.has(entity)) {
 							printd("Frame: %f\n", animation.currentFrame);
-						}
+						}*/
 						if (animation.currentFrame - animation.startFrame >= animation.frameCount) {
 							animation.currentFrame = animation.startFrame;
 						}
 					}
 
+					if (registry.players.has(entity) && registry.onHits.has(entity)) {
+						if (registry.onHits.get(entity).invicibilityShader) {
+							glUniform1i(glGetUniformLocation(shaderProgram, "state"), 2);
+						}
+						else {
+							glUniform1i(glGetUniformLocation(shaderProgram, "state"), 1);
+						}		
+					}
+					else {
+						glUniform1i(glGetUniformLocation(shaderProgram, "state"), 0);
+					}
 					glUniform1f(glGetUniformLocation(shaderProgram, "frame"), animation.currentFrame);
 					glUniform1i(glGetUniformLocation(shaderProgram, "SPRITE_COLS"), animation.spriteCols);
 					glUniform1i(glGetUniformLocation(shaderProgram, "SPRITE_ROWS"), animation.spriteRows);

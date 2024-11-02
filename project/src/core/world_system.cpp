@@ -29,6 +29,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	}
 
 	this->handle_movements(elapsed_ms_since_last_update);
+	this->handle_animations();
 	this->collision_system->handle_collisions();
 
 	this->handle_enemy_logic(elapsed_ms_since_last_update);
@@ -41,6 +42,19 @@ void WorldSystem::set_renderer(RenderSystem* renderer)
 	this->renderer = renderer;
 }
 
+void WorldSystem::handle_animations() {
+	Motion& playerMotion = registry.motions.get(player_mage);
+	Animation& playerAnimation = registry.animations.get(player_mage);
+
+	if (playerMotion.currentDirection == playerMotion.oldDirection) {
+		return;
+	}
+
+	// printd("Current: %d\n", playerMotion.currentDirection);
+
+	playerAnimation.initializeAtRow((int)playerMotion.currentDirection);
+	
+}
 /**
  * @brief Handle projectiles to reduce their range at each step and mark for
  * deletion if they are out of range
@@ -112,11 +126,69 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 			// printd("Enemy angle towards player: %f\n", motion.angle);
 		}
 
+		// Only player for now, can be expanded
+		if (registry.players.has(entity)) {
+			computeNewDirection(entity);
+		}
+
 		RenderRequest& render_request = registry.render_requests.get(entity);
 		render_request.smooth_position.update(motion.position.y);
 	}
 }
 
+void WorldSystem::computeNewDirection(Entity e) {
+	Motion& motion = registry.motions.get(e);
+	motion.oldDirection = motion.currentDirection;
+	
+
+	float xVel = motion.velocity.x;
+	float yVel = motion.velocity.y;
+
+	if (xVel == 0 && yVel == 0) {
+		return;
+	}
+
+	if (xVel == 0) {
+		if (yVel < 0) {
+			motion.currentDirection = Direction::N;
+		}
+		else {
+			motion.currentDirection = Direction::S;
+		}
+		return;
+	}
+
+	if (yVel == 0) {
+		if (xVel > 0) {
+			motion.currentDirection = Direction::E;
+		}
+		else {
+			motion.currentDirection = Direction::W;
+		}
+		return;
+	}
+
+	if (xVel < 0) {
+		if (yVel < 0) {
+			motion.currentDirection = Direction::NW;
+		}
+		else {
+			motion.currentDirection = Direction::SW;
+		}
+		return;
+	}
+
+	if (xVel > 0) {
+		if (yVel < 0) {
+			motion.currentDirection = Direction::NE;
+		}
+		else {
+			motion.currentDirection = Direction::SE;
+		}
+		return;
+	}
+
+}
 /**
  * @brief In charge of updating timers and their side effects
  * @param elapsed_ms_since_last_update
@@ -127,9 +199,13 @@ void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 	{
 		OnHit& hit = registry.onHits.get(hit_ent);
 		hit.invincibility_timer -= elapsed_ms_since_last_update;
-		if (hit.invincibility_timer < 0)
-		{
-			registry.onHits.remove(hit_ent);
+		if (hit.invincibility_timer < PLAYER_INVINCIBILITY_TIMER - 200.f) {
+			hit.invicibilityShader = true;
+
+			if (hit.invincibility_timer < 0)
+			{
+				registry.onHits.remove(hit_ent);
+			}
 		}
 	}
 
@@ -293,7 +369,7 @@ Entity WorldSystem::createPlayer()
 	motion.position = { window_width_px / 2.0f,
 										 window_height_px / 2.0f }; // Center of the screen
 	motion.velocity = { 0.0f, 0.0f };
-	motion.scale = { 0.5f, 0.5f };
+	motion.scale = { 1.f, 1.f };
 
 	Health& health = registry.healths.emplace(player);
 	health.health = PLAYER_HEALTH;
@@ -304,7 +380,10 @@ Entity WorldSystem::createPlayer()
 	// // TODO: Add player initialization code here!
 
 	Animation& animation = registry.animations.emplace(player);
-	animation.spriteRows = 3;
+	animation.spriteCols = 15;
+	animation.spriteRows = 8;
+	animation.spriteCount = 120;
+	animation.frameCount = 15;
 	animation.initializeAtFrame(0.0f);
 
 	RenderRequest& request = registry.render_requests.emplace(player);

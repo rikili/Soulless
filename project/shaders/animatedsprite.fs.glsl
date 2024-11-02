@@ -2,12 +2,15 @@
 in vec2 TexCoords;
 out vec4 color;
 
+uniform int state;
+
 uniform sampler2D image;
 uniform float frame;
 
 uniform int SPRITE_COLS;
 uniform int SPRITE_ROWS;
 uniform int NUM_SPRITES;
+
 
 void main()
 {    
@@ -25,5 +28,12 @@ void main()
         TexCoords.y * spriteSize.y + row * spriteSize.y
     );
 
-    color = texture(image, spriteTexCoords);
+    if (state == 1) {
+        color = vec4(1.0f, 0.0f, 0.0f, 1.0f) * texture(image, spriteTexCoords);
+    } else if (state == 2) {
+        color = vec4(1.0f, 1.0f, 1.0f, 0.75f) *  texture(image, spriteTexCoords);
+    } else {
+        color = texture(image, spriteTexCoords);
+    }
+    
 }  

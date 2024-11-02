@@ -52,7 +52,7 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId spriteMeshId = assetManager.loadMesh("sprite", spriteVertices, indices, spriteAttributes);
 
     // Player
-    AssetId mageTextureId = assetManager.loadTexture("mage", textures_path("player-sheet") + ".png");
+    AssetId mageTextureId = assetManager.loadTexture("mage", textures_path("mage-walk") + ".png");
     assets.textures["mage"] = mageTextureId;
 
 
