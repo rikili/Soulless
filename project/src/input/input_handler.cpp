@@ -86,9 +86,11 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
             }
             break;
         case GLFW_KEY_T:
-            soundManager->toggleMusic();
-            globalOptions.tutorial = true;
-            globalOptions.pause = true;
+            if (!isTutorialOn()) {
+                soundManager->toggleMusic();
+                globalOptions.tutorial = true;
+                globalOptions.pause = true;
+            }
             break;
         default:
             break;
