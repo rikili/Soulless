@@ -17,8 +17,21 @@ public:
 		id = id_count++;
 		// Note, indices of already deleted entities arent re-used in this simple implementation.
 	}
+
 	operator unsigned int() const { return id; }
+	bool operator ==(const Entity& other) const {
+		return other.id == id;
+	}
 };
+
+namespace std {
+	template<>
+	struct hash<Entity> {
+		size_t operator()(const Entity& entity) const {
+			return std::hash<unsigned int>{}((unsigned int)entity);
+		}
+	};
+}
 
 // Common interface to refer to all containers in the ECS registry
 struct ContainerInterface

@@ -45,23 +45,29 @@ int main(int argc, char* argv[])
 
 		if (!globalOptions.tutorial) {
 			world.step(elapsed_ms); // (2) Update the game state
+			if (registry.game_over)
+			{
+				continue;
+			}
 		}
 
 		renderer.drawFrame(elapsed_ms); // (3) Re-render the scene (where the magic happens)
 
-    frames++;
+		frames++;
 
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    float timeDifference = static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count());
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		float timeDifference = static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count());
 
-    if (timeDifference >= 1000.0f) {
-        globalOptions.fps = frames / (timeDifference / 1000.0f);
-        frames = 0;
-        lastTime = currentTime;
-    }
+		if (timeDifference >= 1000.0f) {
+			globalOptions.fps = frames / (timeDifference / 1000.0f);
+			frames = 0;
+			lastTime = currentTime;
+		}
 
 		glfwSwapBuffers(window); // (4) swap front and back buffers
 		glfwPollEvents(); // (5) poll for and process events
+
+		registry.debug_requests.clear();
 	}
 
 	// TODO: Add cleanup code here

@@ -43,6 +43,7 @@ public:
 			});
 	}
 
+	Mesh* getMesh(const AssetId& name) { return asset_manager.getMesh(name); }
 	mat4 getProjectionMatrix() {
 		return projectionMatrix;
 	}
