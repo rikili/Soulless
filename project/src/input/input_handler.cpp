@@ -188,15 +188,6 @@ void InputHandler::cast_player_spell(double x, double y, bool is_left)
     SpellQueue& spell_queue = player.spell_queue;
     SpellType spell = spell_queue.useSpell(is_left);
 
-    // TODO: REMOVE AFTER TESTING
-    std::deque<SpellType> q = spell_queue.getQueue();
-    printd("Spell queue: ");
-    for (auto& s : q)
-    {
-        printd("%d ", (int)s);
-    }
-    printd("\n");
-
     create_player_projectile(player_ent, x, y, spell);
 
     SoundManager* soundManager = SoundManager::getSoundManager();
@@ -230,17 +221,22 @@ void InputHandler::create_player_projectile(Entity& player_ent, double x, double
         projectile.range = FIRE_RANGE;
         damage.value = FIRE_DAMAGE;
         request.texture = "fireball";
+        request.type = PROJECTILE;
         break;
     case SpellType::WATER:
-        deadly.to_enemy = false; // TODO: ?
+    {
         deadly.to_projectile = true;
         projectile_motion.scale = WATER_SCALE;
         projectile_motion.collider = WATER_COLLIDER;
         projectile.type = DamageType::water;
         projectile.range = WATER_RANGE;
         damage.value = WATER_DAMAGE;
+        Timed& timed = registry.timeds.emplace(projectile_ent);
+        timed.timer = WATER_LIFETIME;
         request.texture = "barrier";
+        request.type = OVER_PLAYER;
         break;
+    }
     case SpellType::LIGHTNING:
         // TODO
         break;
@@ -253,7 +249,6 @@ void InputHandler::create_player_projectile(Entity& player_ent, double x, double
 
     request.mesh = "sprite";
     request.shader = "sprite";
-    request.type = PROJECTILE;
 }
 
 void InputHandler::invoke_player_cooldown(Player& player, bool is_left)

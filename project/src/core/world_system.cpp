@@ -120,6 +120,17 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
  */
 void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 {
+
+	for (Entity& timed_ent : registry.timeds.entities)
+	{
+		Timed& timed = registry.timeds.get(timed_ent);
+		timed.timer -= elapsed_ms_since_last_update;
+		if (!registry.deaths.has(timed_ent) && timed.timer < 0)
+		{
+			registry.deaths.emplace(timed_ent);
+		}
+	}
+
 	for (Entity& hit_ent : registry.onHits.entities)
 	{
 		OnHit& hit = registry.onHits.get(hit_ent);
@@ -138,6 +149,7 @@ void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 		{
 			if (!registry.players.has(dead_ent))
 			{
+				printd("Removing all components of entity %u\n", static_cast<unsigned>(dead_ent));
 				registry.remove_all_components_of(dead_ent);
 			}
 			else {

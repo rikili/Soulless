@@ -50,10 +50,11 @@ const vec2 FIRE_COLLIDER = { 150, 150 };
 
 const float WATER_DAMAGE = 0.f;
 const float WATER_VELOCITY = 0.f;
-const float WATER_RANGE = 300.f; // Range acts as a timer for the spell
-const vec2 WATER_SCALE = { 0.85f, 0.85f };
+const float WATER_RANGE = __FLT_MAX__; // Range is "infinite" for barrier
+const vec2 WATER_SCALE = { 1.f, 1.f };
 const float WATER_SCALE_FACTOR = 1.f;
 const vec2 WATER_COLLIDER = { 250, 250 };
+const float WATER_LIFETIME = 1000.f; // Barrier spell lasts for 1 second (or if it collides with enemy projectile)
 
 const float ICE_VELOCITY = 1.f;
 const float ICE_DEGREE_DIFFERENCE = 15.f;
@@ -91,5 +92,6 @@ enum
     BACK = 0,
     PROJECTILE = 1,
     ENEMY = 2,
-    PLAYER = 3
+    PLAYER = 3,
+    OVER_PLAYER = 4,
 };
