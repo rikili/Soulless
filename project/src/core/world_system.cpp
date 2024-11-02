@@ -21,6 +21,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	this->handle_projectiles(elapsed_ms_since_last_update);
 	this->handle_enemy_attacks(elapsed_ms_since_last_update);
 	this->handle_timers(elapsed_ms_since_last_update);
+	this->handle_spell_states(elapsed_ms_since_last_update);
 
 	if (!registry.players.has(player_mage)) {
 		this->restartGame();
@@ -188,6 +189,64 @@ void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 		{
 			// printd("Enemy cooldown is less than 0\n");
 			enemy.cooldown = 0;
+		}
+	}
+}
+
+/**
+ * @brief Handle spell states. Update spells and their states based on timers.
+ * @param elapsed_ms_since_last_update
+ */
+void WorldSystem::handle_spell_states(float elapsed_ms_since_last_update)
+{
+	for (Entity& spell_ent : registry.spellStates.entities) {
+		SpellState& spell_state = registry.spellStates.get(spell_ent);
+		RenderRequest& request = registry.render_requests.get(spell_ent);
+		Damage& damage = registry.damages.get(spell_ent);
+		Projectile& projectile = registry.projectiles.get(spell_ent);
+		Deadly& deadly = registry.deadlies.get(spell_ent);
+
+		spell_state.timer -= elapsed_ms_since_last_update;
+
+		// explicit state change when timer is done
+		if (spell_state.timer <= 0) {
+
+			State current_state = spell_state.state;
+
+			switch (current_state) {
+			case State::CASTING: {
+				spell_state.state = State::CHARGING;
+
+				if (projectile.type == DamageType::lightning) {
+					request.texture = "lightning2";
+					spell_state.timer = LIGHTNING_CHARGING_LIFETIME;
+				}
+				break;
+			}
+			case State::CHARGING: {
+				spell_state.state = State::ACTIVE;
+
+				if (projectile.type == DamageType::lightning) {
+					deadly.to_enemy = true;
+					damage.value = LIGHTNING_ACTIVE_DAMAGE;
+					request.texture = "lightning3";
+					spell_state.timer = LIGHTNING_ACTIVE_LIFETIME;
+				}
+				break;
+			}
+			case State::ACTIVE: {
+				spell_state.state = State::COMPLETE;
+				break;
+			}
+			case State::COMPLETE: {
+				registry.deaths.emplace(spell_ent);
+				break;
+			}
+			default: {
+				break;
+			}
+			}
+
 		}
 	}
 }

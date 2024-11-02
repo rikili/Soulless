@@ -250,18 +250,22 @@ void InputHandler::create_player_projectile(Entity& player_ent, double x, double
         break;
     }
     case SpellType::LIGHTNING:
-        deadly.to_enemy = true;
-        printd("Mouse position when casting lightning: %f, %f\n", x, y); // TODO debug
+    {
+        // printd("Mouse position when casting lightning: %f, %f\n", x, y); 
         projectile_motion.position = { x, y };
         projectile_motion.angle = 0.f;
         projectile_motion.scale = LIGHTNING_SCALE;
         projectile_motion.collider = LIGHTNING_COLLIDER;
         projectile.type = DamageType::lightning;
         projectile.range = LIGHTNING_RANGE;
-        damage.value = LIGHTNING_DAMAGE;
+        damage.value = LIGHTNING_CASTING_DAMAGE;
+        SpellState& spellState = registry.spellStates.emplace(projectile_ent);
+        spellState.state = State::CASTING;
+        spellState.timer = LIGHTNING_CASTING_LIFETIME;
         request.texture = "lightning1";
         request.type = PROJECTILE;
         break;
+    }
     case SpellType::ICE:
         // TODO
         break;

@@ -253,7 +253,17 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
 
     if (registry.projectiles.has(attacker) && !registry.deaths.has(attacker))
     {
-        registry.deaths.emplace(attacker);
+        Projectile& attacker_projectile = registry.projectiles.get(attacker);
+
+        // lightning spell shouldn't die after hitting one target
+        if (attacker_projectile.type == DamageType::lightning)
+        {
+            // do nothing
+        }
+        else {
+            registry.deaths.emplace(attacker);
+        }
+
         // printd("Marked for removal due to collision -> Entity value: %u\n", static_cast<unsigned>(attacker));
     }
 }
