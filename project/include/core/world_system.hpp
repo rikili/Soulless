@@ -21,6 +21,7 @@ public:
 	void set_renderer(RenderSystem* renderer);
 	void handle_projectiles(float elapsed_ms_since_last_update);
 	void handle_timers(float elapsed_ms_since_last_update);
+	void handle_spell_states(float elapsed_ms_since_last_update);
 	void handle_movements(float elapsed_ms_since_last_update);
 	void handle_enemy_attacks(float elapsed_ms_since_last_update);
 	void create_enemy_projectile(Entity& enemy_ent);

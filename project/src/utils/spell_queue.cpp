@@ -16,9 +16,9 @@ SpellQueue::SpellQueue() {
     collectedSpells[spell] = 0;
   }
 
-  // player starts with 1 fire spell + 1 water spell
   collectedSpells[SpellType::FIRE] = 1;
   collectedSpells[SpellType::WATER] = 1;
+  collectedSpells[SpellType::LIGHTNING] = 1;
 
   for (int i = 0; i < QUEUE_SIZE; i++) {
     addSpell();

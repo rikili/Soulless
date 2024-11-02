@@ -15,7 +15,6 @@ public:
 	ComponentContainer<Health> healths;
 	ComponentContainer<ResistanceModifier> resistanceModifiers;
 	ComponentContainer<Collision> collisions;
-	ComponentContainer<Timed> timeds;
 	ComponentContainer<SpellState> spellStates;
 	ComponentContainer<Player> players;
 	ComponentContainer<Enemy> enemies;
@@ -40,7 +39,6 @@ public:
 		registry_list.push_back(&healths);
 		registry_list.push_back(&resistanceModifiers);
 		registry_list.push_back(&collisions);
-		registry_list.push_back(&timeds);
 		registry_list.push_back(&spellStates);
 		registry_list.push_back(&players);
 		registry_list.push_back(&enemies);

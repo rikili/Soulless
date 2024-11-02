@@ -134,16 +134,6 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 {
 
-	for (Entity& timed_ent : registry.timeds.entities)
-	{
-		Timed& timed = registry.timeds.get(timed_ent);
-		timed.timer -= elapsed_ms_since_last_update;
-		if (!registry.deaths.has(timed_ent) && timed.timer < 0)
-		{
-			registry.deaths.emplace(timed_ent);
-		}
-	}
-
 	for (Entity& hit_ent : registry.onHits.entities)
 	{
 		OnHit& hit = registry.onHits.get(hit_ent);
@@ -239,7 +229,10 @@ void WorldSystem::handle_spell_states(float elapsed_ms_since_last_update)
 				break;
 			}
 			case State::COMPLETE: {
-				registry.deaths.emplace(spell_ent);
+				if (!registry.deaths.has(spell_ent))
+				{
+					registry.deaths.emplace(spell_ent);
+				}
 				break;
 			}
 			default: {

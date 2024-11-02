@@ -246,7 +246,7 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
     // victim doesn't have health
     else {
         Projectile& victim_projectile = registry.projectiles.get(victim);
-        if (victim_projectile.type == DamageType::water) {
+        if (victim_projectile.type == DamageType::water && !registry.deaths.has(victim)) {
             registry.deaths.emplace(victim);
         }
     }

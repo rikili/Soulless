@@ -57,9 +57,9 @@ struct Projectile {
 };
 
 // Timed Component
-struct Timed {
-    float timer = 0;
-}; // include temporary effects and counters
+// struct Timed {
+//     float timer = 0;
+// }; // include temporary effects and counters
 
 // Spell State Component
 struct SpellState {

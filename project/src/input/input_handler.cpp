@@ -175,8 +175,6 @@ void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mo
         {
         case GLFW_MOUSE_BUTTON_LEFT:
             printd("Left mouse button pressed.\n");
-            // double x, y; // DEBUG todo
-            // glfwGetCursorPos(window, &x, &y);
             cast_player_spell(this->worldMousePosition.x, this->worldMousePosition.y, true);
             break;
         case GLFW_MOUSE_BUTTON_RIGHT:
@@ -243,8 +241,9 @@ void InputHandler::create_player_projectile(Entity& player_ent, double x, double
         projectile.type = DamageType::water;
         projectile.range = WATER_RANGE;
         damage.value = WATER_DAMAGE;
-        Timed& timed = registry.timeds.emplace(projectile_ent);
-        timed.timer = WATER_LIFETIME;
+        SpellState& spellState = registry.spellStates.emplace(projectile_ent);
+        spellState.state = State::ACTIVE;
+        spellState.timer = WATER_LIFETIME;
         request.texture = "barrier";
         request.type = OVER_PLAYER;
         break;
