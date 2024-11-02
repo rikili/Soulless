@@ -134,3 +134,23 @@ struct GlobalOptions {
 };
 
 extern GlobalOptions globalOptions;
+
+
+enum TileType {
+    GRASS1,
+    GRASS2,
+    GRASS3,
+    GRASS4,
+    GRASS5,
+    MUD,
+    WATER,
+    DENSE_GRASS,
+};
+
+
+struct Tile {
+    TileType type;
+    vec2 position;
+    vec2 scale;
+
+};

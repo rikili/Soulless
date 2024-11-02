@@ -27,9 +27,10 @@ public:
 	void invoke_enemy_cooldown(Entity& enemy_ent);
 	void initialize();
 	void restartGame();
-	Entity getPlayer();
+    void createTileGrid();
+    Entity getPlayer();
 
-	// World state specific variables
+    // World state specific variables
 	float enemy_spawn_timer = 0.0f;
 
 private:
@@ -38,8 +39,9 @@ private:
 
 	Entity createPlayer();
 	void createEnemy(EnemyType type, vec2 position, vec2 velocity);
-	void createFarmer(vec2 position, vec2 velocity);
-	Entity createBackgroundObject(vec2 position, vec2 scale, AssetId texture, bool animate);
+    void createTile(TileType type, vec2 position, vec2 scale);
+    void createFarmer(vec2 position, vec2 velocity);
+    Entity createBackgroundObject(vec2 position, vec2 scale, AssetId texture, bool animate);
 	void handle_enemy_logic(float elapsed_ms_since_last_update);
 
 	Mix_Music* background_music;

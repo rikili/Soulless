@@ -29,15 +29,26 @@ public:
 	InputHandler input_handler;
 
 	void updateRenderOrder(ComponentContainer<RenderRequest>& render_requests) {
-		// Clear and repopulate the sorted_indices
+    // Clear and repopulate the sorted_indices
 		sorted_indices.clear();
+		sorted_indices.reserve(render_requests.components.size());
+
+		// Create indices
 		for (size_t i = 0; i < render_requests.components.size(); ++i) {
 			sorted_indices.emplace_back(i, render_requests.components[i].smooth_position.render_y);
 		}
 
-		// Sort the indices based on render_y
+		// Sort based on type first (using the index to look up type), then y-position
 		std::sort(sorted_indices.begin(), sorted_indices.end(),
-			[](const RenderIndex& a, const RenderIndex& b) {
+			[&render_requests](const RenderIndex& a, const RenderIndex& b) {
+				const auto& request_a = render_requests.components[a.index];
+				const auto& request_b = render_requests.components[b.index];
+				
+				// If types are different, sort by type
+				if (request_a.type != request_b.type) {
+					return request_a.type < request_b.type;
+				}
+				// If same type, sort by y position
 				return a.render_y < b.render_y;
 			});
 	}
@@ -60,7 +71,9 @@ private:
 
 	void updateCameraPosition(float x, float y);
 
-	std::vector<RenderIndex> sorted_indices;
+    void drawBackgroundObjects();
+
+    std::vector<RenderIndex> sorted_indices;
 	GLuint frame_buffer = 0;
 	Entity screen_state_entity;
 	GLFWwindow* window = nullptr;

@@ -2,6 +2,7 @@
 
 #include "entities/ecs_registry.hpp"
 #include "sound/sound_manager.hpp"
+#include "utils/isometric_helper.hpp"
 
 WorldSystem::WorldSystem(RenderSystem* renderer)
 {
@@ -238,9 +239,51 @@ void WorldSystem::restartGame() {
 	
 	soundManager->playMusic(Song::MAIN);
 	player_mage = this->createPlayer();
+	this->createTileGrid();
 	loadBackgroundObjects();
 }
 
+void WorldSystem::createTileGrid() {
+    vec2 gridDim = IsometricGrid::getGridDimensions(window_width_px, window_height_px);
+    int numCols = static_cast<int>(gridDim.x) * 2;
+    int numRows = static_cast<int>(gridDim.y) * 2;
+
+	vec2 offset = {-window_width_px / 2 , -window_height_px / 4};
+	for (int row = 0; row < numRows; row++) {
+			for (int col = 0; col < numCols; col++) {
+			vec2 pos = IsometricGrid::getIsometricPosition(col, row) + offset;
+			
+			// Generate random number between 0 and 99
+			int randNum = rand() % 100;
+        
+			// Distribution:
+			// 40% chance for GRASS
+			// 30% chance for GRASS1
+			// 7.5% chance each for GRASS2, GRASS3, GRASS4, GRASS5
+			TileType type;
+			if (randNum < 40) {
+				type = TileType::GRASS1;
+			}
+			else if (randNum < 70) {
+				type = TileType::GRASS1;
+			}
+			else if (randNum < 77) {
+				type = TileType::GRASS2;
+			}
+			else if (randNum < 84) {
+				type = TileType::GRASS3;
+			}
+			else if (randNum < 92) {
+				type = TileType::GRASS4;
+			}
+			else {
+				type = TileType::GRASS5;
+			}
+			
+			createTile(type, pos, {0.5f, 0.5f});
+        }
+    }
+}
 
 Entity WorldSystem::createPlayer() {
 	auto player = Entity();
@@ -274,12 +317,44 @@ Entity WorldSystem::createPlayer() {
 void WorldSystem::createEnemy(EnemyType type, vec2 position, vec2 velocity)
 {
 	if (type == EnemyType::FARMER) {
-		createFarmer(position, velocity);
+		// createFarmer(position, velocity);
 	} else if (type == EnemyType::ARCHER) {
 		// TODO: Implement archer enemy (can be changed)
 	} else if (type == EnemyType::CLERIC) {
 		// TODO: Implement cleric enemy (can be changed)
 	}
+}
+
+
+void WorldSystem::createTile(TileType type, vec2 position, vec2 scale) {
+	Entity tile;
+	Tile& tile_component = registry.tiles.emplace(tile);
+	tile_component.type = type;
+	tile_component.position = position;
+	tile_component.scale = scale;
+
+	RenderRequest& request = registry.static_render_requests.emplace(tile);
+	request.mesh = "sprite";
+	switch (type) {
+		case TileType::GRASS2:
+			request.texture = "grass2";
+			break;
+		case TileType::GRASS3:
+			request.texture = "grass3";
+			break;
+		case TileType::GRASS4:
+			request.texture = "grass4";
+			break;
+		case TileType::GRASS5:
+			request.texture = "grass5";
+			break;
+		default:
+			request.texture = "grass1";
+			break;
+	}
+	request.shader = "sprite";
+	request.type = BACK;
+
 }
 
 void WorldSystem::createFarmer(vec2 position, vec2 velocity)

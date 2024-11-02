@@ -23,8 +23,11 @@ public:
 	ComponentContainer<Damage> damages;
 	ComponentContainer<OnHit> onHits;
 	ComponentContainer<RenderRequest> render_requests;
+	ComponentContainer<RenderRequest> static_render_requests;
 	ComponentContainer<Animation> animations;
 	ComponentContainer<Camera> cameras;
+	ComponentContainer<Tile> tiles;
+
 	mat4 viewMatrix;
 	mat4 projectionMatrix;
 
@@ -48,6 +51,8 @@ public:
 		registry_list.push_back(&render_requests);
 		registry_list.push_back(&animations);
 		registry_list.push_back(&cameras);
+		registry_list.push_back(&static_render_requests);
+		registry_list.push_back(&tiles);
 	}
 
 	void clear_all_components() const

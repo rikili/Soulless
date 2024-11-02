@@ -20,8 +20,14 @@
  */
 bool RenderSystem::initialize(InputHandler& input_handler, const int width, const int height, const char* title)
 {
-	projectionMatrix = glm::ortho(0.f, (float)window_width_px * zoomFactor, (float)window_height_px * zoomFactor, 0.f, -1.f, 1.f);
-	registry.projectionMatrix = projectionMatrix;
+	 glm::mat4 iso = glm::mat4(1.0f);
+    iso = glm::rotate(iso, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));  // X rotation
+    iso = glm::rotate(iso, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Y rotation
+
+    // Combine with orthographic projection
+    projectionMatrix = glm::ortho(0.f, (float)window_width_px * zoomFactor, 
+                                (float)window_height_px * zoomFactor, 0.f, -1.f, 1.f);
+    registry.projectionMatrix = projectionMatrix;
 
 	camera = Entity();
 	registry.cameras.emplace(camera);
@@ -155,20 +161,20 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		return;
 	}
 
-	if (bgShader && bgMesh && bgTexture) {
-		glUseProgram(bgShader->program);
+	// if (bgShader && bgMesh && bgTexture) {
+	// 	glUseProgram(bgShader->program);
 
-		// Set the texture
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, bgTexture->handle);  // Assuming Texture struct has an 'id' field
-		glUniform1i(glGetUniformLocation(bgShader->program, "backgroundTexture"), 0);
+	// 	// Set the texture
+	// 	glActiveTexture(GL_TEXTURE0);
+	// 	glBindTexture(GL_TEXTURE_2D, bgTexture->handle);  // Assuming Texture struct has an 'id' field
+	// 	glUniform1i(glGetUniformLocation(bgShader->program, "backgroundTexture"), 0);
 
-		// Set the repeat factor (adjust these values to control the number of repetitions)
-		glUniform2f(glGetUniformLocation(bgShader->program, "repeatFactor"), 10.0f, 10.0f);
+	// 	// Set the repeat factor (adjust these values to control the number of repetitions)
+	// 	glUniform2f(glGetUniformLocation(bgShader->program, "repeatFactor"), 10.0f, 10.0f);
 
-		glBindVertexArray(bgMesh->vao);
-		glDrawElements(GL_TRIANGLES, bgMesh->indexCount, GL_UNSIGNED_INT, 0);
-	}
+	// 	glBindVertexArray(bgMesh->vao);
+	// 	glDrawElements(GL_TRIANGLES, bgMesh->indexCount, GL_UNSIGNED_INT, 0);
+	// }
 
 	Entity player = registry.players.entities[0];
 	float playerX = registry.motions.get(player).position.x - window_width_px / 2.0 * zoomFactor;
@@ -176,6 +182,8 @@ void RenderSystem::drawFrame(float elapsed_ms)
 
 	updateCameraPosition(clamp(playerX, 0.f, (float)(window_width_px / 2.0)),
 						 clamp(playerY, 0.f, (float)(window_height_px / 2.0)));
+
+	drawBackgroundObjects();
 	
 	// Draw all entities
 	// registry.render_requests.sort(typeAscending);
@@ -416,11 +424,76 @@ float RenderSystem::getTextWidth(const std::string& text, const std::string& fon
     return width;
 }
 
-void RenderSystem::updateCameraPosition(float x, float y) {
-	Camera& cameraEntity = registry.cameras.get(camera);
-	cameraEntity.position.x = x;
-	cameraEntity.position.y = y;
 
-	viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraEntity.position, 0.0f));
-	registry.viewMatrix = viewMatrix;
+void RenderSystem::updateCameraPosition(float x, float y) {
+    Camera& cameraEntity = registry.cameras.get(camera);
+    
+    cameraEntity.position = {0.0f, 0.0f};  // Start at top-left corner to see whole window
+
+    viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraEntity.position, 0.0f));
+    registry.viewMatrix = viewMatrix;
+}
+
+
+void RenderSystem::drawBackgroundObjects() {
+
+	float zoom = zoomFactor;
+	zoom = 1.0f * zoomFactor; // TODO: Fix zoom
+
+			for (const auto& render_request: registry.static_render_requests.entities) {
+		RenderRequest& request = registry.static_render_requests.get(render_request);
+		const Mesh* mesh = this->asset_manager.getMesh(request.mesh);
+		if (!mesh) {
+			std::cerr << "Mesh with id " << request.mesh << " not found!" << std::endl;
+			std::cerr << "Skipping rendering of this mesh" << std::endl;
+			continue;
+		}
+
+		const Shader* shader = this->asset_manager.getShader(request.shader);
+			if (!shader)
+			{
+				printf("Could not find shader with id %s\n", request.shader.c_str());
+				printf("Skipping rendering of this shader\n");
+				continue;
+			}
+		const GLuint shaderProgram = shader->program;
+		glUseProgram(shaderProgram);
+
+		Tile& tile = registry.tiles.get(render_request);
+
+		mat4 transform = mat4(1.0f);
+		transform = translate(transform, glm::vec3(tile.position, 0.0f));
+		transform = scale(transform, vec3(tile.scale * 100.f * zoom, 1.0f));
+
+		const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+		const GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(registry.projectionMatrix));
+
+		const GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(registry.viewMatrix));
+
+		gl_has_errors();
+
+		const Texture* texture = this->asset_manager.getTexture(request.texture);
+		if (!texture) {
+			std::cerr << "Texture with id " << request.texture << " not found!" << std::endl;
+			continue;
+		}
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture->handle);
+		glUniform1i(glGetUniformLocation(shaderProgram, "image"), 0);
+
+		gl_has_errors();
+
+
+		glBindVertexArray(mesh->vao);
+		glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
+
+
+	}
+	
+
 }
