@@ -122,7 +122,6 @@ void InputHandler::onMouseMove(vec2 mouse_position)
     {
         return;
     }
-
     Entity& player = registry.players.entities[0];
     Motion& playerMotion = registry.motions.get(player);
 
@@ -134,65 +133,20 @@ void InputHandler::onMouseMove(vec2 mouse_position)
     mat4 inverseView = glm::inverse(registry.projectionMatrix * registry.viewMatrix);
     vec4 world = inverseView * vec4(xNDC, yNDC, 0.f, 1.f);
 
+    this->worldMousePosition = vec2(world.x, world.y);
+
     float dx = world.x - playerMotion.position.x;
     float dy = world.y - playerMotion.position.y;
 
     // printd("CAMERA: %f, %f\n", cameraEntity.position.x, cameraEntity.position.y);
-    // printd("x: %f, y: %f \n", world.x, world.y);
+    // printd("MOUSE x: %f, y: %f \n", world.x, world.y);
 
     playerMotion.angle = find_closest_angle(dx, dy);
-}
-
-void create_player_projectile(Entity& player_ent, double x, double y)
-{
-
-    Entity projectile_ent;
-    Projectile& projectile = registry.projectiles.emplace(projectile_ent);
-    Motion& projectile_motion = registry.motions.emplace(projectile_ent);
-    Deadly& deadly = registry.deadlies.emplace(projectile_ent);
-    Damage& damage = registry.damages.emplace(projectile_ent);
-    RenderRequest& request = registry.render_requests.emplace(projectile_ent);
-    Motion& player_motion = registry.motions.get(player_ent);
-
-    deadly.to_enemy = true;
-
-    projectile_motion.scale = FIRE_SCALE;
-    projectile_motion.collider = FIRE_COLLIDER;
-    projectile_motion.position = player_motion.position;
-    projectile_motion.angle = player_motion.angle;
-
-    // TODO: change once finalization is needed
-    projectile.type = DamageType::fire;
-    projectile.range = FIRE_RANGE;
-    projectile_motion.velocity = vec2({ cos(player_motion.angle), sin(player_motion.angle) });
-    damage.value = FIRE_DAMAGE;
-
-    request.mesh = "sprite";
-    request.texture = "fireball";
-    request.shader = "sprite";
-    request.type = PROJECTILE;
 }
 
 void invoke_player_cooldown(Player& player, bool is_left)
 {
     player.cooldown = 700;
-}
-
-void cast_player_spell(double x, double y, bool is_left)
-{
-    Entity& player_ent = registry.players.entities[0];
-    Player& player = registry.players.get(player_ent);
-    if (player.cooldown > 0)
-    {
-        return;
-    }
-
-    create_player_projectile(player_ent, x, y);
-
-    SoundManager* soundManager = SoundManager::getSoundManager();
-    soundManager->playSound(SoundEffect::FIRE);
-
-    invoke_player_cooldown(player, is_left);
 }
 
 void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mods)
@@ -210,15 +164,20 @@ void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mo
         return;
     }
 
+    // fixes issue where mouse position isn't set until mouse is moved
+    double x, y;
+    glfwGetCursorPos(window, &x, &y);
+    this->onMouseMove({ x, y });
+
     if (action == GLFW_PRESS)
     {
         switch (button)
         {
         case GLFW_MOUSE_BUTTON_LEFT:
             printd("Left mouse button pressed.\n");
-            double x, y;
-            glfwGetCursorPos(window, &x, &y);
-            cast_player_spell(x, y, true);
+            // double x, y; // DEBUG todo
+            // glfwGetCursorPos(window, &x, &y);
+            cast_player_spell(this->worldMousePosition.x, this->worldMousePosition.y, true);
             break;
         case GLFW_MOUSE_BUTTON_RIGHT:
             // TODO: Shoot spell 2
@@ -261,14 +220,13 @@ void InputHandler::create_player_projectile(Entity& player_ent, double x, double
     RenderRequest& request = registry.render_requests.emplace(projectile_ent);
     Motion& player_motion = registry.motions.get(player_ent);
 
-    deadly.to_enemy = true;
-
     projectile_motion.position = player_motion.position;
     projectile_motion.angle = player_motion.angle;
     projectile_motion.velocity = vec2({ cos(player_motion.angle), sin(player_motion.angle) });
 
     switch (spell) {
     case SpellType::FIRE:
+        deadly.to_enemy = true;
         projectile_motion.scale = FIRE_SCALE;
         projectile_motion.collider = FIRE_COLLIDER;
         projectile.type = DamageType::fire;
@@ -292,7 +250,17 @@ void InputHandler::create_player_projectile(Entity& player_ent, double x, double
         break;
     }
     case SpellType::LIGHTNING:
-        // TODO
+        deadly.to_enemy = true;
+        printd("Mouse position when casting lightning: %f, %f\n", x, y); // TODO debug
+        projectile_motion.position = { x, y };
+        projectile_motion.angle = 0.f;
+        projectile_motion.scale = LIGHTNING_SCALE;
+        projectile_motion.collider = LIGHTNING_COLLIDER;
+        projectile.type = DamageType::lightning;
+        projectile.range = LIGHTNING_RANGE;
+        damage.value = LIGHTNING_DAMAGE;
+        request.texture = "lightning1";
+        request.type = PROJECTILE;
         break;
     case SpellType::ICE:
         // TODO

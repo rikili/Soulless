@@ -57,6 +57,13 @@ const float WATER_SCALE_FACTOR = 1.f;
 const vec2 WATER_COLLIDER = { 250, 250 };
 const float WATER_LIFETIME = 1000.f; // Barrier spell lasts for 1 second (or if it collides with enemy projectile)
 
+const float LIGHTNING_DAMAGE = 25.f;
+const float LIGHTNING_VELOCITY = 0.f;
+const float LIGHTNING_RANGE = 400.f;
+const vec2 LIGHTNING_SCALE = { 0.75f, 0.75f };
+const float LIGHTNING_SCALE_FACTOR = 1.f;
+const vec2 LIGHTNING_COLLIDER = { 150, 150 };
+
 const float ICE_VELOCITY = 1.f;
 const float ICE_DEGREE_DIFFERENCE = 15.f;
 const int ICE_SHARD_COUNT = 4;

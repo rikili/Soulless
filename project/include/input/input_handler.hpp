@@ -17,6 +17,7 @@ public:
 private:
 	// keeps track of pressed movement keys (up, right, left, down) 
 	std::unordered_set<int> activeMoveKeys;
+	vec2 worldMousePosition;
 
 	void updateVelocity();
 

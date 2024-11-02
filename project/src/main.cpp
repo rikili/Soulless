@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 	renderer.initialize(input_handler, window_width_px, window_height_px, "Soulless"); // must be called at the beginning of the program
 	GLFWwindow* window = renderer.getGLWindow();
 
-	SoundManager *soundManager = SoundManager::getSoundManager();
+	SoundManager* soundManager = SoundManager::getSoundManager();
 	if (!soundManager->initialize()) {
 		printd("Error initializing sound manager\n");
 	}
@@ -49,16 +49,16 @@ int main(int argc, char* argv[])
 
 		renderer.drawFrame(elapsed_ms); // (3) Re-render the scene (where the magic happens)
 
-    frames++;
+		frames++;
 
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    float timeDifference = static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count());
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		float timeDifference = static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count());
 
-    if (timeDifference >= 1000.0f) {
-        globalOptions.fps = frames / (timeDifference / 1000.0f);
-        frames = 0;
-        lastTime = currentTime;
-    }
+		if (timeDifference >= 1000.0f) {
+			globalOptions.fps = frames / (timeDifference / 1000.0f);
+			frames = 0;
+			lastTime = currentTime;
+		}
 
 		glfwSwapBuffers(window); // (4) swap front and back buffers
 		glfwPollEvents(); // (5) poll for and process events

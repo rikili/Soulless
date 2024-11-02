@@ -97,13 +97,20 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 			float y_offset = motion.collider.y * motion.scale.y;
 			motion.position = glm::clamp(motion.position + motion.velocity * elapsed_ms_since_last_update, { x_offset, y_offset }, { window_width_px - x_offset, window_height_px - y_offset });
 		}
-		// Water barrier follows player
-		else if (registry.projectiles.has(entity) && registry.projectiles.get(entity).type == DamageType::water) {
-			motion = player_motion;
-		}
-		else
-		{
-			motion.position += motion.velocity * elapsed_ms_since_last_update;
+
+		// not a player nor enemy
+		else if (registry.projectiles.has(entity)) {
+			Projectile& projectile = registry.projectiles.get(entity);
+
+			if (projectile.type == DamageType::water) {
+				motion = player_motion;	// water barrier follows player
+			}
+			else if (projectile.type == DamageType::lightning) {
+				// lightning attack doesn't move
+			}
+			else {
+				motion.position += motion.velocity * elapsed_ms_since_last_update;
+			}
 		}
 
 		if (registry.enemies.has(entity))

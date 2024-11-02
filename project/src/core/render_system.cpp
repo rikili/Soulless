@@ -121,10 +121,10 @@ void RenderSystem::drawFrame(float elapsed_ms)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST); // native OpenGL does not work with a depth buffer
-							  // and alpha blending, one would have to sort
-							  // sprites back to front
+	// and alpha blending, one would have to sort
+	// sprites back to front
 
-	// Draw the background
+// Draw the background
 	const Shader* bgShader = this->asset_manager.getShader("background");
 	const Mesh* bgMesh = this->asset_manager.getMesh("background");
 	const Texture* bgTexture = this->asset_manager.getTexture("grass");
@@ -137,7 +137,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		currentY -= titleFontSize * 1.2;
 
 		vec3 color = glm::vec3(0.83f, 0.83f, 0.83f);
-		
+
 		drawText("Move using: W, A, S, D", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
 		currentY -= tutFontSize * 1.5;
 
@@ -178,8 +178,8 @@ void RenderSystem::drawFrame(float elapsed_ms)
 	float playerY = registry.motions.get(player).position.y - window_height_px / 2.0 * zoomFactor;
 
 	updateCameraPosition(clamp(playerX, 0.f, (float)(window_width_px / 2.0)),
-						 clamp(playerY, 0.f, (float)(window_height_px / 2.0)));
-	
+		clamp(playerY, 0.f, (float)(window_height_px / 2.0)));
+
 	// Draw all entities
 	// registry.render_requests.sort(typeAscending);
 	this->updateRenderOrder(registry.render_requests);
@@ -212,7 +212,8 @@ void RenderSystem::drawFrame(float elapsed_ms)
 			vec2 position;
 			if (registry.motions.has(entity)) {
 				position = registry.motions.get(entity).position;
-			} else {
+			}
+			else {
 				// Fallback to render_y if no Motion component
 				position = vec2(0, render_request.smooth_position.render_y);
 			}
@@ -230,7 +231,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 
 			if (render_request.shader == "sprite" || render_request.shader == "animatedsprite") {
 				if (registry.players.has(entity) && registry.deaths.has(entity)) {
-					transform = rotate(transform, (float) M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
+					transform = rotate(transform, (float)M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
 				}
 
 				const Texture* texture = this->asset_manager.getTexture(render_request.texture);
@@ -247,7 +248,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 				if (render_request.shader == "animatedsprite") {
 					Animation& animation = registry.animations.get(entity);
 					animation.elapsedTime += elapsed_ms;
-					
+
 					if (animation.elapsedTime > animation.frameTime) {
 						animation.elapsedTime = 0;
 						animation.currentFrame++;
@@ -259,7 +260,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 					glUniform1f(glGetUniformLocation(shaderProgram, "frame"), animation.currentFrame);
 					glUniform1i(glGetUniformLocation(shaderProgram, "SPRITE_COLS"), animation.spriteCols);
 					glUniform1i(glGetUniformLocation(shaderProgram, "SPRITE_ROWS"), animation.spriteRows);
-					glUniform1i(glGetUniformLocation(shaderProgram, "NUM_SPRITES"), animation.frameCount);	
+					glUniform1i(glGetUniformLocation(shaderProgram, "NUM_SPRITES"), animation.frameCount);
 				}
 			}
 			mat4 projection = projectionMatrix;
@@ -307,8 +308,8 @@ void RenderSystem::drawFrame(float elapsed_ms)
 	// makes it kinda slow
 	for (Entity entity : registry.enemies.entities) {
 		if (registry.healths.has(entity) && registry.motions.has(entity)) {
-			Motion &motion = registry.motions.get(entity);
-			Health &health = registry.healths.get(entity);
+			Motion& motion = registry.motions.get(entity);
+			Health& health = registry.healths.get(entity);
 
 			int percentage = static_cast<int>((health.health / health.maxHealth) * 100);
 
@@ -337,12 +338,12 @@ void RenderSystem::drawText(const std::string& text, const std::string& fontName
 	const Shader* fontShader = this->asset_manager.getShader("font");
 	GLuint m_font_shaderProgram = fontShader->program;
 	glUseProgram(m_font_shaderProgram);
-	
+
 	mat4 view;
 	mat4 projection;
-	
+
 	GLint flipLoc = glGetUniformLocation(m_font_shaderProgram, "flip");
-	
+
 	if (fontName == "healthFont") {
 		view = viewMatrix;
 		projection = registry.projectionMatrix;
@@ -353,10 +354,10 @@ void RenderSystem::drawText(const std::string& text, const std::string& fontName
 		projection = glm::ortho(0.f, (float)window_width_px, 0.0f, (float)window_height_px);
 		glUniform1f(flipLoc, false);
 	}
-	
+
 	GLint view_location = glGetUniformLocation(m_font_shaderProgram, "view");
 	glUniformMatrix4fv(view_location, 1, GL_FALSE, glm::value_ptr(view));
-	
+
 	GLint projection_location = glGetUniformLocation(m_font_shaderProgram, "projection");
 	glUniformMatrix4fv(projection_location, 1, GL_FALSE, glm::value_ptr(projection));
 
@@ -368,7 +369,7 @@ void RenderSystem::drawText(const std::string& text, const std::string& fontName
 		glGetUniformLocation(m_font_shaderProgram, "transform");
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
-	
+
 
 	glBindVertexArray(font->vao);
 
@@ -407,16 +408,16 @@ void RenderSystem::drawText(const std::string& text, const std::string& fontName
 }
 
 float RenderSystem::getTextWidth(const std::string& text, const std::string& fontName, float scale) {
-    const Font* font = this->asset_manager.getFont(fontName);
-    float width = 0.0f;
-    for (char c : text) {
-        auto it = font->m_ftCharacters.find(c);
-        if (it != font->m_ftCharacters.end()) {
-            Character ch = it->second;
-            width += (ch.Advance >> 6) * scale;
-        }
-    }
-    return width;
+	const Font* font = this->asset_manager.getFont(fontName);
+	float width = 0.0f;
+	for (char c : text) {
+		auto it = font->m_ftCharacters.find(c);
+		if (it != font->m_ftCharacters.end()) {
+			Character ch = it->second;
+			width += (ch.Advance >> 6) * scale;
+		}
+	}
+	return width;
 }
 
 void RenderSystem::updateCameraPosition(float x, float y) {
