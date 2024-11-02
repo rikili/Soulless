@@ -256,6 +256,13 @@ void RenderSystem::drawFrame(float elapsed_ms)
 						}*/
 						if (animation.currentFrame - animation.startFrame >= animation.frameCount) {
 							animation.currentFrame = animation.startFrame;
+
+							if (animation.oneTime) {
+								animation.state = EntityState::IDLE;
+								animation.frameTime = DEFAULT_LOOP_TIME;
+								animation.oneTime = false;
+								return;
+							}
 						}
 					}
 

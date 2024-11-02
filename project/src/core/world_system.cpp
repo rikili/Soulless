@@ -45,14 +45,31 @@ void WorldSystem::set_renderer(RenderSystem* renderer)
 void WorldSystem::handle_animations() {
 	Motion& playerMotion = registry.motions.get(player_mage);
 	Animation& playerAnimation = registry.animations.get(player_mage);
+	RenderRequest& playerRR = registry.render_requests.get(player_mage);
 
-	if (playerMotion.currentDirection == playerMotion.oldDirection) {
-		return;
+	if (playerAnimation.state == EntityState::ATTACKING) {
+		playerAnimation.oneTime = true;
+		playerRR.texture = "mage-attack";
 	}
+	else {
+		
+		if (playerMotion.velocity.x == 0 && playerMotion.velocity.y == 0) {
+			playerRR.texture = "mage-idle";
+		}
+		else {
+			playerRR.texture = "mage-walk";
+		}
 
+		if (playerMotion.currentDirection == playerMotion.oldDirection) {
+			return;
+		}
+
+		playerAnimation.initializeAtRow((int)playerMotion.currentDirection);
+	}
+	
 	// printd("Current: %d\n", playerMotion.currentDirection);
 
-	playerAnimation.initializeAtRow((int)playerMotion.currentDirection);
+	
 	
 }
 /**
@@ -388,7 +405,7 @@ Entity WorldSystem::createPlayer()
 
 	RenderRequest& request = registry.render_requests.emplace(player);
 	request.mesh = "sprite";
-	request.texture = "mage";
+	request.texture = "mage-idle";
 	request.shader = "animatedsprite";
 	request.type = PLAYER;
 
@@ -509,6 +526,7 @@ void WorldSystem::loadBackgroundObjects() {
 	createBackgroundObject({ window_width_px / 4, window_height_px / 4 }, { 0.75, 0.75 }, "tree", false);
 	Entity campfire = createBackgroundObject({ window_width_px / 2, window_height_px / 2 + 50.f }, { 0.5, 0.5 }, "campfire", true);
 	Animation& campfireAnimation = registry.animations.emplace(campfire);
+	campfireAnimation.frameTime = 100.f;
 	campfireAnimation.spriteCols = 6;
 	campfireAnimation.spriteRows = 1;
 	campfireAnimation.frameCount = 6;

@@ -38,7 +38,6 @@ bool isPause()
 void InputHandler::onKey(int key, int scancode, int action, int mods)
 {
     SoundManager* soundManager = SoundManager::getSoundManager();
-    Animation& playerAnimation = registry.animations.get(registry.players.entities[0]);
 
     if (isTutorialOn() && key == GLFW_KEY_SPACE)
     {
@@ -152,6 +151,12 @@ void create_player_projectile(Entity& player_ent, double x, double y)
     RenderRequest& request = registry.render_requests.emplace(projectile_ent);
     Motion& player_motion = registry.motions.get(player_ent);
 
+    Animation& player_animation = registry.animations.get(player_ent);
+    player_animation.state = EntityState::ATTACKING;
+    player_animation.frameTime = 30.f;
+    player_motion.currentDirection = angleToDirection(player_motion.angle);
+    player_animation.initializeAtRow((int)player_motion.currentDirection);
+
     deadly.to_enemy = true;
 
     projectile_motion.scale = FIRE_SCALE;
@@ -260,6 +265,6 @@ void InputHandler::updateVelocity()
         playerMotion.velocity.y = 0;
     }
 
-    printd("New velocity is: %f, %f\n", playerMotion.velocity.x, playerMotion.velocity.y);
+    //  printd("New velocity is: %f, %f\n", playerMotion.velocity.x, playerMotion.velocity.y);
     //  printd("New position is: %f, %f\n", playerMotion.position.x, playerMotion.position.y);
 }

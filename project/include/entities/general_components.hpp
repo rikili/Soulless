@@ -117,10 +117,12 @@ struct RenderRequest
 
 struct Animation
 {
+    bool oneTime = false;
+
     float startFrame = 0.0f;
     float currentFrame;
 
-    float frameTime = 100.f;
+    float frameTime = DEFAULT_LOOP_TIME;
     float elapsedTime = 0.f;
 
     int spriteCols = 4;
@@ -128,6 +130,8 @@ struct Animation
     int spriteCount = 12;
 
     int frameCount = 4;
+
+    EntityState state = EntityState::IDLE;
 
     void initializeAtFrame(float frame) {
         startFrame = frame;
