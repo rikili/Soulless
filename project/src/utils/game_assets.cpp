@@ -23,6 +23,9 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId healthFont = assetManager.loadFont("healthFont", font_path("deutsch") + ".ttf", 20.0f);
     assets.fonts["healthFont"] = healthFont;
 
+    AssetId spellFont = assetManager.loadFont("spellFont", font_path("deutsch") + ".ttf", 32.0f);
+    assets.fonts["spellFont"] = spellFont;
+
     const std::vector<float> vertices = {
         // positions        // colors           // texture coords
         -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
@@ -85,9 +88,9 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
 
     const std::vector<float> debug_vertices = {
         // positions        // colors
-        -1.f, -1.f, 0.0f, 
+        -1.f, -1.f, 0.0f,
          1.f, -1.f, 0.0f,
-         1.f,  1.f, 0.0f, 
+         1.f,  1.f, 0.0f,
         -1.f,  1.f, 0.0f,
     };
 
@@ -121,9 +124,12 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId knightTextureId = assetManager.loadTexture("knight", textures_path("knight") + ".png");
     assets.textures["knight"] = knightTextureId;
 
-    // Projectiles
+    // Projectiles / Spells
     AssetId fireballTextureId = assetManager.loadTexture("fireball", textures_path("fireball") + ".png");
     assets.textures["fireball"] = fireballTextureId;
+
+    AssetId barrierTextureId = assetManager.loadTexture("barrier", textures_path("barrier") + ".png");
+    assets.textures["barrier"] = barrierTextureId;
 
     AssetId pitchforkTextureId = assetManager.loadTexture("pitchfork", textures_path("pitchfork") + ".png");
     assets.textures["pitchfork"] = pitchforkTextureId;
@@ -158,30 +164,30 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
         {2, GL_FLOAT, GL_FALSE, "texCoord"} };
     AssetId bgMeshId = assetManager.loadMesh("background", bgVertices, indices, bgAttributes);
 
-    AssetId grassTextureId  = assetManager.loadBackgroundTexture("grass1", textures_path("grass1") + ".png");
+    AssetId grassTextureId = assetManager.loadBackgroundTexture("grass1", textures_path("grass1") + ".png");
     assets.textures["grass1"] = grassTextureId;
 
-    AssetId grassTextureId2  = assetManager.loadBackgroundTexture("grass2", textures_path("grass2") + ".png");
+    AssetId grassTextureId2 = assetManager.loadBackgroundTexture("grass2", textures_path("grass2") + ".png");
     assets.textures["grass2"] = grassTextureId2;
 
-    AssetId grassTextureIdDark  = assetManager.loadBackgroundTexture("grass3", textures_path("grass3") + ".png");
+    AssetId grassTextureIdDark = assetManager.loadBackgroundTexture("grass3", textures_path("grass3") + ".png");
     assets.textures["grass3"] = grassTextureIdDark;
 
     // 4
-    AssetId grassTextureId4  = assetManager.loadBackgroundTexture("grass4", textures_path("grass4") + ".png");
+    AssetId grassTextureId4 = assetManager.loadBackgroundTexture("grass4", textures_path("grass4") + ".png");
     assets.textures["grass4"] = grassTextureId4;
 
     // 5
-    AssetId grassTextureId5  = assetManager.loadBackgroundTexture("grass5", textures_path("grass5") + ".png");
+    AssetId grassTextureId5 = assetManager.loadBackgroundTexture("grass5", textures_path("grass5") + ".png");
     assets.textures["grass5"] = grassTextureId5;
 
-    AssetId clayTextureId1  = assetManager.loadBackgroundTexture("clay1", textures_path("clay1") + ".png");
+    AssetId clayTextureId1 = assetManager.loadBackgroundTexture("clay1", textures_path("clay1") + ".png");
     assets.textures["clay1"] = clayTextureId1;
 
-    AssetId clayTextureId2  = assetManager.loadBackgroundTexture("clay2", textures_path("clay2") + ".png");
+    AssetId clayTextureId2 = assetManager.loadBackgroundTexture("clay2", textures_path("clay2") + ".png");
     assets.textures["clay2"] = clayTextureId2;
 
-    AssetId clayTextureId3  = assetManager.loadBackgroundTexture("clay3", textures_path("clay3") + ".png");
+    AssetId clayTextureId3 = assetManager.loadBackgroundTexture("clay3", textures_path("clay3") + ".png");
     assets.textures["clay3"] = clayTextureId3;
 
 

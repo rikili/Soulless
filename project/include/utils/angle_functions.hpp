@@ -1,5 +1,6 @@
 #pragma once
 #include "entities/general_components.hpp"
+#include <array>
 
 float normalizeAngle(float angle) {
     while (angle > M_PI) {

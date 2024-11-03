@@ -17,6 +17,7 @@ public:
 	ComponentContainer<HealthBar> healthBars;
 	ComponentContainer<ResistanceModifier> resistanceModifiers;
 	ComponentContainer<Collision> collisions;
+	ComponentContainer<Timed> timeds;
 	ComponentContainer<Player> players;
 	ComponentContainer<Enemy> enemies;
 	ComponentContainer<Deadly> deadlies;
@@ -50,6 +51,7 @@ public:
 		registry_list.push_back(&healthBars);
 		registry_list.push_back(&resistanceModifiers);
 		registry_list.push_back(&collisions);
+		registry_list.push_back(&timeds);
 		registry_list.push_back(&players);
 		registry_list.push_back(&enemies);
 		registry_list.push_back(&deadlies);

@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/vec2.hpp>
+#include <float.h>
 
 using glm::vec2;
 
@@ -17,9 +18,9 @@ const float PLAYER_INVINCIBILITY_TIMER = 1500.f;
 enum class DamageType
 {
     fire,
-    ice,
-    lightning,
     water,
+    lightning,
+    ice,
     plasma,
     wind,
     enemy,
@@ -40,7 +41,7 @@ enum class Direction
     W,
     NW,
     N,
-    NE,    
+    NE,
 };
 
 // --- States ---
@@ -58,12 +59,30 @@ const float PLAYER_HEAL_COOLDOWN = 10000.f;
 
 // --- Player Spells ---
 
+enum class SpellType
+{
+    FIRE = 0,
+    WATER = 1,
+    LIGHTNING = 2,
+    ICE = 3,
+    // Add any new spells here
+    COUNT // Used to track how many spell types we have
+};
+
 const float FIRE_DAMAGE = 25.f;
 const float FIRE_VELOCITY = 1.f;
 const float FIRE_RANGE = 250.f;
 const vec2 FIRE_SCALE = { 0.3, 0.3 };
 const float FIRE_SCALE_FACTOR = 3.f;
 const vec2 FIRE_COLLIDER = { 50, 50 };
+
+const float WATER_DAMAGE = 0.f;
+const float WATER_VELOCITY = 0.f;
+const float WATER_RANGE = FLT_MAX; // Range is "infinite" for barrier
+const vec2 WATER_SCALE = { 0.6f, 0.6f };
+// const float WATER_SCALE_FACTOR = 1.f;
+const vec2 WATER_COLLIDER = { 250, 250 };
+const float WATER_LIFETIME = 1000.f; // Barrier spell lasts for 1 second (or if it collides with enemy projectile)
 
 const float ICE_VELOCITY = 1.f;
 const float ICE_DEGREE_DIFFERENCE = 15.f;
@@ -128,5 +147,6 @@ enum
     BACK = 0,
     PROJECTILE = 1,
     ENEMY = 2,
-    PLAYER = 3
+    PLAYER = 3,
+    OVER_PLAYER = 4,
 };

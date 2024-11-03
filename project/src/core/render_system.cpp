@@ -8,7 +8,18 @@
 #include <glm/gtc/type_ptr.inl>
 #include <glm/gtc/matrix_transform.hpp>
 #include "entities/general_components.hpp"
+#include "utils/spell_queue.hpp"
 #include "utils/isometric_helper.hpp"
+
+std::string spellTypeToString(SpellType spell) {
+	switch (spell) {
+	case SpellType::FIRE: return "Fire";
+	case SpellType::WATER: return "Water";
+	case SpellType::LIGHTNING: return "Lightning";
+	case SpellType::ICE: return "Ice";
+	default: return "Unknown";
+	}
+}
 
 /**
  * @brief Initialize the render system
@@ -21,14 +32,14 @@
  */
 bool RenderSystem::initialize(InputHandler& input_handler, const int width, const int height, const char* title)
 {
-	 glm::mat4 iso = glm::mat4(1.0f);
-    iso = glm::rotate(iso, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));  // X rotation
-    iso = glm::rotate(iso, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Y rotation
+	glm::mat4 iso = glm::mat4(1.0f);
+	iso = glm::rotate(iso, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));  // X rotation
+	iso = glm::rotate(iso, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Y rotation
 
-    // Combine with orthographic projection
-    projectionMatrix = glm::ortho(0.f, (float)window_width_px * zoomFactor, 
-                                (float)window_height_px * zoomFactor, 0.f, -1.f, 1.f);
-    registry.projectionMatrix = projectionMatrix;
+	// Combine with orthographic projection
+	projectionMatrix = glm::ortho(0.f, (float)window_width_px * zoomFactor,
+		(float)window_height_px * zoomFactor, 0.f, -1.f, 1.f);
+	registry.projectionMatrix = projectionMatrix;
 
 	initializeCamera();
 
@@ -128,8 +139,8 @@ void RenderSystem::drawFrame(float elapsed_ms)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST); // native OpenGL does not work with a depth buffer
-							  // and alpha blending, one would have to sort
-							  // sprites back to front
+	// and alpha blending, one would have to sort
+	// sprites back to front
 
 	if (globalOptions.tutorial) {
 		float titleFontSize = this->asset_manager.getFont("king")->size;
@@ -139,7 +150,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		currentY -= titleFontSize * 1.2;
 
 		vec3 color = glm::vec3(0.83f, 0.83f, 0.83f);
-		
+
 		drawText("Move using: W, A, S, D", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
 		currentY -= tutFontSize * 1.5;
 
@@ -165,10 +176,10 @@ void RenderSystem::drawFrame(float elapsed_ms)
 	float playerY = registry.motions.get(player).position.y - window_height_px / 2.0 * zoomFactor;
 
 	updateCameraPosition(clamp(playerX, 0.f, (float)(window_width_px / 2.0)),
-						 clamp(playerY, 0.f, (float)(window_height_px / 2.0)));
+		clamp(playerY, 0.f, (float)(window_height_px / 2.0)));
 
 	drawBackgroundObjects();
-	
+
 	// Draw all entities
 	// registry.render_requests.sort(typeAscending);
 	this->updateRenderOrder(registry.render_requests);
@@ -201,7 +212,8 @@ void RenderSystem::drawFrame(float elapsed_ms)
 			vec2 position;
 			if (registry.motions.has(entity)) {
 				position = registry.motions.get(entity).position;
-			} else {
+			}
+			else {
 				// Fallback to render_y if no Motion component
 				position = vec2(0, render_request.smooth_position.render_y);
 			}
@@ -215,12 +227,13 @@ void RenderSystem::drawFrame(float elapsed_ms)
 				// printd("Fireball angle: %f\n", motion.angle);
 				transform = rotate(transform, motion.angle, glm::vec3(0.0f, 0.0f, 1.0f)); // Apply rotation
 			}
+
 			transform = scale(transform, vec3(motion.scale * 100.f * zoomFactor, 1.0f));
 
 
 			if (render_request.shader == "sprite" || render_request.shader == "animatedsprite" || render_request.shader == "healthbar") {
 				if (registry.players.has(entity) && registry.deaths.has(entity)) {
-					transform = rotate(transform, (float) M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
+					transform = rotate(transform, (float)M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
 				}
 
 				const Texture* texture = this->asset_manager.getTexture(render_request.texture);
@@ -237,7 +250,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 				if (render_request.shader == "animatedsprite") {
 					Animation& animation = registry.animations.get(entity);
 					animation.elapsedTime += elapsed_ms;
-					
+
 					if (animation.elapsedTime > animation.frameTime) {
 						animation.elapsedTime = 0;
 						animation.currentFrame++;
@@ -270,7 +283,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 						}
 						else {
 							glUniform1i(glGetUniformLocation(shaderProgram, "state"), 1);
-						}		
+						}
 					}
 					else {
 						glUniform1i(glGetUniformLocation(shaderProgram, "state"), 0);
@@ -278,7 +291,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 					glUniform1f(glGetUniformLocation(shaderProgram, "frame"), animation.currentFrame);
 					glUniform1i(glGetUniformLocation(shaderProgram, "SPRITE_COLS"), animation.spriteCols);
 					glUniform1i(glGetUniformLocation(shaderProgram, "SPRITE_ROWS"), animation.spriteRows);
-					glUniform1i(glGetUniformLocation(shaderProgram, "NUM_SPRITES"), animation.spriteCount);	
+					glUniform1i(glGetUniformLocation(shaderProgram, "NUM_SPRITES"), animation.spriteCount);
 				}
 
 				if (render_request.shader == "healthbar") {
@@ -332,7 +345,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		DebugRequest& debug = registry.debug_requests.get(debug_entity);
 
 		mat4 transform = mat4(1.0f);
-		transform = translate(transform, vec3({ debug.position, 1.0f }) );
+		transform = translate(transform, vec3({ debug.position, 1.0f }));
 		transform = rotate(transform, debug.angle, glm::vec3(0.0f, 0.0f, 1.0f));
 		transform = scale(transform, vec3(debug.collider, 1.0f));
 
@@ -362,7 +375,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		glDrawElements(draw_type, debug_mesh->indexCount, GL_UNSIGNED_INT, 0);
 		gl_has_errors();
 	}
-	
+
 	// TODO: does this work with the camera????
 	if (globalOptions.showFps) {
 		drawText(std::to_string(globalOptions.fps), "deutsch", window_width_px - 100.0f, window_height_px - 50.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -371,13 +384,21 @@ void RenderSystem::drawFrame(float elapsed_ms)
 	// makes it kinda slow
 	for (Entity entity : registry.enemies.entities) {
 		if (registry.healths.has(entity) && registry.motions.has(entity)) {
-			Motion &motion = registry.motions.get(entity);
-			Health &health = registry.healths.get(entity);
+			Motion& motion = registry.motions.get(entity);
+			Health& health = registry.healths.get(entity);
 
 			int percentage = static_cast<int>((health.health / health.maxHealth) * 100);
 
 			drawText(std::to_string(percentage) + "%", "healthFont", motion.position.x, motion.position.y - 55.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 		}
+	}
+
+	Player& playerObj = registry.players.get(player);
+	SpellQueue& spell_queue = playerObj.spell_queue;
+	if (!spell_queue.getQueue().empty()) {
+		SpellType spell = spell_queue.getQueue().front();
+		std::string spellText = spellTypeToString(spell);
+		drawText(spellText, "spellFont", window_width_px / 2.0f, 30.0f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 }
 
@@ -401,12 +422,12 @@ void RenderSystem::drawText(const std::string& text, const std::string& fontName
 	const Shader* fontShader = this->asset_manager.getShader("font");
 	GLuint m_font_shaderProgram = fontShader->program;
 	glUseProgram(m_font_shaderProgram);
-	
+
 	mat4 view;
 	mat4 projection;
-	
+
 	GLint flipLoc = glGetUniformLocation(m_font_shaderProgram, "flip");
-	
+
 	if (fontName == "healthFont") {
 		view = viewMatrix;
 		projection = registry.projectionMatrix;
@@ -417,10 +438,10 @@ void RenderSystem::drawText(const std::string& text, const std::string& fontName
 		projection = glm::ortho(0.f, (float)window_width_px, 0.0f, (float)window_height_px);
 		glUniform1f(flipLoc, false);
 	}
-	
+
 	GLint view_location = glGetUniformLocation(m_font_shaderProgram, "view");
 	glUniformMatrix4fv(view_location, 1, GL_FALSE, glm::value_ptr(view));
-	
+
 	GLint projection_location = glGetUniformLocation(m_font_shaderProgram, "projection");
 	glUniformMatrix4fv(projection_location, 1, GL_FALSE, glm::value_ptr(projection));
 
@@ -432,7 +453,7 @@ void RenderSystem::drawText(const std::string& text, const std::string& fontName
 		glGetUniformLocation(m_font_shaderProgram, "transform");
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
-	
+
 
 	glBindVertexArray(font->vao);
 
@@ -471,16 +492,16 @@ void RenderSystem::drawText(const std::string& text, const std::string& fontName
 }
 
 float RenderSystem::getTextWidth(const std::string& text, const std::string& fontName, float scale) {
-    const Font* font = this->asset_manager.getFont(fontName);
-    float width = 0.0f;
-    for (char c : text) {
-        auto it = font->m_ftCharacters.find(c);
-        if (it != font->m_ftCharacters.end()) {
-            Character ch = it->second;
-            width += (ch.Advance >> 6) * scale;
-        }
-    }
-    return width;
+	const Font* font = this->asset_manager.getFont(fontName);
+	float width = 0.0f;
+	for (char c : text) {
+		auto it = font->m_ftCharacters.find(c);
+		if (it != font->m_ftCharacters.end()) {
+			Character ch = it->second;
+			width += (ch.Advance >> 6) * scale;
+		}
+	}
+	return width;
 }
 
 
@@ -498,7 +519,7 @@ void RenderSystem::drawBackgroundObjects() {
 	float zoom = zoomFactor;
 	zoom = 1.0f * zoomFactor; // TODO: Fix zoom
 
-		for (const auto& render_request: registry.static_render_requests.entities) {
+	for (const auto& render_request : registry.static_render_requests.entities) {
 		RenderRequest& request = registry.static_render_requests.get(render_request);
 
 		Tile& tile = registry.tiles.get(render_request);
@@ -506,7 +527,7 @@ void RenderSystem::drawBackgroundObjects() {
 		if (tile.position.x < 0 || tile.position.x > window_width_px || tile.position.y < 0 || tile.position.y > window_height_px) {
 			continue;
 		}
-	
+
 		const Mesh* mesh = this->asset_manager.getMesh(request.mesh);
 		if (!mesh) {
 			std::cerr << "Mesh with id " << request.mesh << " not found!" << std::endl;
@@ -515,16 +536,16 @@ void RenderSystem::drawBackgroundObjects() {
 		}
 
 		const Shader* shader = this->asset_manager.getShader(request.shader);
-			if (!shader)
-			{
-				printf("Could not find shader with id %s\n", request.shader.c_str());
-				printf("Skipping rendering of this shader\n");
-				continue;
-			}
+		if (!shader)
+		{
+			printf("Could not find shader with id %s\n", request.shader.c_str());
+			printf("Skipping rendering of this shader\n");
+			continue;
+		}
 		const GLuint shaderProgram = shader->program;
 		glUseProgram(shaderProgram);
 
-		
+
 
 		mat4 transform = mat4(1.0f);
 		transform = translate(transform, glm::vec3(tile.position, 0.0f));
@@ -559,6 +580,6 @@ void RenderSystem::drawBackgroundObjects() {
 
 
 	}
-	
+
 
 }

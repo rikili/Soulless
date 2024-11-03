@@ -152,14 +152,16 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 	for (Entity entity : motions_registry.entities)
 	{
 		Motion& motion = motions_registry.get(entity);
+
 		if (registry.players.has(entity) || registry.enemies.has(entity))
 		{
 			float x_offset = motion.collider.x * motion.scale.x;
 			float y_offset = motion.collider.y * motion.scale.y;
-			motion.position = glm::clamp(
-				motion.position + motion.velocity * elapsed_ms_since_last_update,
-				{ x_offset, y_offset },
-				{ window_width_px - x_offset, window_height_px - y_offset });
+			motion.position = glm::clamp(motion.position + motion.velocity * elapsed_ms_since_last_update, { x_offset, y_offset }, { window_width_px - x_offset, window_height_px - y_offset });
+		}
+		// Water barrier follows player
+		else if (registry.projectiles.has(entity) && registry.projectiles.get(entity).type == DamageType::water) {
+			motion.position = player_motion.position;
 		}
 		else
 		{
@@ -243,6 +245,17 @@ void WorldSystem::computeNewDirection(Entity e) {
  */
 void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 {
+
+	for (Entity& timed_ent : registry.timeds.entities)
+	{
+		Timed& timed = registry.timeds.get(timed_ent);
+		timed.timer -= elapsed_ms_since_last_update;
+		if (!registry.deaths.has(timed_ent) && timed.timer < 0)
+		{
+			registry.deaths.emplace(timed_ent);
+		}
+	}
+
 	for (Entity& hit_ent : registry.onHits.entities)
 	{
 		OnHit& hit = registry.onHits.get(hit_ent);
@@ -425,9 +438,9 @@ void WorldSystem::restartGame() {
 }
 
 void WorldSystem::createTileGrid() {
-    vec2 gridDim = IsometricGrid::getGridDimensions(window_width_px, window_height_px);
-    int numCols = static_cast<int>(gridDim.x) * 2;
-    int numRows = static_cast<int>(gridDim.y) * 2;
+	vec2 gridDim = IsometricGrid::getGridDimensions(window_width_px, window_height_px);
+	int numCols = static_cast<int>(gridDim.x) * 2;
+	int numRows = static_cast<int>(gridDim.y) * 2;
 
 	TileGenerator tileGenerator(numCols, numRows, true);
 	tileGenerator.generateTiles();
@@ -436,7 +449,10 @@ void WorldSystem::createTileGrid() {
 Entity WorldSystem::createPlayer() {
 	auto player = Entity();
 
-	registry.players.emplace(player);
+	Player& player_component = registry.players.emplace(player);
+	player_component.spell_queue = SpellQueue();
+	// TODO: Add player initialization code here!
+
 	Motion& motion = registry.motions.emplace(player);
 	motion.position = { window_width_px / 2.0f,
 										 window_height_px / 2.0f }; // Center of the screen
@@ -449,15 +465,12 @@ Entity WorldSystem::createPlayer() {
 
 	auto healthBar = Entity();
 	Motion& healthBarMotion = registry.motions.emplace(healthBar);
-	healthBarMotion.position = { window_width_px / 2.0f, window_height_px / 2.0f + HEALTH_BAR_Y_OFFSET};
+	healthBarMotion.position = { window_width_px / 2.0f, window_height_px / 2.0f + HEALTH_BAR_Y_OFFSET };
 	healthBarMotion.scale = { 0.5, 0.5 };
 
 	HealthBar& healthBarComp = registry.healthBars.emplace(healthBar);
 	healthBarComp.assignHealthBar(player);
 	// TODO: Add resistances here!
-
-	// Player& player_component = registry.players.emplace(player);
-	// // TODO: Add player initialization code here!
 
 	Animation& animation = registry.animations.emplace(player);
 	animation.spriteCols = 15;
@@ -670,8 +683,7 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 		constexpr float offset_x = window_width_px / 10.f;
 		constexpr float offset_y = window_height_px / 10.f;
 
-		switch (side)
-		{
+		switch (side) {
 		case TOP:
 			candidate_x = dis(gen) * window_width_px;
 			candidate_y = -offset_y;
@@ -737,8 +749,7 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 			const vec2 velocity = glm::normalize(distance) * enemy_velocity_modifier;
 			motion.velocity = velocity;
 		}
-		else
-		{
+		else {
 			motion.velocity = { 0, 0 };
 		}
 	}

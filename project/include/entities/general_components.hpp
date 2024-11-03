@@ -74,7 +74,9 @@ struct Interactable {
 };
 
 // Timed Component
-struct Timed { }; // include temporary effects and counters
+struct Timed {
+    float timer = 0;
+}; // include temporary effects and counters
 
 // Structure to store collision information
 struct Collision

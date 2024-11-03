@@ -1,6 +1,7 @@
 #include "input/input_handler.hpp"
 #include "entities/general_components.hpp"
 #include "utils/angle_functions.hpp"
+#include "utils/spell_queue.hpp"
 #include <cstdio>
 #include <iostream>
 #include "sound/sound_manager.hpp"
@@ -146,62 +147,9 @@ void InputHandler::onMouseMove(vec2 mouse_position)
     playerMotion.angle = find_closest_angle(dx, dy);
 }
 
-void create_player_projectile(Entity& player_ent, double x, double y)
-{
-
-    const Entity projectile_ent;
-    Projectile& projectile = registry.projectiles.emplace(projectile_ent);
-    Motion& projectile_motion = registry.motions.emplace(projectile_ent);
-    Deadly& deadly = registry.deadlies.emplace(projectile_ent);
-    Damage& damage = registry.damages.emplace(projectile_ent);
-    RenderRequest& request = registry.render_requests.emplace(projectile_ent);
-    Motion& player_motion = registry.motions.get(player_ent);
-
-    Animation& player_animation = registry.animations.get(player_ent);
-    player_animation.state = EntityState::ATTACKING;
-    player_animation.frameTime = 30.f;
-    player_motion.currentDirection = angleToDirection(player_motion.angle);
-    player_animation.initializeAtRow((int)player_motion.currentDirection);
-
-    deadly.to_enemy = true;
-
-    projectile_motion.scale = FIRE_SCALE;
-    projectile_motion.collider = FIRE_COLLIDER;
-    projectile_motion.position = player_motion.position;
-    projectile_motion.angle = player_motion.angle;
-
-    // TODO: change once finalization is needed
-    projectile.type = DamageType::fire;
-    projectile.range = FIRE_RANGE;
-    projectile_motion.velocity = vec2({ cos(player_motion.angle), sin(player_motion.angle) });
-    damage.value = FIRE_DAMAGE;
-
-    request.mesh = "sprite";
-    request.texture = "fireball";
-    request.shader = "sprite";
-    request.type = PROJECTILE;
-}
-
 void invoke_player_cooldown(Player& player, bool is_left)
 {
     player.cooldown = 700;
-}
-
-void cast_player_spell(double x, double y, bool is_left)
-{
-    Entity& player_ent = registry.players.entities[0];
-    Player& player = registry.players.get(player_ent);
-    if (player.cooldown > 0)
-    {
-        return;
-    }
-
-    create_player_projectile(player_ent, x, y);
-
-    SoundManager* soundManager = SoundManager::getSoundManager();
-    soundManager->playSound(SoundEffect::FIRE);
-
-    invoke_player_cooldown(player, is_left);
 }
 
 void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mods)
@@ -237,6 +185,92 @@ void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mo
             break;
         }
     }
+}
+
+void InputHandler::cast_player_spell(double x, double y, bool is_left)
+{
+    Entity& player_ent = registry.players.entities[0];
+    Player& player = registry.players.get(player_ent);
+    if (player.cooldown > 0)
+    {
+        return;
+    }
+
+    SpellQueue& spell_queue = player.spell_queue;
+    SpellType spell = spell_queue.useSpell(is_left);
+
+    create_player_projectile(player_ent, x, y, spell);
+
+    SoundManager* soundManager = SoundManager::getSoundManager();
+    soundManager->playSound(SoundEffect::FIRE);
+
+    invoke_player_cooldown(player, is_left);
+}
+
+void InputHandler::create_player_projectile(Entity& player_ent, double x, double y, SpellType spell)
+{
+
+    const Entity projectile_ent;
+    Projectile& projectile = registry.projectiles.emplace(projectile_ent);
+    Motion& projectile_motion = registry.motions.emplace(projectile_ent);
+    Deadly& deadly = registry.deadlies.emplace(projectile_ent);
+    Damage& damage = registry.damages.emplace(projectile_ent);
+    RenderRequest& request = registry.render_requests.emplace(projectile_ent);
+    Motion& player_motion = registry.motions.get(player_ent);
+
+    Animation& player_animation = registry.animations.get(player_ent);
+    player_animation.state = EntityState::ATTACKING;
+    player_animation.frameTime = 30.f;
+    player_motion.currentDirection = angleToDirection(player_motion.angle);
+    player_animation.initializeAtRow((int)player_motion.currentDirection);
+
+    deadly.to_enemy = true;
+
+    projectile_motion.position = player_motion.position;
+    projectile_motion.angle = player_motion.angle;
+    projectile_motion.velocity = vec2({ cos(player_motion.angle), sin(player_motion.angle) });
+
+    switch (spell) {
+    case SpellType::FIRE:
+        projectile_motion.scale = FIRE_SCALE;
+        projectile_motion.collider = FIRE_COLLIDER;
+        projectile.type = DamageType::fire;
+        projectile.range = FIRE_RANGE;
+        damage.value = FIRE_DAMAGE;
+        request.texture = "fireball";
+        request.type = PROJECTILE;
+        break;
+    case SpellType::WATER:
+    {
+        deadly.to_projectile = true;
+        projectile_motion.scale = WATER_SCALE;
+        projectile_motion.collider = WATER_COLLIDER;
+        projectile.type = DamageType::water;
+        projectile.range = WATER_RANGE;
+        damage.value = WATER_DAMAGE;
+        Timed& timed = registry.timeds.emplace(projectile_ent);
+        timed.timer = WATER_LIFETIME;
+        request.texture = "barrier";
+        request.type = OVER_PLAYER;
+        break;
+    }
+    case SpellType::LIGHTNING:
+        // TODO
+        break;
+    case SpellType::ICE:
+        // TODO
+        break;
+    default: // Should not happen
+        break;
+    }
+
+    request.mesh = "sprite";
+    request.shader = "sprite";
+}
+
+void InputHandler::invoke_player_cooldown(Player& player, bool is_left)
+{
+    player.cooldown = 700;
 }
 
 void InputHandler::updateVelocity()

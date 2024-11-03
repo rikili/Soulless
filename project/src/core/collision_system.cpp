@@ -35,7 +35,7 @@ static bool check_collision(const Entity& entity, const Entity& other_entity)
     return (
         std::abs(motion.position.x - other_motion.position.x) <= bounding_box.x + other_bounding_box.x
         && std::abs(motion.position.y - other_motion.position.y) <= bounding_box.y + other_bounding_box.y
-    );
+        );
 }
 
 static mat4 create_transform(const Motion& motion, bool do_rotate = false)
@@ -69,7 +69,7 @@ static void draw_debug(const vec2& vertex, const vec2& other_vertex, vec3 color 
     vertex_debug.type = type;
 }
 
-static void draw_bounding_box(const Entity& entity, const vec3 color = {1.f, 0.f, 0.f})
+static void draw_bounding_box(const Entity& entity, const vec3 color = { 1.f, 0.f, 0.f })
 {
     Motion& motion = registry.motions.get(entity);
     const Entity box_entity;
@@ -148,7 +148,7 @@ void CollisionSystem::detect_collisions()
             visited.insert(entity);
             continue;
         }
-      
+
         if (registry.players.has(entity) && registry.debug)
         {
             draw_vertices(entity, *renderer->getMesh("mage_collider")); // can fetch mesh from component as well
@@ -213,7 +213,7 @@ bool CollisionSystem::is_mesh_colliding(const Entity& primary, const Entity& oth
             {
                 draw_debug(vertex1, vertex2, { 0.f, 1.f, 0.f }, DebugType::fill);
                 draw_debug(vertex2, vertex3, { 0.f, 1.f, 0.f }, DebugType::fill);
-                draw_debug(vertex3, vertex1,  { 0.f, 1.f, 0.f }, DebugType::fill);
+                draw_debug(vertex3, vertex1, { 0.f, 1.f, 0.f }, DebugType::fill);
             }
             result = true;
         }
@@ -224,6 +224,28 @@ bool CollisionSystem::is_mesh_colliding(const Entity& primary, const Entity& oth
 void CollisionSystem::resolve_collisions()
 {
     // Ordering matters for which types of entites are checked (careful when changing)
+
+    // Water Barrier with other projectile collisions (can't be done within the projectile <-> projectile logic below)
+    for (const Entity& barrier_entity : registry.projectiles.entities) {
+        const Projectile& projectile = registry.projectiles.get(barrier_entity);
+
+        if (projectile.type != DamageType::water) continue;
+
+        const Deadly& deadly = registry.deadlies.get(barrier_entity);
+        std::unordered_set<Entity> other_entities = registry.collision_registry.get_collision_by_ent(barrier_entity);
+
+        for (const Entity& other_entity : other_entities)
+        {
+            // Only interested in projectile vs projectile collisions
+            if (!registry.projectiles.has(other_entity) || !registry.deadlies.has(other_entity)) continue;
+            if (!registry.deadlies.get(other_entity).to_player) continue;
+            if (!registry.collision_registry.check_collision(barrier_entity, other_entity)) continue;
+
+            applyDamage(other_entity, barrier_entity);
+
+            registry.collision_registry.remove_collision(barrier_entity, other_entity);
+        }
+    }
 
     // Projectile collisions
     for (const Entity& proj_entity : registry.projectiles.entities)
@@ -292,52 +314,62 @@ void CollisionSystem::resolve_collisions()
 
 void CollisionSystem::applyDamage(Entity attacker, Entity victim)
 {
-    if (registry.onHits.has(victim))
+    if (registry.onHits.has(victim) || registry.deaths.has(attacker) || registry.deaths.has(victim))
     {
         return;
     }
 
     SoundManager* soundManager = SoundManager::getSoundManager();
 
-    const Damage& damage = registry.damages.get(attacker);
-    Health& health = registry.healths.get(victim);
-    if (health.health - damage.value <= 0 && !registry.deaths.has(victim)) {
-        health.health = 0;
-        Death& death = registry.deaths.emplace(victim);
+    if (registry.healths.has(victim)) {
+        const Damage& damage = registry.damages.get(attacker);
+        Health& health = registry.healths.get(victim);
+        if (health.health - damage.value <= 0 && !registry.deaths.has(victim)) {
+            health.health = 0;
+            Death& death = registry.deaths.emplace(victim);
 
-        if (registry.players.has(victim))
-        {
-            printd("Player has died!\n");
-            // set player velocity to 0: to prevent bug where player moves after death
-            Motion& motion = registry.motions.get(victim);
-            motion.velocity = { 0.0f, 0.0f };
-            soundManager->playSound(SoundEffect::PLAYER_DEFEATED);
-            soundManager->playMusic(Song::DEFEAT);
-            death.timer = 7000;
+            if (registry.players.has(victim))
+            {
+                printd("Player has died!\n");
+                // set player velocity to 0: to prevent bug where player moves after death
+                Motion& motion = registry.motions.get(victim);
+                motion.velocity = { 0.0f, 0.0f };
+                soundManager->playSound(SoundEffect::PLAYER_DEFEATED);
+                soundManager->playMusic(Song::DEFEAT);
+                death.timer = 7000;
+            }
+            else {
+                death.timer = 10;
+            }
+
         }
         else {
-            death.timer = 10;
-        }
+            // TODO: Need to change based on entity type
+            if (!registry.players.has(victim)) {
+                soundManager->playSound(SoundEffect::VILLAGER_DAMAGE);
+            }
+            else if (registry.players.has(victim)) {
+                soundManager->playSound(SoundEffect::PITCHFORK_DAMAGE);
+            }
 
+            health.health -= damage.value;
+            OnHit& hit = registry.onHits.emplace(victim);
+            if (registry.players.has(victim))
+            {
+                printd("Player has been hit! Remaining health: %f\n", health.health);
+                hit.invincibility_timer = PLAYER_INVINCIBILITY_TIMER;
+            }
+            else
+            {
+                hit.invincibility_timer = ENEMY_INVINCIBILITY_TIMER;
+            }
+        }
     }
+    // projectile <-> projectile -- projectiles don't have health
     else {
-        if (!registry.players.has(victim)) {
-            soundManager->playSound(SoundEffect::VILLAGER_DAMAGE);
-        }
-        else if (registry.players.has(victim)) {
-            soundManager->playSound(SoundEffect::PITCHFORK_DAMAGE);
-        }
-
-        health.health -= damage.value;
-        OnHit& hit = registry.onHits.emplace(victim);
-        if (registry.players.has(victim))
-        {
-            // printd("Player has been hit! Remaining health: %f\n", health.health);
-            hit.invincibility_timer = PLAYER_INVINCIBILITY_TIMER;
-        }
-        else
-        {
-            hit.invincibility_timer = ENEMY_INVINCIBILITY_TIMER;
+        Projectile& victim_projectile = registry.projectiles.get(victim);
+        if (victim_projectile.type == DamageType::water) {
+            registry.deaths.emplace(victim);
         }
     }
 
