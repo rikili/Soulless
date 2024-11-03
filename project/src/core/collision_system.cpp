@@ -401,7 +401,7 @@ void CollisionSystem::applyHealing(Entity target)
         return;
     }
 
-    health.health += 10.f;
+    health.health = std::min(PLAYER_HEALTH, health.health + 10.0f);
     printd("Player has been healed! New health: %f\n", health.health);
 
     OnHeal& heal = registry.onHeals.emplace(target);
