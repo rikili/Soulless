@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/vec2.hpp>
+#include <float.h>
 
 using glm::vec2;
 
@@ -51,7 +52,7 @@ const vec2 FIRE_COLLIDER = { 50, 50 };
 
 const float WATER_DAMAGE = 0.f;
 const float WATER_VELOCITY = 0.f;
-const float WATER_RANGE = __FLT_MAX__; // Range is "infinite" for barrier
+const float WATER_RANGE = FLT_MAX; // Range is "infinite" for barrier
 const vec2 WATER_SCALE = { 1.f, 1.f };
 const float WATER_SCALE_FACTOR = 1.f;
 const vec2 WATER_COLLIDER = { 250, 250 };
