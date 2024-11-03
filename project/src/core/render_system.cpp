@@ -79,7 +79,7 @@ bool RenderSystem::initialize(InputHandler& input_handler, const int width, cons
 	assert(is_fine == 0);
 
 	// Set initial window colour
-	glClearColor(0.376f, 0.78f, 0.376f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glfwSwapBuffers(this->window);
 	return true;
@@ -95,7 +95,7 @@ void RenderSystem::setUpView() const
 	int width, height;
 	glfwGetFramebufferSize(this->window, &width, &height);
 	glViewport(0, 0, width, height);
-	glClearColor((0.376), (0.78), (0.376), 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -131,11 +131,6 @@ void RenderSystem::drawFrame(float elapsed_ms)
 							  // and alpha blending, one would have to sort
 							  // sprites back to front
 
-	// Draw the background
-	const Shader* bgShader = this->asset_manager.getShader("background");
-	const Mesh* bgMesh = this->asset_manager.getMesh("background");
-	const Texture* bgTexture = this->asset_manager.getTexture("grass");
-
 	if (globalOptions.tutorial) {
 		float titleFontSize = this->asset_manager.getFont("king")->size;
 		float tutFontSize = this->asset_manager.getFont("deutsch")->size;
@@ -164,21 +159,6 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		drawText(message + start, "deutsch", window_width_px / 2.0f, tutFontSize * 1.5, 1.0f, color);
 		return;
 	}
-
-	// if (bgShader && bgMesh && bgTexture) {
-	// 	glUseProgram(bgShader->program);
-
-	// 	// Set the texture
-	// 	glActiveTexture(GL_TEXTURE0);
-	// 	glBindTexture(GL_TEXTURE_2D, bgTexture->handle);  // Assuming Texture struct has an 'id' field
-	// 	glUniform1i(glGetUniformLocation(bgShader->program, "backgroundTexture"), 0);
-
-	// 	// Set the repeat factor (adjust these values to control the number of repetitions)
-	// 	glUniform2f(glGetUniformLocation(bgShader->program, "repeatFactor"), 10.0f, 10.0f);
-
-	// 	glBindVertexArray(bgMesh->vao);
-	// 	glDrawElements(GL_TRIANGLES, bgMesh->indexCount, GL_UNSIGNED_INT, 0);
-	// }
 
 	Entity player = registry.players.entities[0];
 	float playerX = registry.motions.get(player).position.x - window_width_px / 2.0 * zoomFactor;
@@ -501,8 +481,15 @@ void RenderSystem::drawBackgroundObjects() {
 	float zoom = zoomFactor;
 	zoom = 1.0f * zoomFactor; // TODO: Fix zoom
 
-			for (const auto& render_request: registry.static_render_requests.entities) {
+		for (const auto& render_request: registry.static_render_requests.entities) {
 		RenderRequest& request = registry.static_render_requests.get(render_request);
+
+		Tile& tile = registry.tiles.get(render_request);
+
+		if (tile.position.x < 0 || tile.position.x > window_width_px || tile.position.y < 0 || tile.position.y > window_height_px) {
+			continue;
+		}
+	
 		const Mesh* mesh = this->asset_manager.getMesh(request.mesh);
 		if (!mesh) {
 			std::cerr << "Mesh with id " << request.mesh << " not found!" << std::endl;
@@ -520,7 +507,7 @@ void RenderSystem::drawBackgroundObjects() {
 		const GLuint shaderProgram = shader->program;
 		glUseProgram(shaderProgram);
 
-		Tile& tile = registry.tiles.get(render_request);
+		
 
 		mat4 transform = mat4(1.0f);
 		transform = translate(transform, glm::vec3(tile.position, 0.0f));

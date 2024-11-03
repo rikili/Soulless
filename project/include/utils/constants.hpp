@@ -4,10 +4,10 @@
 using glm::vec2;
 
 // --- Game Logic Constants ---
-const unsigned int MAX_ENEMIES = 100;
-const float FARMER_SPAWN_INTERVAL_MS = 5000.f;
-const float ARCHER_SPAWN_INTERVAL_MS = 10000.f;
-const float KNIGHT_SPAWN_INTERVAL_MS = 15000.f;
+const unsigned int MAX_ENEMIES = 50;
+const float FARMER_SPAWN_INTERVAL_MS = 8000.f;
+const float ARCHER_SPAWN_INTERVAL_MS = 16000.f;
+const float KNIGHT_SPAWN_INTERVAL_MS = 20000.f;
 const unsigned int QUEUE_SIZE = 8;
 
 const float ENEMY_INVINCIBILITY_TIMER = 800.f;
@@ -87,7 +87,7 @@ const float ENEMY_BASIC_RANGE = 100.f;
 
 // Farmer + Pitchfork
 const float FARMER_HEALTH = 25.f;
-const float FARMER_COOLDOWN = 1000.f;
+const float FARMER_COOLDOWN = 4000.f;
 const float FARMER_VELOCITY = 0.10f;
 const float FARMER_RANGE = 200.f;
 const float FARMER_DAMAGE = 5.f;

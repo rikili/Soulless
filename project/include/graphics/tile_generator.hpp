@@ -62,8 +62,8 @@ private:
 
 public:
     TileGenerator(int rows, int cols, bool safetyMultiplier = true) :
-        numRows(rows * (safetyMultiplier ? 2.5 : 1)),
-        numCols(cols * (safetyMultiplier ? 2.5 : 1)),
+        numRows(rows * (safetyMultiplier ? 1 : 1)),
+        numCols(cols * (safetyMultiplier ? 1 : 1)),
         gen(rd()) {
         generateNoiseMap();
     }
