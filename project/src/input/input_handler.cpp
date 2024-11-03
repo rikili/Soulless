@@ -21,7 +21,7 @@ InputHandler::InputHandler() {}
 
 bool isPlayerDead()
 {
-    Entity &player_ent = registry.players.entities[0];
+    Entity& player_ent = registry.players.entities[0];
     return registry.deaths.has(player_ent);
 }
 
@@ -37,7 +37,7 @@ bool isPause()
 
 void InputHandler::onKey(int key, int scancode, int action, int mods)
 {
-    SoundManager *soundManager = SoundManager::getSoundManager();
+    SoundManager* soundManager = SoundManager::getSoundManager();
 
     if (isTutorialOn() && key == GLFW_KEY_SPACE)
     {
@@ -78,7 +78,7 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
             printd("E button pressed.\n");
             // TODO: drop spell 2 and increase HP
             break;
-        // TODO: NEED A NEW KEY FOR... interact with item on ground (unused for now)
+            // TODO: NEED A NEW KEY FOR... interact with item on ground (unused for now)
         case GLFW_KEY_F:
             if (mods & GLFW_MOD_SHIFT)
             {
@@ -120,8 +120,8 @@ void InputHandler::onMouseMove(vec2 mouse_position)
         return;
     }
 
-    Entity &player = registry.players.entities[0];
-    Motion &playerMotion = registry.motions.get(player);
+    Entity& player = registry.players.entities[0];
+    Motion& playerMotion = registry.motions.get(player);
 
     Entity& camera = registry.cameras.entities[0];
     Camera& cameraEntity = registry.cameras.get(camera);
@@ -140,16 +140,22 @@ void InputHandler::onMouseMove(vec2 mouse_position)
     playerMotion.angle = find_closest_angle(dx, dy);
 }
 
-void create_player_projectile(Entity &player_ent, double x, double y)
+void create_player_projectile(Entity& player_ent, double x, double y)
 {
 
     Entity projectile_ent;
-    Projectile &projectile = registry.projectiles.emplace(projectile_ent);
-    Motion &projectile_motion = registry.motions.emplace(projectile_ent);
-    Deadly &deadly = registry.deadlies.emplace(projectile_ent);
-    Damage &damage = registry.damages.emplace(projectile_ent);
-    RenderRequest &request = registry.render_requests.emplace(projectile_ent);
-    Motion &player_motion = registry.motions.get(player_ent);
+    Projectile& projectile = registry.projectiles.emplace(projectile_ent);
+    Motion& projectile_motion = registry.motions.emplace(projectile_ent);
+    Deadly& deadly = registry.deadlies.emplace(projectile_ent);
+    Damage& damage = registry.damages.emplace(projectile_ent);
+    RenderRequest& request = registry.render_requests.emplace(projectile_ent);
+    Motion& player_motion = registry.motions.get(player_ent);
+
+    Animation& player_animation = registry.animations.get(player_ent);
+    player_animation.state = EntityState::ATTACKING;
+    player_animation.frameTime = 30.f;
+    player_motion.currentDirection = angleToDirection(player_motion.angle);
+    player_animation.initializeAtRow((int)player_motion.currentDirection);
 
     deadly.to_enemy = true;
 
@@ -161,7 +167,7 @@ void create_player_projectile(Entity &player_ent, double x, double y)
     // TODO: change once finalization is needed
     projectile.type = DamageType::fire;
     projectile.range = FIRE_RANGE;
-    projectile_motion.velocity = vec2({cos(player_motion.angle), sin(player_motion.angle)});
+    projectile_motion.velocity = vec2({ cos(player_motion.angle), sin(player_motion.angle) });
     damage.value = FIRE_DAMAGE;
 
     request.mesh = "sprite";
@@ -170,15 +176,15 @@ void create_player_projectile(Entity &player_ent, double x, double y)
     request.type = PROJECTILE;
 }
 
-void invoke_player_cooldown(Player &player, bool is_left)
+void invoke_player_cooldown(Player& player, bool is_left)
 {
     player.cooldown = 700;
 }
 
 void cast_player_spell(double x, double y, bool is_left)
 {
-    Entity &player_ent = registry.players.entities[0];
-    Player &player = registry.players.get(player_ent);
+    Entity& player_ent = registry.players.entities[0];
+    Player& player = registry.players.get(player_ent);
     if (player.cooldown > 0)
     {
         return;
@@ -186,18 +192,18 @@ void cast_player_spell(double x, double y, bool is_left)
 
     create_player_projectile(player_ent, x, y);
 
-    SoundManager *soundManager = SoundManager::getSoundManager();
+    SoundManager* soundManager = SoundManager::getSoundManager();
     soundManager->playSound(SoundEffect::FIRE);
 
     invoke_player_cooldown(player, is_left);
 }
 
-void InputHandler::onMouseKey(GLFWwindow *window, int button, int action, int mods)
+void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mods)
 {
     if (isTutorialOn())
     {
         globalOptions.tutorial = false;
-        SoundManager *soundManager = SoundManager::getSoundManager();
+        SoundManager* soundManager = SoundManager::getSoundManager();
         soundManager->playMusic(Song::MAIN);
         return;
     }
@@ -233,8 +239,11 @@ void InputHandler::updateVelocity()
     // Entity player = player_wizard;
     auto player = registry.players.entities[0];
 
-    auto &motion_registry = registry.motions;
-    Motion &playerMotion = motion_registry.get(player);
+    auto& motion_registry = registry.motions;
+    Motion& playerMotion = motion_registry.get(player);
+
+    printf("Player position: %f, %f\n", playerMotion.position.x, playerMotion.position.y);
+
 
     int verticalDir = activeMoveKeys.count(GLFW_KEY_S) - activeMoveKeys.count(GLFW_KEY_W);
     int horizontalDir = activeMoveKeys.count(GLFW_KEY_D) - activeMoveKeys.count(GLFW_KEY_A);
@@ -259,6 +268,6 @@ void InputHandler::updateVelocity()
         playerMotion.velocity.y = 0;
     }
 
-     printd("New velocity is: %f, %f\n", playerMotion.velocity.x, playerMotion.velocity.y);
-     printd("New position is: %f, %f\n", playerMotion.position.x, playerMotion.position.y);
+    //  printd("New velocity is: %f, %f\n", playerMotion.velocity.x, playerMotion.velocity.y);
+    //  printd("New position is: %f, %f\n", playerMotion.position.x, playerMotion.position.y);
 }

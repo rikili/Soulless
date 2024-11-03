@@ -19,6 +19,7 @@ class RenderSystem {
 public:
 	bool initialize(InputHandler& input_handler, int width = 480, int height = 500, const char* title = "OpenGL Example");
 	void setUpView() const;
+	void initializeCamera();
 	// void setUpFont();
 	GLFWwindow* getGLWindow() const;
 	void drawFrame(float elapsed_ms);
@@ -73,8 +74,9 @@ private:
 
     void drawBackgroundObjects();
 
-    std::vector<RenderIndex> sorted_indices;
-	GLuint frame_buffer = 0;
+
+	std::vector<RenderIndex> sorted_indices;
+	// GLuint frame_buffer = 0;
 	Entity screen_state_entity;
 	GLFWwindow* window = nullptr;
 	AssetManager asset_manager; // Holds all the assets

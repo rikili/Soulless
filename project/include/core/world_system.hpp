@@ -17,12 +17,13 @@ public:
 	explicit WorldSystem(RenderSystem* renderer);
 	~WorldSystem();
 	bool step(float elapsed_ms);
-	bool is_over()const;
+	bool is_over() const;
 	void set_renderer(RenderSystem* renderer);
 	void handle_projectiles(float elapsed_ms_since_last_update);
 	void handle_timers(float elapsed_ms_since_last_update);
 	void handle_movements(float elapsed_ms_since_last_update);
 	void handle_enemy_attacks(float elapsed_ms_since_last_update);
+	void handle_animations();
 	void create_enemy_projectile(Entity& enemy_ent);
 	void invoke_enemy_cooldown(Entity& enemy_ent);
 	void initialize();
@@ -30,18 +31,22 @@ public:
     void createTileGrid();
     Entity getPlayer();
 
-    // World state specific variables
-	float enemy_spawn_timer = 0.0f;
+	// World state specific variables
+	float farmer_spawn_timer = 0.0f;
+	float archer_spawn_timer = 60000.0f; // Spawns in at 1 minute
+	float knight_spawn_timer = 120000.0f; // Spawns in at 2 minutes
 
 private:
 	// helper functions to set the world
 	void loadBackgroundObjects();
 
 	Entity createPlayer();
+	void computeNewDirection(Entity e);
 	void createEnemy(EnemyType type, vec2 position, vec2 velocity);
-    void createTile(TileType type, vec2 position, vec2 scale);
-    void createFarmer(vec2 position, vec2 velocity);
-    Entity createBackgroundObject(vec2 position, vec2 scale, AssetId texture, bool animate);
+	void createFarmer(vec2 position, vec2 velocity);
+	void createArcher(vec2 position, vec2 velocity);
+	void createKnight(vec2 position, vec2 velocity);
+	Entity createBackgroundObject(vec2 position, vec2 scale, AssetId texture, bool animate);
 	void handle_enemy_logic(float elapsed_ms_since_last_update);
 
 	Mix_Music* background_music;

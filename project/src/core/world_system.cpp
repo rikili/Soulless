@@ -3,6 +3,7 @@
 #include "entities/ecs_registry.hpp"
 #include "sound/sound_manager.hpp"
 #include "utils/isometric_helper.hpp"
+#include "graphics/tile_generator.hpp"
 
 WorldSystem::WorldSystem(RenderSystem* renderer)
 {
@@ -19,17 +20,18 @@ bool WorldSystem::is_over() const {
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
-
 	this->handle_projectiles(elapsed_ms_since_last_update);
 	this->handle_enemy_attacks(elapsed_ms_since_last_update);
 	this->handle_timers(elapsed_ms_since_last_update);
 
 	if (!registry.players.has(player_mage)) {
 		this->restartGame();
+		this->renderer->initializeCamera();
 		return true;
 	}
 
 	this->handle_movements(elapsed_ms_since_last_update);
+	this->handle_animations();
 	this->collision_system->handle_collisions();
 
 	this->handle_enemy_logic(elapsed_ms_since_last_update);
@@ -42,9 +44,40 @@ void WorldSystem::set_renderer(RenderSystem* renderer)
 	this->renderer = renderer;
 }
 
+void WorldSystem::handle_animations() {
+	Motion& playerMotion = registry.motions.get(player_mage);
+	Animation& playerAnimation = registry.animations.get(player_mage);
+	RenderRequest& playerRR = registry.render_requests.get(player_mage);
+
+	if (playerAnimation.state == EntityState::ATTACKING) {
+		playerAnimation.oneTime = true;
+		playerRR.texture = "mage-attack";
+	}
+	else {
+		
+		if (playerMotion.velocity.x == 0 && playerMotion.velocity.y == 0) {
+			playerRR.texture = "mage-idle";
+		}
+		else {
+			playerRR.texture = "mage-walk";
+		}
+
+		if (playerMotion.currentDirection == playerMotion.oldDirection) {
+			return;
+		}
+
+		playerAnimation.initializeAtRow((int)playerMotion.currentDirection);
+	}
+	
+	// printd("Current: %d\n", playerMotion.currentDirection);
+
+	
+	
+}
 /**
- * @brief Handle projectiles to reduce their range at each step and mark for deletion if they are out of range
- * @param 
+ * @brief Handle projectiles to reduce their range at each step and mark for
+ * deletion if they are out of range
+ * @param
  */
 void WorldSystem::handle_projectiles(float elapsed_ms_since_last_update)
 {
@@ -70,28 +103,34 @@ void WorldSystem::handle_projectiles(float elapsed_ms_since_last_update)
 		if (projectile.range <= 0)
 		{
 			registry.deaths.emplace(projectile_ent);
-			// printd("Marked for removal due to distance travelled - Entity value: %u\n", static_cast<unsigned>(projectile_ent));
+			// printd("Marked for removal due to distance travelled - Entity value:
+			// %u\n", static_cast<unsigned>(projectile_ent));
 		}
 	}
 }
 
 /**
- * @brief In charge of updating the position of all entities with a motion component
+ * @brief In charge of updating the position of all entities with a motion
+ * component
  * @param elapsed_ms_since_last_update
  */
 void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 {
-	ComponentContainer<Motion> &motions_registry = registry.motions;
+	ComponentContainer<Motion>& motions_registry = registry.motions;
 	Motion& player_motion = motions_registry.get(player_mage);
 
 	// Update all motions
-	for (Entity entity : motions_registry.entities) {
+	for (Entity entity : motions_registry.entities)
+	{
 		Motion& motion = motions_registry.get(entity);
 		if (registry.players.has(entity) || registry.enemies.has(entity))
 		{
 			float x_offset = motion.collider.x * motion.scale.x;
 			float y_offset = motion.collider.y * motion.scale.y;
-			motion.position = glm::clamp(motion.position + motion.velocity * elapsed_ms_since_last_update, { x_offset, y_offset }, { window_width_px - x_offset, window_height_px - y_offset });
+			motion.position = glm::clamp(
+				motion.position + motion.velocity * elapsed_ms_since_last_update,
+				{ x_offset, y_offset },
+				{ window_width_px - x_offset, window_height_px - y_offset });
 		}
 		else
 		{
@@ -100,16 +139,75 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 
 		if (registry.enemies.has(entity))
 		{
-			Enemy& enemy = registry.enemies.get(entity);
-			motion.angle = atan2(player_motion.position.y - motion.position.y, player_motion.position.x - motion.position.x);
+			// Enemy& enemy = registry.enemies.get(entity);
+			motion.angle = atan2(player_motion.position.y - motion.position.y,
+				player_motion.position.x - motion.position.x);
 			// printd("Enemy angle towards player: %f\n", motion.angle);
-		}	
+		}
+
+		// Only player for now, can be expanded
+		if (registry.players.has(entity)) {
+			computeNewDirection(entity);
+		}
 
 		RenderRequest& render_request = registry.render_requests.get(entity);
 		render_request.smooth_position.update(motion.position.y);
 	}
 }
 
+void WorldSystem::computeNewDirection(Entity e) {
+	Motion& motion = registry.motions.get(e);
+	motion.oldDirection = motion.currentDirection;
+	
+
+	float xVel = motion.velocity.x;
+	float yVel = motion.velocity.y;
+
+	if (xVel == 0 && yVel == 0) {
+		return;
+	}
+
+	if (xVel == 0) {
+		if (yVel < 0) {
+			motion.currentDirection = Direction::N;
+		}
+		else {
+			motion.currentDirection = Direction::S;
+		}
+		return;
+	}
+
+	if (yVel == 0) {
+		if (xVel > 0) {
+			motion.currentDirection = Direction::E;
+		}
+		else {
+			motion.currentDirection = Direction::W;
+		}
+		return;
+	}
+
+	if (xVel < 0) {
+		if (yVel < 0) {
+			motion.currentDirection = Direction::NW;
+		}
+		else {
+			motion.currentDirection = Direction::SW;
+		}
+		return;
+	}
+
+	if (xVel > 0) {
+		if (yVel < 0) {
+			motion.currentDirection = Direction::NE;
+		}
+		else {
+			motion.currentDirection = Direction::SE;
+		}
+		return;
+	}
+
+}
 /**
  * @brief In charge of updating timers and their side effects
  * @param elapsed_ms_since_last_update
@@ -120,9 +218,13 @@ void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 	{
 		OnHit& hit = registry.onHits.get(hit_ent);
 		hit.invincibility_timer -= elapsed_ms_since_last_update;
-		if (hit.invincibility_timer < 0)
-		{
-			registry.onHits.remove(hit_ent);
+		if (hit.invincibility_timer < PLAYER_INVINCIBILITY_TIMER - 200.f) {
+			hit.invicibilityShader = true;
+
+			if (hit.invincibility_timer < 0)
+			{
+				registry.onHits.remove(hit_ent);
+			}
 		}
 	}
 
@@ -135,7 +237,9 @@ void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 			if (!registry.players.has(dead_ent))
 			{
 				registry.remove_all_components_of(dead_ent);
-			} else {
+			}
+			else
+			{
 				registry.clear_all_components();
 				printd("Successfully killed player!\n");
 			}
@@ -165,7 +269,8 @@ void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 }
 
 /**
- * @brief In charge of enemies using their attacks when they are in range and off cooldown
+ * @brief In charge of enemies using their attacks when they are in range and
+ * off cooldown
  * @param elapsed_ms_since_last_update
  */
 void WorldSystem::handle_enemy_attacks(float elapsed_ms_since_last_update)
@@ -176,10 +281,10 @@ void WorldSystem::handle_enemy_attacks(float elapsed_ms_since_last_update)
 		Motion& enemy_motion = registry.motions.get(enemy_ent);
 		Motion& player_motion = registry.motions.get(player_mage);
 
-		// printd("Distance between player and enemy: %f\n", glm::distance(enemy_motion.position, player_motion.position));
+		// printd("Distance between player and enemy: %f\n",
+		// glm::distance(enemy_motion.position, player_motion.position));
 
-		if (enemy.cooldown <= 0 && (glm::distance(enemy_motion.position, player_motion.position) <= enemy.range))
-		{
+		if (enemy.cooldown <= 0 && (glm::distance(enemy_motion.position, player_motion.position) <= enemy.range)) {
 			create_enemy_projectile(enemy_ent);
 			invoke_enemy_cooldown(enemy_ent);
 		}
@@ -203,28 +308,59 @@ void WorldSystem::create_enemy_projectile(Entity& enemy_ent)
 	projectile_motion.position = enemy_motion.position;
 	projectile_motion.angle = enemy_motion.angle;
 
+	float attack_velocity;
+	float attack_damage;
+	std::string attack_texture;
+	switch (enemy.type) {
+	case EnemyType::FARMER:
+		attack_velocity = PITCHFORK_VELOCITY;
+		attack_damage = PITCHFORK_DAMAGE;
+		attack_texture = "pitchfork";
+		break;
+	case EnemyType::ARCHER:
+		attack_velocity = ARROW_VELOCITY;
+		attack_damage = ARROW_DAMAGE;
+		attack_texture = "arrow";
+		break;
+	case EnemyType::KNIGHT:
+		attack_velocity = KNIGHT_VELOCITY;
+		attack_damage = SWORD_DAMAGE;
+		attack_texture = "filler";
+		break;
+	default: // Should not happen but just in case
+		attack_velocity = PITCHFORK_VELOCITY;
+		attack_damage = PITCHFORK_DAMAGE;
+		attack_texture = "pitchfork";
+		break;
+	}
+
 	projectile.type = DamageType::elementless;
 	projectile.range = enemy.range;
-	projectile_motion.velocity = vec2({ cos(enemy_motion.angle), sin(enemy_motion.angle) }) * PITCHFORK_VELOCITY;
-	damage.value = PITCHFORK_DAMAGE;
+	projectile_motion.velocity = vec2({ cos(enemy_motion.angle), sin(enemy_motion.angle) }) * attack_velocity;
+	damage.value = attack_damage;
 
 	request.mesh = "sprite";
-	request.texture = "pitchfork";
+	request.texture = attack_texture;
 	request.shader = "sprite";
 	request.type = PROJECTILE;
 }
 
-void WorldSystem::invoke_enemy_cooldown(Entity& enemy_ent) {
-		Enemy& enemy = registry.enemies.get(enemy_ent);
+void WorldSystem::invoke_enemy_cooldown(Entity& enemy_ent)
+{
+	Enemy& enemy = registry.enemies.get(enemy_ent);
+	EnemyType enemy_type = enemy.type;
 
-	if (enemy.type == EnemyType::FARMER) {
+	switch (enemy_type) {
+	case EnemyType::FARMER:
 		enemy.cooldown = FARMER_COOLDOWN;
-	} else if (enemy.type == EnemyType::ARCHER) {
-		// TODO
-	} else if (enemy.type == EnemyType::CLERIC) {
-		// TODO
+		break;
+	case EnemyType::ARCHER:
+		enemy.cooldown = ARCHER_COOLDOWN;
+		break;
+	case EnemyType::KNIGHT:
+		enemy.cooldown = KNIGHT_COOLDOWN;
+		break;
 	}
-
 }
 
 /**
@@ -235,9 +371,10 @@ void WorldSystem::initialize() {
 }
 
 void WorldSystem::restartGame() {
-	SoundManager *soundManager = SoundManager::getSoundManager();
-	
-	soundManager->playMusic(Song::MAIN);
+	if (!globalOptions.tutorial) {
+		SoundManager* soundManager = SoundManager::getSoundManager();
+		soundManager->playMusic(Song::MAIN);
+	}
 	player_mage = this->createPlayer();
 	this->createTileGrid();
 	loadBackgroundObjects();
@@ -248,41 +385,8 @@ void WorldSystem::createTileGrid() {
     int numCols = static_cast<int>(gridDim.x) * 2;
     int numRows = static_cast<int>(gridDim.y) * 2;
 
-	vec2 offset = {-window_width_px / 2 , -window_height_px / 4};
-	for (int row = 0; row < numRows; row++) {
-			for (int col = 0; col < numCols; col++) {
-			vec2 pos = IsometricGrid::getIsometricPosition(col, row) + offset;
-			
-			// Generate random number between 0 and 99
-			int randNum = rand() % 100;
-        
-			// Distribution:
-			// 40% chance for GRASS
-			// 30% chance for GRASS1
-			// 7.5% chance each for GRASS2, GRASS3, GRASS4, GRASS5
-			TileType type;
-			if (randNum < 40) {
-				type = TileType::GRASS1;
-			}
-			else if (randNum < 70) {
-				type = TileType::GRASS1;
-			}
-			else if (randNum < 77) {
-				type = TileType::GRASS2;
-			}
-			else if (randNum < 84) {
-				type = TileType::GRASS3;
-			}
-			else if (randNum < 92) {
-				type = TileType::GRASS4;
-			}
-			else {
-				type = TileType::GRASS5;
-			}
-			
-			createTile(type, pos, {0.5f, 0.5f});
-        }
-    }
+	TileGenerator tileGenerator(numCols, numRows, true);
+	tileGenerator.generateTiles();
 }
 
 Entity WorldSystem::createPlayer() {
@@ -290,9 +394,10 @@ Entity WorldSystem::createPlayer() {
 
 	registry.players.emplace(player);
 	Motion& motion = registry.motions.emplace(player);
-	motion.position = { window_width_px / 2.0f, window_height_px / 2.0f };  // Center of the screen
+	motion.position = { window_width_px / 2.0f,
+										 window_height_px / 2.0f }; // Center of the screen
 	motion.velocity = { 0.0f, 0.0f };
-	motion.scale = { 0.5f, 0.5f };
+	motion.scale = { 1.f, 1.f };
 
 	Health& health = registry.healths.emplace(player);
 	health.health = PLAYER_HEALTH;
@@ -303,59 +408,39 @@ Entity WorldSystem::createPlayer() {
 	// // TODO: Add player initialization code here!
 
 	Animation& animation = registry.animations.emplace(player);
+	animation.spriteCols = 15;
+	animation.spriteRows = 8;
+	animation.spriteCount = 120;
+	animation.frameCount = 15;
+	animation.initializeAtFrame(0.0f);
 
 	RenderRequest& request = registry.render_requests.emplace(player);
 	request.mesh = "sprite";
-	request.texture = "mage";
+	request.texture = "mage-idle";
 	request.shader = "animatedsprite";
 	request.type = PLAYER;
 
 	return player;
 }
 
-
 void WorldSystem::createEnemy(EnemyType type, vec2 position, vec2 velocity)
 {
-	if (type == EnemyType::FARMER) {
+	EnemyType enemy_type = type;
+
+	switch (enemy_type) {
+	case EnemyType::FARMER:
 		// createFarmer(position, velocity);
-	} else if (type == EnemyType::ARCHER) {
-		// TODO: Implement archer enemy (can be changed)
-	} else if (type == EnemyType::CLERIC) {
-		// TODO: Implement cleric enemy (can be changed)
+		break;
+	case EnemyType::ARCHER:
+		createArcher(position, velocity);
+		break;
+	case EnemyType::KNIGHT:
+		createKnight(position, velocity);
+		break;
 	}
 }
 
 
-void WorldSystem::createTile(TileType type, vec2 position, vec2 scale) {
-	Entity tile;
-	Tile& tile_component = registry.tiles.emplace(tile);
-	tile_component.type = type;
-	tile_component.position = position;
-	tile_component.scale = scale;
-
-	RenderRequest& request = registry.static_render_requests.emplace(tile);
-	request.mesh = "sprite";
-	switch (type) {
-		case TileType::GRASS2:
-			request.texture = "grass2";
-			break;
-		case TileType::GRASS3:
-			request.texture = "grass3";
-			break;
-		case TileType::GRASS4:
-			request.texture = "grass4";
-			break;
-		case TileType::GRASS5:
-			request.texture = "grass5";
-			break;
-		default:
-			request.texture = "grass1";
-			break;
-	}
-	request.shader = "sprite";
-	request.type = BACK;
-
-}
 
 void WorldSystem::createFarmer(vec2 position, vec2 velocity)
 {
@@ -388,10 +473,73 @@ void WorldSystem::createFarmer(vec2 position, vec2 velocity)
 	request.type = ENEMY;
 }
 
+void WorldSystem::createArcher(vec2 position, vec2 velocity)
+{
+	Entity enemy;
+
+	Enemy& enemy_component = registry.enemies.emplace(enemy);
+	enemy_component.type = EnemyType::ARCHER;
+	enemy_component.range = ARCHER_RANGE;
+	enemy_component.cooldown = ARCHER_COOLDOWN;
+
+	Motion& motion = registry.motions.emplace(enemy);
+	motion.position = position;
+	motion.velocity = velocity;
+	motion.scale = { 0.5f, 0.5f };
+
+	Health& health = registry.healths.emplace(enemy);
+	health.health = ARCHER_HEALTH;
+	health.maxHealth = ARCHER_HEALTH;
+
+	Deadly& deadly = registry.deadlies.emplace(enemy);
+	deadly.to_projectile = true;
+
+	Damage& damage = registry.damages.emplace(enemy);
+	damage.value = ARCHER_DAMAGE;
+
+	RenderRequest& request = registry.render_requests.emplace(enemy);
+	request.mesh = "sprite";
+	request.texture = "archer";
+	request.shader = "sprite";
+	request.type = ENEMY;
+}
+
+void WorldSystem::createKnight(vec2 position, vec2 velocity)
+{
+	Entity enemy;
+
+	Enemy& enemy_component = registry.enemies.emplace(enemy);
+	enemy_component.type = EnemyType::KNIGHT;
+	enemy_component.range = KNIGHT_RANGE;
+	enemy_component.cooldown = KNIGHT_COOLDOWN;
+
+	Motion& motion = registry.motions.emplace(enemy);
+	motion.position = position;
+	motion.velocity = velocity;
+	motion.scale = { 0.5f, 0.5f };
+
+	Health& health = registry.healths.emplace(enemy);
+	health.health = KNIGHT_HEALTH;
+	health.maxHealth = KNIGHT_HEALTH;
+
+	Deadly& deadly = registry.deadlies.emplace(enemy);
+	deadly.to_projectile = true;
+
+	Damage& damage = registry.damages.emplace(enemy);
+	damage.value = KNIGHT_DAMAGE;
+
+	RenderRequest& request = registry.render_requests.emplace(enemy);
+	request.mesh = "sprite";
+	request.texture = "knight";
+	request.shader = "sprite";
+	request.type = ENEMY;
+}
+
 void WorldSystem::loadBackgroundObjects() {
 	createBackgroundObject({ window_width_px / 4, window_height_px / 4 }, { 0.75, 0.75 }, "tree", false);
 	Entity campfire = createBackgroundObject({ window_width_px / 2, window_height_px / 2 + 50.f }, { 0.5, 0.5 }, "campfire", true);
 	Animation& campfireAnimation = registry.animations.emplace(campfire);
+	campfireAnimation.frameTime = 100.f;
 	campfireAnimation.spriteCols = 6;
 	campfireAnimation.spriteRows = 1;
 	campfireAnimation.frameCount = 6;
@@ -420,23 +568,34 @@ Entity WorldSystem::createBackgroundObject(vec2 position, vec2 scale, AssetId te
 }
 
 /**
- * @brief Handles the logic for spawning enemies and their movement direction towards the player
+ * @brief Handles the logic for spawning enemies and their movement direction
+ * towards the player
  * @param elapsed_ms_since_last_update
  * @return void
- * If the enemy spawn timer has elapsed, a new enemy is spawned at a random location
- * Enemies are spawned outside the window and move towards the player
+ * If the enemy spawn timer has elapsed, a new enemy is spawned at a random
+ * location Enemies are spawned outside the window and move towards the player
  */
 void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 {
-	this->enemy_spawn_timer -= elapsed_ms_since_last_update;
-	const bool should_spawn = this->enemy_spawn_timer <= 0;
-	if (should_spawn)
-	{
-		this->enemy_spawn_timer = ENEMY_SPAWN_INTERVAL_MS; // Reset the timer
+	this->farmer_spawn_timer -= elapsed_ms_since_last_update;
+	this->archer_spawn_timer -= elapsed_ms_since_last_update;
+	this->knight_spawn_timer -= elapsed_ms_since_last_update;
 
-		std::random_device rd;  // Random device
+	const bool should_spawn_farmer = this->farmer_spawn_timer <= 0;
+	const bool should_spawn_archer = this->archer_spawn_timer <= 0;
+	const bool should_spawn_knight = this->knight_spawn_timer <= 0;
+
+	if (should_spawn_farmer || should_spawn_archer || should_spawn_knight)
+	{
+		std::random_device rd;	// Random device
 		std::mt19937 gen(rd()); // Mersenne Twister generator
-		enum SIDE { TOP, RIGHT, BOTTOM, LEFT }; // Side of the window to spawn from
+		enum SIDE
+		{
+			TOP,
+			RIGHT,
+			BOTTOM,
+			LEFT
+		}; // Side of the window to spawn from
 		std::uniform_int_distribution<int> side_dis(TOP, LEFT);
 		const int side = side_dis(gen);
 
@@ -445,7 +604,8 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 		constexpr float offset_x = window_width_px / 10.f;
 		constexpr float offset_y = window_height_px / 10.f;
 
-		switch(side) {
+		switch (side)
+		{
 		case TOP:
 			candidate_x = dis(gen) * window_width_px;
 			candidate_y = -offset_y;
@@ -465,7 +625,21 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 			break;
 		}
 		const vec2 position = { candidate_x, candidate_y };
-		this->createEnemy(EnemyType::FARMER, position, { 0, 0 });
+
+		if (should_spawn_farmer) {
+			this->farmer_spawn_timer = FARMER_SPAWN_INTERVAL_MS;
+			this->createEnemy(EnemyType::FARMER, position, { 0, 0 });
+		}
+
+		if (should_spawn_archer) {
+			this->archer_spawn_timer = ARCHER_SPAWN_INTERVAL_MS;
+			this->createEnemy(EnemyType::ARCHER, position, { 0, 0 });
+		}
+
+		if (should_spawn_knight) {
+			this->knight_spawn_timer = KNIGHT_SPAWN_INTERVAL_MS;
+			this->createEnemy(EnemyType::KNIGHT, position, { 0, 0 });
+		}
 	}
 
 	// Reorient enemies towards the player
@@ -476,13 +650,30 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 		const vec2* position = &motion.position;
 		const vec2 des = registry.motions.get(player_mage).position;
 		vec2 distance = { des.x - position->x, des.y - position->y };
-		if (enemy_component.range <= sqrt(distance.x * distance.x + distance.y * distance.y))
+		if (enemy_component.range <=
+			sqrt(distance.x * distance.x + distance.y * distance.y))
 		{
-			const vec2 velocity = glm::normalize(distance) * ENEMY_BASIC_VELOCITY;
+			float enemy_velocity_modifier = ENEMY_BASIC_VELOCITY;
+
+			switch (enemy_component.type)
+			{
+			case EnemyType::FARMER:
+				enemy_velocity_modifier = FARMER_VELOCITY;
+				break;
+			case EnemyType::ARCHER:
+				enemy_velocity_modifier = ARCHER_VELOCITY;
+				break;
+			case EnemyType::KNIGHT:
+				enemy_velocity_modifier = KNIGHT_VELOCITY;
+				break;
+			}
+
+			const vec2 velocity = glm::normalize(distance) * enemy_velocity_modifier;
 			motion.velocity = velocity;
-		} else {
+		}
+		else
+		{
 			motion.velocity = { 0, 0 };
 		}
-
 	}
 }

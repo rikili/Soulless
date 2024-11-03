@@ -46,3 +46,31 @@ float find_closest_angle(float dx, float dy) {
 
   return closestAngle;
 }
+
+Direction angleToDirection(float angle) {
+    if (angle == 0.f) {
+        return Direction::E;
+    }
+    else if (angle == -M_PI / 4) {
+        return Direction::NE;
+    }
+    else if (angle == -M_PI / 2) {
+        return Direction::N;
+    }
+    else if (angle == -3 * M_PI / 4) {
+        return Direction::NW;
+    }
+    else if (angle == -M_PI) {
+        return Direction::W;
+    }
+    else if (angle == 3 * M_PI / 4) {
+        return Direction::SW;
+    }
+    else if (angle == M_PI / 2) {
+        return Direction::S;
+    }
+    else if (angle == M_PI / 4) {
+        return Direction::SE;
+    }
+    return Direction::E; // placeholder
+}
