@@ -112,6 +112,25 @@ struct RenderRequest
 
 };
 
+enum class DebugType
+{
+    outline,
+    fill
+};
+struct DebugRequest
+{
+    vec2 position = { 0, 0 };
+    vec2 collider = { 0, 0 };
+    float angle = 0.f;
+    vec3 color = { 1.0f, 0.0f, 0.0f };
+    DebugType type = DebugType::outline;
+};
+
+struct MeshCollider
+{
+    AssetId mesh = "";
+};
+
 struct Animation
 {
     float currentFrame = 0.f;
