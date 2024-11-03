@@ -3,6 +3,7 @@ in vec2 TexCoords;
 out vec4 color;
 
 uniform int state;
+uniform bool visible;
 
 uniform sampler2D image;
 uniform float frame;
@@ -28,12 +29,17 @@ void main()
         TexCoords.y * spriteSize.y + row * spriteSize.y
     );
 
+    vec4 computedColor = vec4(1.0f);
+
     if (state == 1) {
-        color = vec4(1.0f, 0.0f, 0.0f, 1.0f) * texture(image, spriteTexCoords);
+        computedColor = vec4(1.0f, 0.0f, 0.0f, 1.0f) * texture(image, spriteTexCoords);
     } else if (state == 2) {
-        color = vec4(1.0f, 1.0f, 1.0f, 0.75f) *  texture(image, spriteTexCoords);
-    } else {
-        color = texture(image, spriteTexCoords);
-    }
+        computedColor = vec4(1.0f, 1.0f, 1.0f, 0.75f) *  texture(image, spriteTexCoords);
+    } 
     
+    if (!visible) {
+        computedColor.a = 0.0f;
+    }
+
+    color = computedColor * texture(image, spriteTexCoords);
 }  

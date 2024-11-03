@@ -266,6 +266,14 @@ void RenderSystem::drawFrame(float elapsed_ms)
 						}
 					}
 
+					// TODO: Rework this, maybe make an Invisible component
+					if (registry.onHeals.has(registry.players.entities[0]) && registry.interactables.has(entity)) {
+						glUniform1i(glGetUniformLocation(shaderProgram, "visible"), 0);
+					}
+					else {
+						glUniform1i(glGetUniformLocation(shaderProgram, "visible"), 1);
+					}
+
 					if (registry.players.has(entity) && registry.onHits.has(entity)) {
 						if (registry.onHits.get(entity).invicibilityShader) {
 							glUniform1i(glGetUniformLocation(shaderProgram, "state"), 2);
