@@ -368,8 +368,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 	if (!spell_queue.getQueue().empty()) {
 		SpellType spell = spell_queue.getQueue().front();
 		std::string spellText = spellTypeToString(spell);
-		// Motion &playerMotion = registry.motions.get(player);
-		drawText(spellText, "deutsch", playerX, playerY, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+		drawText(spellText, "spellFont", window_width_px / 2.0f, 30.0f , 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 }
 

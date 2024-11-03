@@ -22,6 +22,9 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId healthFont = assetManager.loadFont("healthFont", font_path("deutsch") + ".ttf", 20.0f);
     assets.fonts["healthFont"] = healthFont;
 
+    AssetId spellFont = assetManager.loadFont("spellFont", font_path("deutsch") + ".ttf", 32.0f);
+    assets.fonts["spellFont"] = spellFont;
+
     const std::vector<float> vertices = {
         // positions        // colors           // texture coords
         -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
