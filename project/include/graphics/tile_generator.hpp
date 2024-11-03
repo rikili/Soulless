@@ -137,7 +137,7 @@ public:
                     else type = TileType::CLAY3;
                 }
                 
-                createTile(type, pos, {0.25f, 0.25f});
+                createTile(type, pos, {0.5f, 0.5f});
             }
         }
     }

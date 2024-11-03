@@ -19,8 +19,8 @@ public:
     // Core position conversion with adjusted spacing
     static vec2 getIsometricPosition(int col, int row, bool isIsometricOverride = false) {
         if (isIsometricOverride || IS_ISOMETRIC) {
-            float x = (col * ISO_TILE_WIDTH) /2 + (row * ISO_TILE_HEIGHT /4);
-            float y = (row * ISO_TILE_HEIGHT) / 4;
+            float x = (col * ISO_TILE_WIDTH)  + (row * ISO_TILE_HEIGHT /2);
+            float y = (row * ISO_TILE_HEIGHT) / 2;
             return {x, y};
         } else {
             float x = col * TILE_WIDTH;
