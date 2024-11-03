@@ -109,7 +109,10 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
             updateVelocity();
             break;
         case GLFW_KEY_K:
-            registry.debug = true;
+            registry.debug = !registry.debug;
+            break;
+        case GLFW_KEY_J:
+            registry.game_over = true;
         default:
             break;
         }
@@ -210,7 +213,7 @@ void InputHandler::cast_player_spell(double x, double y, bool is_left)
 void InputHandler::create_player_projectile(Entity& player_ent, double x, double y, SpellType spell)
 {
 
-    Entity projectile_ent;
+    const Entity projectile_ent;
     Projectile& projectile = registry.projectiles.emplace(projectile_ent);
     Motion& projectile_motion = registry.motions.emplace(projectile_ent);
     Deadly& deadly = registry.deadlies.emplace(projectile_ent);

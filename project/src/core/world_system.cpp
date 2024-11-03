@@ -18,22 +18,21 @@ bool WorldSystem::is_over() const {
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
-	this->handle_projectiles(elapsed_ms_since_last_update);
-	this->handle_enemy_attacks(elapsed_ms_since_last_update);
-	this->handle_timers(elapsed_ms_since_last_update);
-	this->handle_spell_states(elapsed_ms_since_last_update);
-
-	if (!registry.players.has(player_mage)) {
-		this->restartGame();
-		this->renderer->initializeCamera();
-		return true;
+	if (!registry.players.has(player_mage) || registry.game_over) {
+		printf("\n----------------\nGame Over! Resetting...\n----------------\n");
+		registry.game_over = false;
 	}
 
-	this->handle_movements(elapsed_ms_since_last_update);
-	this->collision_system->handle_collisions();
-
+	this->handle_projectiles(elapsed_ms_since_last_update);
+	this->handle_enemy_attacks(elapsed_ms_since_last_update);
 	this->handle_enemy_logic(elapsed_ms_since_last_update);
+	this->handle_movements(elapsed_ms_since_last_update);
+	this->collision_system->detect_collisions();
+	this->collision_system->resolve_collisions();
 
+	this->handle_timers(elapsed_ms_since_last_update);
+	this->handle_spell_states(elapsed_ms_since_last_update);
+	registry.collision_registry.clear_collisions();
 	return true;
 }
 
@@ -150,14 +149,11 @@ void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 		death.timer -= elapsed_ms_since_last_update;
 		if (death.timer < 0)
 		{
-			if (!registry.players.has(dead_ent))
+			if (registry.players.has(dead_ent))
 			{
-				registry.remove_all_components_of(dead_ent);
+				registry.game_over = true;
 			}
-			else {
-				registry.clear_all_components();
-				printd("Successfully killed player!\n");
-			}
+			registry.remove_all_components_of(dead_ent);
 		}
 	}
 
@@ -344,15 +340,24 @@ void WorldSystem::invoke_enemy_cooldown(Entity& enemy_ent)
  */
 void WorldSystem::initialize() {
 	restartGame();
+
+	// DEBUG: still enemy/projectile
+	//this->createEnemy(EnemyType::FARMER, {100, 100}, {0, 0});
+	//create_enemy_projectile(registry.enemies.entities[0]);
 }
 
 void WorldSystem::restartGame() {
+	if (registry.players.entities.size() > 0)
+	{
+		registry.clear_all_components();
+	}
 	if (!globalOptions.tutorial) {
 		SoundManager* soundManager = SoundManager::getSoundManager();
 		soundManager->playMusic(Song::MAIN);
 	}
 	player_mage = this->createPlayer();
 	loadBackgroundObjects();
+	this->renderer->initializeCamera();
 }
 
 Entity WorldSystem::createPlayer()
@@ -381,6 +386,9 @@ Entity WorldSystem::createPlayer()
 	request.texture = "mage";
 	request.shader = "animatedsprite";
 	request.type = PLAYER;
+
+	MeshCollider& collider = registry.mesh_colliders.emplace(player);
+	collider.mesh = "mage_collider";
 
 	return player;
 }
@@ -422,6 +430,7 @@ void WorldSystem::createFarmer(vec2 position, vec2 velocity)
 
 	Deadly& deadly = registry.deadlies.emplace(enemy);
 	deadly.to_projectile = true;
+	deadly.to_player = true;
 
 	Damage& damage = registry.damages.emplace(enemy);
 	damage.value = FARMER_DAMAGE;

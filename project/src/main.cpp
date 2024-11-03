@@ -45,6 +45,10 @@ int main(int argc, char* argv[])
 
 		if (!globalOptions.tutorial) {
 			world.step(elapsed_ms); // (2) Update the game state
+			if (registry.game_over)
+			{
+				continue;
+			}
 		}
 
 		renderer.drawFrame(elapsed_ms); // (3) Re-render the scene (where the magic happens)
@@ -62,6 +66,8 @@ int main(int argc, char* argv[])
 
 		glfwSwapBuffers(window); // (4) swap front and back buffers
 		glfwPollEvents(); // (5) poll for and process events
+
+		registry.debug_requests.clear();
 	}
 
 	// TODO: Add cleanup code here

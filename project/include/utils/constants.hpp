@@ -44,10 +44,10 @@ enum class SpellType
 
 const float FIRE_DAMAGE = 25.f;
 const float FIRE_VELOCITY = 1.f;
-const float FIRE_RANGE = 400.f;
-const vec2 FIRE_SCALE = { 0.2, 0.2 };
+const float FIRE_RANGE = 250.f;
+const vec2 FIRE_SCALE = { 0.3, 0.3 };
 const float FIRE_SCALE_FACTOR = 3.f;
-const vec2 FIRE_COLLIDER = { 150, 150 };
+const vec2 FIRE_COLLIDER = { 50, 50 };
 
 const float WATER_DAMAGE = 0.f;
 const float WATER_VELOCITY = 0.f;
