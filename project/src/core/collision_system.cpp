@@ -316,6 +316,9 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
 {
     if (registry.onHits.has(victim) || registry.deaths.has(attacker) || registry.deaths.has(victim))
     {
+        if (registry.projectiles.has(attacker) && !registry.deaths.has(attacker)) {
+            registry.deaths.emplace(attacker);
+        }
         return;
     }
 
