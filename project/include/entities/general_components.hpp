@@ -11,9 +11,13 @@ struct Motion {
     vec2 velocity = { 0, 0 };
     vec2 scale = { 1, 1 };
     vec2 collider = { 50, 50 };
+    
     float mass = 0;
     float speedModifier = 1.f;
     float angle = 0;
+
+    Direction currentDirection = Direction::E;
+    Direction oldDirection = Direction::E;
 };
 
 // Resistance Modifier
@@ -26,6 +30,16 @@ struct Health
     float health = 0;
     float maxHealth = 0;
     ResistanceModifier resistance_modifier;
+};
+
+struct HealthBar
+{
+    Entity assignedTo{};
+    bool assigned = false;
+    void assignHealthBar(Entity& ent) {
+        this->assignedTo = ent;
+        assigned = true;
+    }
 };
 
 // Damage Component
@@ -55,6 +69,10 @@ struct Projectile {
     float range = 0;
 };
 
+struct Interactable {
+    InteractableType type;
+};
+
 // Timed Component
 struct Timed {
     float timer = 0;
@@ -72,6 +90,13 @@ struct Collision
 struct OnHit
 {
     float invincibility_timer = 0;
+    bool invicibilityShader = false;
+};
+
+// Structure to store information on being healed
+struct OnHeal
+{
+    float heal_time = 0;
 };
 
 // Structure to store entities marked to die
@@ -133,13 +158,31 @@ struct MeshCollider
 
 struct Animation
 {
-    float currentFrame = 0.f;
-    float frameTime = 100.f;
+    bool oneTime = false;
+
+    float startFrame = 0.0f;
+    float currentFrame;
+
+    float frameTime = DEFAULT_LOOP_TIME;
     float elapsedTime = 0.f;
 
     int spriteCols = 4;
     int spriteRows = 1;
+    int spriteCount = 12;
+
     int frameCount = 4;
+
+    EntityState state = EntityState::IDLE;
+
+    void initializeAtFrame(float frame) {
+        startFrame = frame;
+        currentFrame = startFrame;
+    }
+
+    void initializeAtRow(int row) {
+        startFrame = row * spriteCols * 1.0;
+        currentFrame = startFrame;
+    }
 };
 
 struct Camera
@@ -155,3 +198,23 @@ struct GlobalOptions {
 };
 
 extern GlobalOptions globalOptions;
+
+
+enum TileType {
+    GRASS1,
+    GRASS2,
+    GRASS3,
+    GRASS4,
+    GRASS5,
+    CLAY1,
+    CLAY2,
+    CLAY3,
+};
+
+
+struct Tile {
+    TileType type;
+    vec2 position;
+    vec2 scale;
+
+};

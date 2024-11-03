@@ -73,30 +73,43 @@ AssetId AssetManager::loadMesh(const std::string& name, const std::vector<float>
 
 AssetId AssetManager::loadBackgroundTexture(const std::string& name, const std::string& path) {
     auto texture = std::make_shared<Texture>();
-
     int width, height, channels;
+    
+    // Load the image data
     unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
     if (data) {
         glGenTextures(1, &texture->handle);
         glBindTexture(GL_TEXTURE_2D, texture->handle);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
+        
+        // Set parameters BEFORE uploading the texture data
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // Changed from LINEAR
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Changed from LINEAR
+        
+        // Use sRGB format for the texture
+        GLenum internalFormat = GL_SRGB;
+        GLenum format = GL_RGB;
+        if (channels == 4) {
+            internalFormat = GL_SRGB_ALPHA;
+            format = GL_RGBA;
+        }
+        
+        // Upload the texture with sRGB format
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        
         stbi_image_free(data);
-
         texture->dimensions = glm::ivec2(width, height);
         textures[name] = std::move(texture);
         return name;
     } else {
         std::cerr << "Failed to load texture: " << path << std::endl;
+        std::cerr << "STB Error: " << stbi_failure_reason() << std::endl;
         return "";
     }
 }
+
 
 AssetId AssetManager::loadTexture(const std::string& name, const std::string& path) {
     auto texture = std::make_shared<Texture>();

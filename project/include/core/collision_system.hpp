@@ -11,6 +11,7 @@ public:
     void detect_collisions();
     void resolve_collisions();
     void applyDamage(Entity attacker, Entity victim);
+    void applyHealing(Entity target);
 
 private:
     RenderSystem* renderer;
