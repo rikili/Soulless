@@ -41,7 +41,7 @@ enum class Direction
     W,
     NW,
     N,
-    NE,    
+    NE,
 };
 
 // --- States ---
@@ -79,8 +79,8 @@ const vec2 FIRE_COLLIDER = { 50, 50 };
 const float WATER_DAMAGE = 0.f;
 const float WATER_VELOCITY = 0.f;
 const float WATER_RANGE = FLT_MAX; // Range is "infinite" for barrier
-const vec2 WATER_SCALE = { 1.f, 1.f };
-const float WATER_SCALE_FACTOR = 1.f;
+const vec2 WATER_SCALE = { 0.6f, 0.6f };
+// const float WATER_SCALE_FACTOR = 1.f;
 const vec2 WATER_COLLIDER = { 250, 250 };
 const float WATER_LIFETIME = 1000.f; // Barrier spell lasts for 1 second (or if it collides with enemy projectile)
 

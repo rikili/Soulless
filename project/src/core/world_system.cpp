@@ -161,7 +161,7 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 		}
 		// Water barrier follows player
 		else if (registry.projectiles.has(entity) && registry.projectiles.get(entity).type == DamageType::water) {
-			motion = player_motion;
+			motion.position = player_motion.position;
 		}
 		else
 		{
@@ -438,9 +438,9 @@ void WorldSystem::restartGame() {
 }
 
 void WorldSystem::createTileGrid() {
-    vec2 gridDim = IsometricGrid::getGridDimensions(window_width_px, window_height_px);
-    int numCols = static_cast<int>(gridDim.x) * 2;
-    int numRows = static_cast<int>(gridDim.y) * 2;
+	vec2 gridDim = IsometricGrid::getGridDimensions(window_width_px, window_height_px);
+	int numCols = static_cast<int>(gridDim.x) * 2;
+	int numRows = static_cast<int>(gridDim.y) * 2;
 
 	TileGenerator tileGenerator(numCols, numRows, true);
 	tileGenerator.generateTiles();
@@ -465,7 +465,7 @@ Entity WorldSystem::createPlayer() {
 
 	auto healthBar = Entity();
 	Motion& healthBarMotion = registry.motions.emplace(healthBar);
-	healthBarMotion.position = { window_width_px / 2.0f, window_height_px / 2.0f + HEALTH_BAR_Y_OFFSET};
+	healthBarMotion.position = { window_width_px / 2.0f, window_height_px / 2.0f + HEALTH_BAR_Y_OFFSET };
 	healthBarMotion.scale = { 0.5, 0.5 };
 
 	HealthBar& healthBarComp = registry.healthBars.emplace(healthBar);

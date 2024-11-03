@@ -227,6 +227,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 				// printd("Fireball angle: %f\n", motion.angle);
 				transform = rotate(transform, motion.angle, glm::vec3(0.0f, 0.0f, 1.0f)); // Apply rotation
 			}
+
 			transform = scale(transform, vec3(motion.scale * 100.f * zoomFactor, 1.0f));
 
 
