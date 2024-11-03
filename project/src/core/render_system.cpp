@@ -21,6 +21,16 @@ std::string spellTypeToString(SpellType spell) {
 	}
 }
 
+glm::vec3 spellTypeToColor(SpellType spell) {
+	switch (spell) {
+	case SpellType::FIRE: return { 0.984313725490196f, 0.5215686274509804f, 0.20784313725490197f };
+	case SpellType::WATER: return { 0.09411764705882353f, 0.7568627450980392f, 0.8980392156862745f };
+	case SpellType::LIGHTNING: return { 0.984313725490196f, 0.9490196078431372f, 0.21176470588235294f };
+	case SpellType::ICE: return { 0, 1, 1 }; // TODO: Change this to a different color
+	default: return { 0.f, 0.f, 0.f };
+	}
+}
+
 /**
  * @brief Initialize the render system
  *
@@ -398,7 +408,8 @@ void RenderSystem::drawFrame(float elapsed_ms)
 	if (!spell_queue.getQueue().empty()) {
 		SpellType spell = spell_queue.getQueue().front();
 		std::string spellText = spellTypeToString(spell);
-		drawText(spellText, "spellFont", window_width_px / 2.0f, 30.0f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::vec3 color = spellTypeToColor(spell);
+		drawText(spellText, "spellFont", window_width_px / 2.0f, 30.0f, 1.0f, color);
 	}
 }
 
