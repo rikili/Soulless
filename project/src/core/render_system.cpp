@@ -170,7 +170,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		drawText("Left click to shoot.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
 		currentY -= tutFontSize * 1.5;
 
-		drawText("Press t to pause/show tutorial.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
+		drawText("Press shift + t to pause/show tutorial.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
 		currentY -= tutFontSize * 1.5;
 
 		drawText("Survive as long as you can!", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);

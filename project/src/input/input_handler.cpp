@@ -88,7 +88,7 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
             printf("FPS: %d\n", globalOptions.fps);
             break;
         case GLFW_KEY_T:
-            if (!isTutorialOn()) {
+            if (!isTutorialOn() && mods & GLFW_MOD_SHIFT) {
                 soundManager->toggleMusic();
                 globalOptions.tutorial = true;
                 globalOptions.pause = true;
