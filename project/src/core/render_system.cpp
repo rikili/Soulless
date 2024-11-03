@@ -8,6 +8,17 @@
 #include <glm/gtc/type_ptr.inl>
 #include <glm/gtc/matrix_transform.hpp>
 #include "entities/general_components.hpp"
+#include "utils/spell_queue.hpp"
+
+std::string spellTypeToString(SpellType spell) {
+    switch (spell) {
+        case SpellType::FIRE: return "Fire";
+        case SpellType::WATER: return "Water";
+        case SpellType::LIGHTNING: return "Lightning";
+        case SpellType::ICE: return "Ice";
+        default: return "Unknown";
+    }
+}
 
 /**
  * @brief Initialize the render system
@@ -350,6 +361,15 @@ void RenderSystem::drawFrame(float elapsed_ms)
 
 			drawText(std::to_string(percentage) + "%", "healthFont", motion.position.x, motion.position.y - 55.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 		}
+	}
+
+	Player &playerObj = registry.players.get(player);
+	SpellQueue& spell_queue = playerObj.spell_queue;
+	if (!spell_queue.getQueue().empty()) {
+		SpellType spell = spell_queue.getQueue().front();
+		std::string spellText = spellTypeToString(spell);
+		// Motion &playerMotion = registry.motions.get(player);
+		drawText(spellText, "deutsch", playerX, playerY, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 }
 
