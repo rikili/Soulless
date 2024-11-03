@@ -8,6 +8,18 @@
 #include <glm/gtc/type_ptr.inl>
 #include <glm/gtc/matrix_transform.hpp>
 #include "entities/general_components.hpp"
+#include "utils/spell_queue.hpp"
+#include "utils/isometric_helper.hpp"
+
+std::string spellTypeToString(SpellType spell) {
+	switch (spell) {
+	case SpellType::FIRE: return "Fire";
+	case SpellType::WATER: return "Water";
+	case SpellType::LIGHTNING: return "Lightning";
+	case SpellType::ICE: return "Ice";
+	default: return "Unknown";
+	}
+}
 
 /**
  * @brief Initialize the render system
@@ -20,7 +32,13 @@
  */
 bool RenderSystem::initialize(InputHandler& input_handler, const int width, const int height, const char* title)
 {
-	projectionMatrix = glm::ortho(0.f, (float)window_width_px * zoomFactor, (float)window_height_px * zoomFactor, 0.f, -1.f, 1.f);
+	glm::mat4 iso = glm::mat4(1.0f);
+	iso = glm::rotate(iso, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));  // X rotation
+	iso = glm::rotate(iso, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Y rotation
+
+	// Combine with orthographic projection
+	projectionMatrix = glm::ortho(0.f, (float)window_width_px * zoomFactor,
+		(float)window_height_px * zoomFactor, 0.f, -1.f, 1.f);
 	registry.projectionMatrix = projectionMatrix;
 
 	initializeCamera();
@@ -72,7 +90,7 @@ bool RenderSystem::initialize(InputHandler& input_handler, const int width, cons
 	assert(is_fine == 0);
 
 	// Set initial window colour
-	glClearColor(0.376f, 0.78f, 0.376f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glfwSwapBuffers(this->window);
 	return true;
@@ -88,7 +106,7 @@ void RenderSystem::setUpView() const
 	int width, height;
 	glfwGetFramebufferSize(this->window, &width, &height);
 	glViewport(0, 0, width, height);
-	glClearColor((0.376), (0.78), (0.376), 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -124,11 +142,6 @@ void RenderSystem::drawFrame(float elapsed_ms)
 	// and alpha blending, one would have to sort
 	// sprites back to front
 
-// Draw the background
-	const Shader* bgShader = this->asset_manager.getShader("background");
-	const Mesh* bgMesh = this->asset_manager.getMesh("background");
-	const Texture* bgTexture = this->asset_manager.getTexture("grass");
-
 	if (globalOptions.tutorial) {
 		float titleFontSize = this->asset_manager.getFont("king")->size;
 		float tutFontSize = this->asset_manager.getFont("deutsch")->size;
@@ -158,27 +171,14 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		return;
 	}
 
-	if (bgShader && bgMesh && bgTexture) {
-		glUseProgram(bgShader->program);
-
-		// Set the texture
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, bgTexture->handle);  // Assuming Texture struct has an 'id' field
-		glUniform1i(glGetUniformLocation(bgShader->program, "backgroundTexture"), 0);
-
-		// Set the repeat factor (adjust these values to control the number of repetitions)
-		glUniform2f(glGetUniformLocation(bgShader->program, "repeatFactor"), 10.0f, 10.0f);
-
-		glBindVertexArray(bgMesh->vao);
-		glDrawElements(GL_TRIANGLES, bgMesh->indexCount, GL_UNSIGNED_INT, 0);
-	}
-
 	Entity player = registry.players.entities[0];
 	float playerX = registry.motions.get(player).position.x - window_width_px / 2.0 * zoomFactor;
 	float playerY = registry.motions.get(player).position.y - window_height_px / 2.0 * zoomFactor;
 
 	updateCameraPosition(clamp(playerX, 0.f, (float)(window_width_px / 2.0)),
 		clamp(playerY, 0.f, (float)(window_height_px / 2.0)));
+
+	drawBackgroundObjects();
 
 	// Draw all entities
 	// registry.render_requests.sort(typeAscending);
@@ -219,17 +219,19 @@ void RenderSystem::drawFrame(float elapsed_ms)
 			}
 
 			mat4 transform = mat4(1.0f);
-			transform = translate(transform, glm::vec3(position, 0.0f));
+			vec2 isoPos = IsometricGrid::convertToIsometric(position);
+			transform = translate(transform, glm::vec3(isoPos, 0.0f));
 
 			// Rotate the sprite for all eight directions if request type is a PROJECTILE
 			if (render_request.type == PROJECTILE) {
 				// printd("Fireball angle: %f\n", motion.angle);
 				transform = rotate(transform, motion.angle, glm::vec3(0.0f, 0.0f, 1.0f)); // Apply rotation
 			}
+
 			transform = scale(transform, vec3(motion.scale * 100.f * zoomFactor, 1.0f));
 
 
-			if (render_request.shader == "sprite" || render_request.shader == "animatedsprite") {
+			if (render_request.shader == "sprite" || render_request.shader == "animatedsprite" || render_request.shader == "healthbar") {
 				if (registry.players.has(entity) && registry.deaths.has(entity)) {
 					transform = rotate(transform, (float)M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
 				}
@@ -252,17 +254,55 @@ void RenderSystem::drawFrame(float elapsed_ms)
 					if (animation.elapsedTime > animation.frameTime) {
 						animation.elapsedTime = 0;
 						animation.currentFrame++;
-						if (animation.currentFrame >= animation.frameCount) {
-							animation.currentFrame = 0;
+						/*if (registry.players.has(entity)) {
+							printd("Frame: %f\n", animation.currentFrame);
+						}*/
+						if (animation.currentFrame - animation.startFrame >= animation.frameCount) {
+							animation.currentFrame = animation.startFrame;
+
+							if (animation.oneTime) {
+								animation.state = EntityState::IDLE;
+								animation.frameTime = DEFAULT_LOOP_TIME;
+								animation.oneTime = false;
+								return;
+							}
 						}
 					}
 
+					// TODO: Rework this, maybe make an Invisible component
+					if (registry.onHeals.has(registry.players.entities[0]) && registry.interactables.has(entity)) {
+						glUniform1i(glGetUniformLocation(shaderProgram, "visible"), 0);
+					}
+					else {
+						glUniform1i(glGetUniformLocation(shaderProgram, "visible"), 1);
+					}
+
+					if (registry.players.has(entity) && registry.onHits.has(entity)) {
+						if (registry.onHits.get(entity).invicibilityShader) {
+							glUniform1i(glGetUniformLocation(shaderProgram, "state"), 2);
+						}
+						else {
+							glUniform1i(glGetUniformLocation(shaderProgram, "state"), 1);
+						}
+					}
+					else {
+						glUniform1i(glGetUniformLocation(shaderProgram, "state"), 0);
+					}
 					glUniform1f(glGetUniformLocation(shaderProgram, "frame"), animation.currentFrame);
 					glUniform1i(glGetUniformLocation(shaderProgram, "SPRITE_COLS"), animation.spriteCols);
 					glUniform1i(glGetUniformLocation(shaderProgram, "SPRITE_ROWS"), animation.spriteRows);
-					glUniform1i(glGetUniformLocation(shaderProgram, "NUM_SPRITES"), animation.frameCount);
+					glUniform1i(glGetUniformLocation(shaderProgram, "NUM_SPRITES"), animation.spriteCount);
+				}
+
+				if (render_request.shader == "healthbar") {
+					if (!registry.healthBars.has(entity) || !registry.healthBars.get(entity).assigned) {
+						assert("Healthbar shader can only be used on entities with an assigned HealthBar component.\n");
+					}
+					Health& health = registry.healths.get(registry.healthBars.get(entity).assignedTo);
+					glUniform1f(glGetUniformLocation(shaderProgram, "proportionFilled"), health.health / 100.f);
 				}
 			}
+
 			mat4 projection = projectionMatrix;
 			mat4 view = viewMatrix;
 
@@ -305,7 +345,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		DebugRequest& debug = registry.debug_requests.get(debug_entity);
 
 		mat4 transform = mat4(1.0f);
-		transform = translate(transform, vec3({ debug.position, 1.0f }) );
+		transform = translate(transform, vec3({ debug.position, 1.0f }));
 		transform = rotate(transform, debug.angle, glm::vec3(0.0f, 0.0f, 1.0f));
 		transform = scale(transform, vec3(debug.collider, 1.0f));
 
@@ -335,7 +375,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		glDrawElements(draw_type, debug_mesh->indexCount, GL_UNSIGNED_INT, 0);
 		gl_has_errors();
 	}
-	
+
 	// TODO: does this work with the camera????
 	if (globalOptions.showFps) {
 		drawText(std::to_string(globalOptions.fps), "deutsch", window_width_px - 100.0f, window_height_px - 50.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -351,6 +391,14 @@ void RenderSystem::drawFrame(float elapsed_ms)
 
 			drawText(std::to_string(percentage) + "%", "healthFont", motion.position.x, motion.position.y - 55.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 		}
+	}
+
+	Player& playerObj = registry.players.get(player);
+	SpellQueue& spell_queue = playerObj.spell_queue;
+	if (!spell_queue.getQueue().empty()) {
+		SpellType spell = spell_queue.getQueue().front();
+		std::string spellText = spellTypeToString(spell);
+		drawText(spellText, "spellFont", window_width_px / 2.0f, 30.0f, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 }
 
@@ -456,6 +504,7 @@ float RenderSystem::getTextWidth(const std::string& text, const std::string& fon
 	return width;
 }
 
+
 void RenderSystem::updateCameraPosition(float x, float y) {
 	Camera& cameraEntity = registry.cameras.get(camera);
 	cameraEntity.position.x = x;
@@ -463,4 +512,74 @@ void RenderSystem::updateCameraPosition(float x, float y) {
 
 	viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraEntity.position, 0.0f));
 	registry.viewMatrix = viewMatrix;
+}
+
+
+void RenderSystem::drawBackgroundObjects() {
+	float zoom = zoomFactor;
+	zoom = 1.0f * zoomFactor; // TODO: Fix zoom
+
+	for (const auto& render_request : registry.static_render_requests.entities) {
+		RenderRequest& request = registry.static_render_requests.get(render_request);
+
+		Tile& tile = registry.tiles.get(render_request);
+
+		if (tile.position.x < 0 || tile.position.x > window_width_px || tile.position.y < 0 || tile.position.y > window_height_px) {
+			continue;
+		}
+
+		const Mesh* mesh = this->asset_manager.getMesh(request.mesh);
+		if (!mesh) {
+			std::cerr << "Mesh with id " << request.mesh << " not found!" << std::endl;
+			std::cerr << "Skipping rendering of this mesh" << std::endl;
+			continue;
+		}
+
+		const Shader* shader = this->asset_manager.getShader(request.shader);
+		if (!shader)
+		{
+			printf("Could not find shader with id %s\n", request.shader.c_str());
+			printf("Skipping rendering of this shader\n");
+			continue;
+		}
+		const GLuint shaderProgram = shader->program;
+		glUseProgram(shaderProgram);
+
+
+
+		mat4 transform = mat4(1.0f);
+		transform = translate(transform, glm::vec3(tile.position, 0.0f));
+		transform = scale(transform, vec3(tile.scale * 100.f * zoom, 1.0f));
+
+		const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+		const GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(registry.projectionMatrix));
+
+		const GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(registry.viewMatrix));
+
+		gl_has_errors();
+
+		const Texture* texture = this->asset_manager.getTexture(request.texture);
+		if (!texture) {
+			std::cerr << "Texture with id " << request.texture << " not found!" << std::endl;
+			continue;
+		}
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture->handle);
+		glUniform1i(glGetUniformLocation(shaderProgram, "image"), 0);
+
+		gl_has_errors();
+
+
+		glBindVertexArray(mesh->vao);
+		glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
+
+
+	}
+
+
 }

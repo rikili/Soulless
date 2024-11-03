@@ -24,11 +24,14 @@ public:
 	void handle_spell_states(float elapsed_ms_since_last_update);
 	void handle_movements(float elapsed_ms_since_last_update);
 	void handle_enemy_attacks(float elapsed_ms_since_last_update);
+	void handle_health_bars();
+	void handle_animations();
 	void create_enemy_projectile(Entity& enemy_ent);
 	void invoke_enemy_cooldown(Entity& enemy_ent);
 	void initialize();
 	void restartGame();
-	Entity getPlayer();
+    void createTileGrid();
+    Entity getPlayer();
 
 	// World state specific variables
 	float farmer_spawn_timer = 0.0f;
@@ -40,12 +43,14 @@ private:
 	void loadBackgroundObjects();
 
 	Entity createPlayer();
+	void computeNewDirection(Entity e);
 	void createEnemy(EnemyType type, vec2 position, vec2 velocity);
 	void createFarmer(vec2 position, vec2 velocity);
 	void createArcher(vec2 position, vec2 velocity);
 	void createKnight(vec2 position, vec2 velocity);
 	Entity createBackgroundObject(vec2 position, vec2 scale, AssetId texture, bool animate);
 	void handle_enemy_logic(float elapsed_ms_since_last_update);
+
 
 	Mix_Music* background_music;
 

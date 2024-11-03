@@ -1,13 +1,14 @@
 #pragma once
 #include <glm/vec2.hpp>
+#include <float.h>
 
 using glm::vec2;
 
 // --- Game Logic Constants ---
-const unsigned int MAX_ENEMIES = 100;
-const float FARMER_SPAWN_INTERVAL_MS = 5000.f;
-const float ARCHER_SPAWN_INTERVAL_MS = 10000.f;
-const float KNIGHT_SPAWN_INTERVAL_MS = 15000.f;
+const unsigned int MAX_ENEMIES = 50;
+const float FARMER_SPAWN_INTERVAL_MS = 8000.f;
+const float ARCHER_SPAWN_INTERVAL_MS = 16000.f;
+const float KNIGHT_SPAWN_INTERVAL_MS = 20000.f;
 const unsigned int QUEUE_SIZE = 8;
 
 const float ENEMY_INVINCIBILITY_TIMER = 800.f;
@@ -26,9 +27,35 @@ enum class DamageType
     elementless
 };
 
+// --- Animation ---
+const float DEFAULT_LOOP_TIME = 50.f;
+
+// --- Directions ---
+// Note: These are ordered to correspond with the orientation of the spritesheets of our 2.5D characters
+enum class Direction
+{
+    E,
+    SE,
+    S,
+    SW,
+    W,
+    NW,
+    N,
+    NE,
+};
+
+// --- States ---
+enum class EntityState
+{
+    IDLE,
+    WALKING,
+    ATTACKING
+};
+
 // --- Player Constants ---
 const float PLAYER_HEALTH = 100.f;
 const float PLAYER_MAX_HEALTH = 100.f;
+const float PLAYER_HEAL_COOLDOWN = 10000.f;
 
 // --- Player Spells ---
 
@@ -51,9 +78,9 @@ const vec2 FIRE_COLLIDER = { 50, 50 };
 
 const float WATER_DAMAGE = 0.f;
 const float WATER_VELOCITY = 0.f;
-const float WATER_RANGE = __FLT_MAX__; // Range is "infinite" for barrier
-const vec2 WATER_SCALE = { 1.f, 1.f };
-const float WATER_SCALE_FACTOR = 1.f;
+const float WATER_RANGE = FLT_MAX; // Range is "infinite" for barrier
+const vec2 WATER_SCALE = { 0.6f, 0.6f };
+// const float WATER_SCALE_FACTOR = 1.f;
 const vec2 WATER_COLLIDER = { 250, 250 };
 const float WATER_LIFETIME = 1000.f; // Barrier spell lasts for 1 second (or if it collides with enemy projectile)
 
@@ -91,7 +118,7 @@ const float ENEMY_BASIC_RANGE = 100.f;
 
 // Farmer + Pitchfork
 const float FARMER_HEALTH = 25.f;
-const float FARMER_COOLDOWN = 1000.f;
+const float FARMER_COOLDOWN = 4000.f;
 const float FARMER_VELOCITY = 0.10f;
 const float FARMER_RANGE = 200.f;
 const float FARMER_DAMAGE = 5.f;
@@ -115,6 +142,15 @@ const float KNIGHT_RANGE = 35.f; // Melee range
 const float KNIGHT_DAMAGE = 15.f;
 const float SWORD_VELOCITY = 0.35f;
 const float SWORD_DAMAGE = 35.f;
+
+// --- World Interactables ---
+enum class InteractableType
+{
+    HEALER
+};
+
+// --- Offsets ---
+const float HEALTH_BAR_Y_OFFSET = -30.f;
 
 // Draw order (largest number = frontmost)
 enum

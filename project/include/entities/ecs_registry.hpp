@@ -14,6 +14,7 @@ public:
 	// Manually created list of all components this game has
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Health> healths;
+	ComponentContainer<HealthBar> healthBars;
 	ComponentContainer<ResistanceModifier> resistanceModifiers;
 	ComponentContainer<Collision> collisions;
 	ComponentContainer<SpellState> spellStates;
@@ -22,14 +23,19 @@ public:
 	ComponentContainer<Deadly> deadlies;
 	ComponentContainer<Death> deaths;
 	ComponentContainer<Projectile> projectiles;
+	ComponentContainer<Interactable> interactables;
 	ComponentContainer<Damage> damages;
 	ComponentContainer<OnHit> onHits;
+	ComponentContainer<OnHeal> onHeals;
 	ComponentContainer<RenderRequest> render_requests;
-	ComponentContainer<DebugRequest> debug_requests;
-	ComponentContainer<MeshCollider> mesh_colliders;
+	ComponentContainer<RenderRequest> static_render_requests;
 	ComponentContainer<Animation> animations;
 	ComponentContainer<Camera> cameras;
+	ComponentContainer<Tile> tiles;
+	ComponentContainer<DebugRequest> debug_requests;
+	ComponentContainer<MeshCollider> mesh_colliders;
 	CollisionRegistry collision_registry;
+  
 	mat4 viewMatrix;
 	mat4 projectionMatrix;
 
@@ -42,6 +48,7 @@ public:
 	{
 		registry_list.push_back(&motions);
 		registry_list.push_back(&healths);
+		registry_list.push_back(&healthBars);
 		registry_list.push_back(&resistanceModifiers);
 		registry_list.push_back(&collisions);
 		registry_list.push_back(&spellStates);
@@ -50,11 +57,15 @@ public:
 		registry_list.push_back(&deadlies);
 		registry_list.push_back(&deaths);
 		registry_list.push_back(&projectiles);
+		registry_list.push_back(&interactables);
 		registry_list.push_back(&damages);
 		registry_list.push_back(&onHits);
+		registry_list.push_back(&onHeals);
 		registry_list.push_back(&render_requests);
 		registry_list.push_back(&animations);
 		registry_list.push_back(&cameras);
+		registry_list.push_back(&static_render_requests);
+		registry_list.push_back(&tiles);
 	}
 
 	void clear_all_components() const
