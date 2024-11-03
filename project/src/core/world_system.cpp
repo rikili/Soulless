@@ -438,7 +438,7 @@ void WorldSystem::createEnemy(EnemyType type, vec2 position, vec2 velocity)
 
 	switch (enemy_type) {
 	case EnemyType::FARMER:
-		// createFarmer(position, velocity);
+		createFarmer(position, velocity);
 		break;
 	case EnemyType::ARCHER:
 		createArcher(position, velocity);
