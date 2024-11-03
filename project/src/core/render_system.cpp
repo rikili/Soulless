@@ -228,7 +228,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 			transform = scale(transform, vec3(motion.scale * 100.f * zoomFactor, 1.0f));
 
 
-			if (render_request.shader == "sprite" || render_request.shader == "animatedsprite") {
+			if (render_request.shader == "sprite" || render_request.shader == "animatedsprite" || render_request.shader == "healthbar") {
 				if (registry.players.has(entity) && registry.deaths.has(entity)) {
 					transform = rotate(transform, (float) M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
 				}
@@ -261,7 +261,16 @@ void RenderSystem::drawFrame(float elapsed_ms)
 					glUniform1i(glGetUniformLocation(shaderProgram, "SPRITE_ROWS"), animation.spriteRows);
 					glUniform1i(glGetUniformLocation(shaderProgram, "NUM_SPRITES"), animation.frameCount);	
 				}
+
+				if (render_request.shader == "healthbar") {
+					if (!registry.healthBars.has(entity) || !registry.healthBars.get(entity).assigned) {
+						assert("Healthbar shader can only be used on entities with an assigned HealthBar component.\n");
+					}
+					Health& health = registry.healths.get(registry.healthBars.get(entity).assignedTo);
+					glUniform1f(glGetUniformLocation(shaderProgram, "proportionFilled"), health.health / 100.f);
+				}
 			}
+
 			mat4 projection = projectionMatrix;
 			mat4 view = viewMatrix;
 

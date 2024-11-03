@@ -23,6 +23,7 @@ public:
 	void handle_timers(float elapsed_ms_since_last_update);
 	void handle_movements(float elapsed_ms_since_last_update);
 	void handle_enemy_attacks(float elapsed_ms_since_last_update);
+	void handle_health_bars();
 	void create_enemy_projectile(Entity& enemy_ent);
 	void invoke_enemy_cooldown(Entity& enemy_ent);
 	void initialize();
@@ -45,6 +46,7 @@ private:
 	void createKnight(vec2 position, vec2 velocity);
 	Entity createBackgroundObject(vec2 position, vec2 scale, AssetId texture, bool animate);
 	void handle_enemy_logic(float elapsed_ms_since_last_update);
+
 
 	Mix_Music* background_music;
 

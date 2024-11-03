@@ -14,6 +14,7 @@ public:
 	// Manually created list of all components this game has
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Health> healths;
+	ComponentContainer<HealthBar> healthBars;
 	ComponentContainer<ResistanceModifier> resistanceModifiers;
 	ComponentContainer<Collision> collisions;
 	ComponentContainer<Player> players;
@@ -21,8 +22,10 @@ public:
 	ComponentContainer<Deadly> deadlies;
 	ComponentContainer<Death> deaths;
 	ComponentContainer<Projectile> projectiles;
+	ComponentContainer<Interactable> interactables;
 	ComponentContainer<Damage> damages;
 	ComponentContainer<OnHit> onHits;
+	ComponentContainer<OnHeal> onHeals;
 	ComponentContainer<RenderRequest> render_requests;
 	ComponentContainer<DebugRequest> debug_requests;
 	ComponentContainer<MeshCollider> mesh_colliders;
@@ -41,6 +44,7 @@ public:
 	{
 		registry_list.push_back(&motions);
 		registry_list.push_back(&healths);
+		registry_list.push_back(&healthBars);
 		registry_list.push_back(&resistanceModifiers);
 		registry_list.push_back(&collisions);
 		registry_list.push_back(&players);
@@ -48,8 +52,10 @@ public:
 		registry_list.push_back(&deadlies);
 		registry_list.push_back(&deaths);
 		registry_list.push_back(&projectiles);
+		registry_list.push_back(&interactables);
 		registry_list.push_back(&damages);
 		registry_list.push_back(&onHits);
+		registry_list.push_back(&onHeals);
 		registry_list.push_back(&render_requests);
 		registry_list.push_back(&animations);
 		registry_list.push_back(&cameras);

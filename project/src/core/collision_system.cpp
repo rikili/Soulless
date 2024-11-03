@@ -272,6 +272,22 @@ void CollisionSystem::resolve_collisions()
     }
 
     // TODO: add check for terrain collisions
+
+    for (const Entity& interactable_entity : registry.interactables.entities)
+    {
+        std::unordered_set<Entity> other_entities = registry.collision_registry.get_collision_by_ent(interactable_entity);
+        const Interactable& interactable = registry.interactables.get(interactable_entity);
+        for (const Entity& other_entity : other_entities)
+        {
+            if (!registry.collision_registry.check_collision(interactable_entity, other_entity)) continue;
+            if (registry.players.has(other_entity))
+            {
+                if (is_mesh_colliding(other_entity, interactable_entity)) applyHealing(other_entity);
+            }
+
+            registry.collision_registry.remove_collision(interactable_entity, other_entity);
+        }
+    }
 }
 
 void CollisionSystem::applyDamage(Entity attacker, Entity victim)
@@ -330,4 +346,19 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
         registry.deaths.emplace(attacker);
         // printd("Marked for removal due to collision -> Entity value: %u\n", static_cast<unsigned>(attacker));
     }
+}
+
+void CollisionSystem::applyHealing(Entity target)
+{
+    Health& health = registry.healths.get(target);
+
+    if (registry.onHeals.has(target) || health.health == PLAYER_HEALTH) {
+        return;
+    }
+
+    health.health += 10.f;
+    printd("Player has been healed! New health: %f\n", health.health);
+
+    OnHeal& heal = registry.onHeals.emplace(target);
+    heal.heal_time = PLAYER_HEAL_COOLDOWN;
 }
