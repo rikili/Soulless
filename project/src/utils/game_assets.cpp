@@ -102,9 +102,14 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId debugId = assetManager.loadMesh("debug", debug_vertices, debug_indices, debug_attributes);
 
     // Player
-    AssetId mageTextureId = assetManager.loadTexture("mage", textures_path("Idle-sheet") + ".png");
-    assets.textures["mage"] = mageTextureId;
+    AssetId mageTextureId = assetManager.loadTexture("mage-idle", textures_path("mage-idle") + ".png");
+    assets.textures["mage-idle"] = mageTextureId;
 
+    AssetId mageWalkTextureId = assetManager.loadTexture("mage-walk", textures_path("mage-walk") + ".png");
+    assets.textures["mage-walk"] = mageWalkTextureId;
+
+    AssetId mageAttackTextureId = assetManager.loadTexture("mage-attack", textures_path("mage-attack") + ".png");
+    assets.textures["mage-attack"] = mageAttackTextureId;
 
     // Enemies
     AssetId farmerTextureId = assetManager.loadTexture("farmer", textures_path("farmer") + ".png");

@@ -11,9 +11,13 @@ struct Motion {
     vec2 velocity = { 0, 0 };
     vec2 scale = { 1, 1 };
     vec2 collider = { 50, 50 };
+    
     float mass = 0;
     float speedModifier = 1.f;
     float angle = 0;
+
+    Direction currentDirection = Direction::E;
+    Direction oldDirection = Direction::E;
 };
 
 // Resistance Modifier
@@ -84,6 +88,7 @@ struct Collision
 struct OnHit
 {
     float invincibility_timer = 0;
+    bool invicibilityShader = false;
 };
 
 // Structure to store information on being healed
@@ -151,13 +156,31 @@ struct MeshCollider
 
 struct Animation
 {
-    float currentFrame = 0.f;
-    float frameTime = 100.f;
+    bool oneTime = false;
+
+    float startFrame = 0.0f;
+    float currentFrame;
+
+    float frameTime = DEFAULT_LOOP_TIME;
     float elapsedTime = 0.f;
 
     int spriteCols = 4;
     int spriteRows = 1;
+    int spriteCount = 12;
+
     int frameCount = 4;
+
+    EntityState state = EntityState::IDLE;
+
+    void initializeAtFrame(float frame) {
+        startFrame = frame;
+        currentFrame = startFrame;
+    }
+
+    void initializeAtRow(int row) {
+        startFrame = row * spriteCols * 1.0;
+        currentFrame = startFrame;
+    }
 };
 
 struct Camera

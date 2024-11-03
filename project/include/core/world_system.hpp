@@ -24,6 +24,7 @@ public:
 	void handle_movements(float elapsed_ms_since_last_update);
 	void handle_enemy_attacks(float elapsed_ms_since_last_update);
 	void handle_health_bars();
+	void handle_animations();
 	void create_enemy_projectile(Entity& enemy_ent);
 	void invoke_enemy_cooldown(Entity& enemy_ent);
 	void initialize();
@@ -40,6 +41,7 @@ private:
 	void loadBackgroundObjects();
 
 	Entity createPlayer();
+	void computeNewDirection(Entity e);
 	void createEnemy(EnemyType type, vec2 position, vec2 velocity);
 	void createFarmer(vec2 position, vec2 velocity);
 	void createArcher(vec2 position, vec2 velocity);

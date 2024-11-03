@@ -26,6 +26,31 @@ enum class DamageType
     elementless
 };
 
+// --- Animation ---
+const float DEFAULT_LOOP_TIME = 50.f;
+
+// --- Directions ---
+// Note: These are ordered to correspond with the orientation of the spritesheets of our 2.5D characters
+enum class Direction
+{
+    E,
+    SE,
+    S,
+    SW,
+    W,
+    NW,
+    N,
+    NE,    
+};
+
+// --- States ---
+enum class EntityState
+{
+    IDLE,
+    WALKING,
+    ATTACKING
+};
+
 // --- Player Constants ---
 const float PLAYER_HEALTH = 100.f;
 const float PLAYER_MAX_HEALTH = 100.f;
