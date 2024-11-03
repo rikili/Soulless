@@ -368,14 +368,24 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
     // projectile <-> projectile -- projectiles don't have health
     else {
         Projectile& victim_projectile = registry.projectiles.get(victim);
-        if (victim_projectile.type == DamageType::water) {
+        if (victim_projectile.type == DamageType::water && !registry.deaths.has(victim)) {
             registry.deaths.emplace(victim);
         }
     }
 
     if (registry.projectiles.has(attacker) && !registry.deaths.has(attacker))
     {
-        registry.deaths.emplace(attacker);
+        Projectile& attacker_projectile = registry.projectiles.get(attacker);
+
+        // lightning spell shouldn't die after hitting one target
+        if (attacker_projectile.type == DamageType::lightning)
+        {
+            // do nothing
+        }
+        else {
+            registry.deaths.emplace(attacker);
+        }
+
         // printd("Marked for removal due to collision -> Entity value: %u\n", static_cast<unsigned>(attacker));
     }
 }

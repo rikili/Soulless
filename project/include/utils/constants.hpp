@@ -84,6 +84,17 @@ const vec2 WATER_SCALE = { 0.6f, 0.6f };
 const vec2 WATER_COLLIDER = { 250, 250 };
 const float WATER_LIFETIME = 1000.f; // Barrier spell lasts for 1 second (or if it collides with enemy projectile)
 
+const float LIGHTNING_CASTING_DAMAGE = 0.f;
+const float LIGHTNING_ACTIVE_DAMAGE = 35.f;
+const float LIGHTNING_VELOCITY = 0.f;
+const float LIGHTNING_RANGE = __FLT_MAX__; // Range is "infinite" for lightning
+const vec2 LIGHTNING_SCALE = { 0.75f, 0.75f };
+const float LIGHTNING_SCALE_FACTOR = 1.f;
+const vec2 LIGHTNING_COLLIDER = { 150, 150 };
+const float LIGHTNING_CASTING_LIFETIME = 500.f; // Lightning cast lasts 0.5 seconds before changing state
+const float LIGHTNING_CHARGING_LIFETIME = 500.f; // Lightning cast lasts 0.5 seconds before changing state
+const float LIGHTNING_ACTIVE_LIFETIME = 250.f; // Lightning bolt lasts 0.25 seconds before disappearing
+
 const float ICE_VELOCITY = 1.f;
 const float ICE_DEGREE_DIFFERENCE = 15.f;
 const int ICE_SHARD_COUNT = 4;

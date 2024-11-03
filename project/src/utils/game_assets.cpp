@@ -131,6 +131,15 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId barrierTextureId = assetManager.loadTexture("barrier", textures_path("barrier") + ".png");
     assets.textures["barrier"] = barrierTextureId;
 
+    AssetId lightning1TextureId = assetManager.loadTexture("lightning1", textures_path("lightning1") + ".png");
+    assets.textures["lightning1"] = lightning1TextureId;
+
+    AssetId lightning2TextureId = assetManager.loadTexture("lightning2", textures_path("lightning2") + ".png");
+    assets.textures["lightning2"] = lightning2TextureId;
+
+    AssetId lightning3TextureId = assetManager.loadTexture("lightning3", textures_path("lightning3") + ".png");
+    assets.textures["lightning3"] = lightning3TextureId;
+
     AssetId pitchforkTextureId = assetManager.loadTexture("pitchfork", textures_path("pitchfork") + ".png");
     assets.textures["pitchfork"] = pitchforkTextureId;
 

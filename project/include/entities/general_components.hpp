@@ -3,6 +3,7 @@
 #include <core/common.hpp>
 #include <utils/constants.hpp>
 #include <utils/spell_queue.hpp>
+#include <utils/state.hpp>
 #include <graphics/asset_manager.hpp>
 
 // Motion Component
@@ -74,9 +75,15 @@ struct Interactable {
 };
 
 // Timed Component
-struct Timed {
+// struct Timed {
+//     float timer = 0;
+// }; // include temporary effects and counters
+
+// Spell State Component
+struct SpellState {
+    State state = State::CASTING;
     float timer = 0;
-}; // include temporary effects and counters
+};
 
 // Structure to store collision information
 struct Collision

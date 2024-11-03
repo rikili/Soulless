@@ -126,7 +126,6 @@ void InputHandler::onMouseMove(vec2 mouse_position)
     {
         return;
     }
-
     Entity& player = registry.players.entities[0];
     Motion& playerMotion = registry.motions.get(player);
 
@@ -138,11 +137,13 @@ void InputHandler::onMouseMove(vec2 mouse_position)
     mat4 inverseView = glm::inverse(registry.projectionMatrix * registry.viewMatrix);
     vec4 world = inverseView * vec4(xNDC, yNDC, 0.f, 1.f);
 
+    this->worldMousePosition = vec2(world.x, world.y);
+
     float dx = world.x - playerMotion.position.x;
     float dy = world.y - playerMotion.position.y;
 
     // printd("CAMERA: %f, %f\n", cameraEntity.position.x, cameraEntity.position.y);
-    // printd("x: %f, y: %f \n", world.x, world.y);
+    // printd("MOUSE x: %f, y: %f \n", world.x, world.y);
 
     playerMotion.angle = find_closest_angle(dx, dy);
 }
@@ -167,15 +168,18 @@ void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mo
         return;
     }
 
+    // fixes issue where mouse position isn't set until mouse is moved
+    double x, y;
+    glfwGetCursorPos(window, &x, &y);
+    this->onMouseMove({ x, y });
+
     if (action == GLFW_PRESS)
     {
         switch (button)
         {
         case GLFW_MOUSE_BUTTON_LEFT:
             printd("Left mouse button pressed.\n");
-            double x, y;
-            glfwGetCursorPos(window, &x, &y);
-            cast_player_spell(x, y, true);
+            cast_player_spell(this->worldMousePosition.x, this->worldMousePosition.y, true);
             break;
         case GLFW_MOUSE_BUTTON_RIGHT:
             // TODO: Shoot spell 2
@@ -224,14 +228,13 @@ void InputHandler::create_player_projectile(Entity& player_ent, double x, double
     player_motion.currentDirection = angleToDirection(player_motion.angle);
     player_animation.initializeAtRow((int)player_motion.currentDirection);
 
-    deadly.to_enemy = true;
-
     projectile_motion.position = player_motion.position;
     projectile_motion.angle = player_motion.angle;
     projectile_motion.velocity = vec2({ cos(player_motion.angle), sin(player_motion.angle) });
 
     switch (spell) {
     case SpellType::FIRE:
+        deadly.to_enemy = true;
         projectile_motion.scale = FIRE_SCALE;
         projectile_motion.collider = FIRE_COLLIDER;
         projectile.type = DamageType::fire;
@@ -248,15 +251,30 @@ void InputHandler::create_player_projectile(Entity& player_ent, double x, double
         projectile.type = DamageType::water;
         projectile.range = WATER_RANGE;
         damage.value = WATER_DAMAGE;
-        Timed& timed = registry.timeds.emplace(projectile_ent);
-        timed.timer = WATER_LIFETIME;
+        SpellState& spellState = registry.spellStates.emplace(projectile_ent);
+        spellState.state = State::ACTIVE;
+        spellState.timer = WATER_LIFETIME;
         request.texture = "barrier";
         request.type = OVER_PLAYER;
         break;
     }
     case SpellType::LIGHTNING:
-        // TODO
+    {
+        // printd("Mouse position when casting lightning: %f, %f\n", x, y); 
+        projectile_motion.position = { x, y };
+        projectile_motion.angle = 0.f;
+        projectile_motion.scale = LIGHTNING_SCALE;
+        projectile_motion.collider = LIGHTNING_COLLIDER;
+        projectile.type = DamageType::lightning;
+        projectile.range = LIGHTNING_RANGE;
+        damage.value = LIGHTNING_CASTING_DAMAGE;
+        SpellState& spellState = registry.spellStates.emplace(projectile_ent);
+        spellState.state = State::CASTING;
+        spellState.timer = LIGHTNING_CASTING_LIFETIME;
+        request.texture = "lightning1";
+        request.type = PROJECTILE;
         break;
+    }
     case SpellType::ICE:
         // TODO
         break;

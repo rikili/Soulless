@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 	renderer.initialize(input_handler, window_width_px, window_height_px, "Soulless"); // must be called at the beginning of the program
 	GLFWwindow* window = renderer.getGLWindow();
 
-	SoundManager *soundManager = SoundManager::getSoundManager();
+	SoundManager* soundManager = SoundManager::getSoundManager();
 	if (!soundManager->initialize()) {
 		printd("Error initializing sound manager\n");
 	}

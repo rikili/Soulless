@@ -1,4 +1,4 @@
-#include "entities/collision_registry.hpp";
+#include "entities/collision_registry.hpp"
 
 void CollisionRegistry::print_collision_map()
 {
@@ -7,7 +7,7 @@ void CollisionRegistry::print_collision_map()
 		printf("key: %u\n   values:", (unsigned int)pairing.first);
 		for (auto value : pairing.second)
 		{
-			printf("%u ",(unsigned int)value);
+			printf("%u ", (unsigned int)value);
 		}
 		printf("\n");
 	}
@@ -33,7 +33,7 @@ void CollisionRegistry::register_collision(const Entity& entity, const Entity& o
 {
 	const auto pairing = build_pairing(entity, other_entity);
 	if (exists_in_both(pairing)) return;
-	
+
 	this->collision_mapping[pairing.first].insert(pairing.second);
 	this->collision_mapping[pairing.second].insert(pairing.first);
 }

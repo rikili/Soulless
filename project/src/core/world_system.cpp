@@ -37,6 +37,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	this->handle_animations();
 	this->handle_health_bars();
 	this->handle_timers(elapsed_ms_since_last_update);
+	this->handle_spell_states(elapsed_ms_since_last_update);
 	registry.collision_registry.clear_collisions();
 	return true;
 }
@@ -159,13 +160,20 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 			float y_offset = motion.collider.y * motion.scale.y;
 			motion.position = glm::clamp(motion.position + motion.velocity * elapsed_ms_since_last_update, { x_offset, y_offset }, { window_width_px - x_offset, window_height_px - y_offset });
 		}
-		// Water barrier follows player
-		else if (registry.projectiles.has(entity) && registry.projectiles.get(entity).type == DamageType::water) {
-			motion.position = player_motion.position;
-		}
-		else
-		{
-			motion.position += motion.velocity * elapsed_ms_since_last_update;
+
+		// not a player nor enemy
+		else if (registry.projectiles.has(entity)) {
+			Projectile& projectile = registry.projectiles.get(entity);
+
+			if (projectile.type == DamageType::water) {
+				motion.position = player_motion.position;
+			}
+			else if (projectile.type == DamageType::lightning) {
+				// lightning attack doesn't move
+			}
+			else {
+				motion.position += motion.velocity * elapsed_ms_since_last_update;
+			}
 		}
 
 		if (registry.enemies.has(entity))
@@ -246,16 +254,6 @@ void WorldSystem::computeNewDirection(Entity e) {
 void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 {
 
-	for (Entity& timed_ent : registry.timeds.entities)
-	{
-		Timed& timed = registry.timeds.get(timed_ent);
-		timed.timer -= elapsed_ms_since_last_update;
-		if (!registry.deaths.has(timed_ent) && timed.timer < 0)
-		{
-			registry.deaths.emplace(timed_ent);
-		}
-	}
-
 	for (Entity& hit_ent : registry.onHits.entities)
 	{
 		OnHit& hit = registry.onHits.get(hit_ent);
@@ -312,6 +310,67 @@ void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 		{
 			// printd("Enemy cooldown is less than 0\n");
 			enemy.cooldown = 0;
+		}
+	}
+}
+
+/**
+ * @brief Handle spell states. Update spells and their states based on timers.
+ * @param elapsed_ms_since_last_update
+ */
+void WorldSystem::handle_spell_states(float elapsed_ms_since_last_update)
+{
+	for (Entity& spell_ent : registry.spellStates.entities) {
+		SpellState& spell_state = registry.spellStates.get(spell_ent);
+		RenderRequest& request = registry.render_requests.get(spell_ent);
+		Damage& damage = registry.damages.get(spell_ent);
+		Projectile& projectile = registry.projectiles.get(spell_ent);
+		Deadly& deadly = registry.deadlies.get(spell_ent);
+
+		spell_state.timer -= elapsed_ms_since_last_update;
+
+		// explicit state change when timer is done
+		if (spell_state.timer <= 0) {
+
+			State current_state = spell_state.state;
+
+			switch (current_state) {
+			case State::CASTING: {
+				spell_state.state = State::CHARGING;
+
+				if (projectile.type == DamageType::lightning) {
+					request.texture = "lightning2";
+					spell_state.timer = LIGHTNING_CHARGING_LIFETIME;
+				}
+				break;
+			}
+			case State::CHARGING: {
+				spell_state.state = State::ACTIVE;
+
+				if (projectile.type == DamageType::lightning) {
+					deadly.to_enemy = true;
+					damage.value = LIGHTNING_ACTIVE_DAMAGE;
+					request.texture = "lightning3";
+					spell_state.timer = LIGHTNING_ACTIVE_LIFETIME;
+				}
+				break;
+			}
+			case State::ACTIVE: {
+				spell_state.state = State::COMPLETE;
+				break;
+			}
+			case State::COMPLETE: {
+				if (!registry.deaths.has(spell_ent))
+				{
+					registry.deaths.emplace(spell_ent);
+				}
+				break;
+			}
+			default: {
+				break;
+			}
+			}
+
 		}
 	}
 }
