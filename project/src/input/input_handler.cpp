@@ -84,6 +84,7 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
             {
                 globalOptions.showFps = !globalOptions.showFps;
             }
+            printf("FPS: %d\n", globalOptions.fps);
             break;
         case GLFW_KEY_T:
             if (!isTutorialOn()) {
@@ -155,6 +156,12 @@ void create_player_projectile(Entity& player_ent, double x, double y)
     Damage& damage = registry.damages.emplace(projectile_ent);
     RenderRequest& request = registry.render_requests.emplace(projectile_ent);
     Motion& player_motion = registry.motions.get(player_ent);
+
+    Animation& player_animation = registry.animations.get(player_ent);
+    player_animation.state = EntityState::ATTACKING;
+    player_animation.frameTime = 30.f;
+    player_motion.currentDirection = angleToDirection(player_motion.angle);
+    player_animation.initializeAtRow((int)player_motion.currentDirection);
 
     deadly.to_enemy = true;
 
@@ -240,6 +247,7 @@ void InputHandler::updateVelocity()
 
     auto& motion_registry = registry.motions;
     Motion& playerMotion = motion_registry.get(player);
+
 
     int verticalDir = activeMoveKeys.count(GLFW_KEY_S) - activeMoveKeys.count(GLFW_KEY_W);
     int horizontalDir = activeMoveKeys.count(GLFW_KEY_D) - activeMoveKeys.count(GLFW_KEY_A);

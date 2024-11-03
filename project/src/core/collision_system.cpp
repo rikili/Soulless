@@ -316,7 +316,7 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
         OnHit& hit = registry.onHits.emplace(victim);
         if (registry.players.has(victim))
         {
-            printd("Player has been hit! Remaining health: %f\n", health.health);
+            // printd("Player has been hit! Remaining health: %f\n", health.health);
             hit.invincibility_timer = PLAYER_INVINCIBILITY_TIMER;
         }
         else
