@@ -27,11 +27,14 @@ public:
 	ComponentContainer<OnHit> onHits;
 	ComponentContainer<OnHeal> onHeals;
 	ComponentContainer<RenderRequest> render_requests;
-	ComponentContainer<DebugRequest> debug_requests;
-	ComponentContainer<MeshCollider> mesh_colliders;
+	ComponentContainer<RenderRequest> static_render_requests;
 	ComponentContainer<Animation> animations;
 	ComponentContainer<Camera> cameras;
+	ComponentContainer<Tile> tiles;
+	ComponentContainer<DebugRequest> debug_requests;
+	ComponentContainer<MeshCollider> mesh_colliders;
 	CollisionRegistry collision_registry;
+  
 	mat4 viewMatrix;
 	mat4 projectionMatrix;
 
@@ -59,6 +62,8 @@ public:
 		registry_list.push_back(&render_requests);
 		registry_list.push_back(&animations);
 		registry_list.push_back(&cameras);
+		registry_list.push_back(&static_render_requests);
+		registry_list.push_back(&tiles);
 	}
 
 	void clear_all_components() const

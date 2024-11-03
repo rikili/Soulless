@@ -29,7 +29,8 @@ public:
 	void invoke_enemy_cooldown(Entity& enemy_ent);
 	void initialize();
 	void restartGame();
-	Entity getPlayer();
+    void createTileGrid();
+    Entity getPlayer();
 
 	// World state specific variables
 	float farmer_spawn_timer = 0.0f;

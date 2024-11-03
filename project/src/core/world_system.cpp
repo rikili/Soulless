@@ -2,6 +2,8 @@
 
 #include "entities/ecs_registry.hpp"
 #include "sound/sound_manager.hpp"
+#include "utils/isometric_helper.hpp"
+#include "graphics/tile_generator.hpp"
 
 WorldSystem::WorldSystem(RenderSystem* renderer)
 {
@@ -25,7 +27,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		this->restartGame();
 		return true;
 	}
-
 
 	this->handle_projectiles(elapsed_ms_since_last_update);
 	this->handle_enemy_attacks(elapsed_ms_since_last_update);
@@ -409,7 +410,6 @@ void WorldSystem::initialize() {
 }
 
 void WorldSystem::restartGame() {
-
 	if (registry.players.entities.size() > 0)
 	{
 		registry.clear_all_components();
@@ -419,14 +419,21 @@ void WorldSystem::restartGame() {
 		soundManager->playMusic(Song::MAIN);
 	}
 	player_mage = this->createPlayer();
+	this->createTileGrid();
 	loadBackgroundObjects();
 	this->renderer->initializeCamera();
-
-	registry.list_all_components();
 }
 
-Entity WorldSystem::createPlayer()
-{
+void WorldSystem::createTileGrid() {
+    vec2 gridDim = IsometricGrid::getGridDimensions(window_width_px, window_height_px);
+    int numCols = static_cast<int>(gridDim.x) * 2;
+    int numRows = static_cast<int>(gridDim.y) * 2;
+
+	TileGenerator tileGenerator(numCols, numRows, true);
+	tileGenerator.generateTiles();
+}
+
+Entity WorldSystem::createPlayer() {
 	auto player = Entity();
 
 	registry.players.emplace(player);
@@ -494,6 +501,8 @@ void WorldSystem::createEnemy(EnemyType type, vec2 position, vec2 velocity)
 		break;
 	}
 }
+
+
 
 void WorldSystem::createFarmer(vec2 position, vec2 velocity)
 {

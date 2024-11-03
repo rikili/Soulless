@@ -84,6 +84,7 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
             {
                 globalOptions.showFps = !globalOptions.showFps;
             }
+            printf("FPS: %d\n", globalOptions.fps);
             break;
         case GLFW_KEY_T:
             if (!isTutorialOn()) {
@@ -246,6 +247,7 @@ void InputHandler::updateVelocity()
 
     auto& motion_registry = registry.motions;
     Motion& playerMotion = motion_registry.get(player);
+
 
     int verticalDir = activeMoveKeys.count(GLFW_KEY_S) - activeMoveKeys.count(GLFW_KEY_W);
     int horizontalDir = activeMoveKeys.count(GLFW_KEY_D) - activeMoveKeys.count(GLFW_KEY_A);

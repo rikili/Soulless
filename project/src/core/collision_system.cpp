@@ -148,7 +148,7 @@ void CollisionSystem::detect_collisions()
             visited.insert(entity);
             continue;
         }
-
+      
         if (registry.players.has(entity) && registry.debug)
         {
             draw_vertices(entity, *renderer->getMesh("mage_collider")); // can fetch mesh from component as well
@@ -160,7 +160,6 @@ void CollisionSystem::detect_collisions()
             if (entity == other_entity) continue;
             if (visited.find(other_entity) != visited.end()) continue;
             if (registry.deaths.has(other_entity)) continue;
-
             if (check_collision(entity, other_entity))
             {
                 registry.collision_registry.register_collision(entity, other_entity);
@@ -267,6 +266,7 @@ void CollisionSystem::resolve_collisions()
             {
                 // enemy <-> enemy interaction
             }
+
             registry.collision_registry.remove_collision(enemy_entity, other_entity);
         }
     }
@@ -332,7 +332,7 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
         OnHit& hit = registry.onHits.emplace(victim);
         if (registry.players.has(victim))
         {
-            printd("Player has been hit! Remaining health: %f\n", health.health);
+            // printd("Player has been hit! Remaining health: %f\n", health.health);
             hit.invincibility_timer = PLAYER_INVINCIBILITY_TIMER;
         }
         else
