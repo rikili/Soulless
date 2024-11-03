@@ -6,6 +6,7 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
 {
     GameAssets assets;
     assets.shaders["basic"] = assetManager.loadShader("basic", shader_path("basic") + ".vs.glsl", shader_path("basic") + ".fs.glsl");
+    assets.shaders["debug"] = assetManager.loadShader("debug", shader_path("debug") + ".vs.glsl", shader_path("debug") + ".fs.glsl");
     assets.shaders["background"] = assetManager.loadShader("background", shader_path("background") + ".vs.glsl", shader_path("background") + ".fs.glsl");
     assets.shaders["sprite"] = assetManager.loadShader("sprite", shader_path("sprite") + ".vs.glsl", shader_path("sprite") + ".fs.glsl");
     assets.shaders["animatedsprite"] = assetManager.loadShader("animatedsprite", shader_path("animatedsprite") + ".vs.glsl", shader_path("animatedsprite") + ".fs.glsl");
@@ -50,6 +51,54 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
         {2, GL_FLOAT, GL_FALSE, "texCoord"} };
 
     AssetId spriteMeshId = assetManager.loadMesh("sprite", spriteVertices, indices, spriteAttributes);
+
+    const std::vector<float> mageCollisionVertices = {
+        0.f, 1.f, 0.f,
+        -.5333333f, 0.2666667f, 0.f,
+        .9333333f, .0666667f, 0.f,
+        -.4f, -0.333333f, 0.f,
+        -0.5333333f, -1.f, 0.f,
+        0.4666667f, -1.f, 0.f,
+        0.7333333f, -1.f, 0.f,
+        0.4f, -0.2f, 0.f,
+        0.333333f, 0.8f, 0.f,
+        0.9333333f, 0.9333333f, 0.f
+    };
+
+    const std::vector<uint32_t> mage_col_indices = {
+        0, 1, 8,
+        1, 2, 3,
+        3, 4, 5,
+        3, 5, 7,
+        1, 3, 7,
+        1, 7, 8,
+        7, 8, 9,
+        6, 7, 9
+    };
+
+    const std::vector<VertexAttribute> mageCollisionAttributes = {
+        {3, GL_FLOAT, GL_FALSE, "position"}
+    };
+
+    AssetId mageCollisionMeshId = assetManager.loadMesh("mage_collider", mageCollisionVertices, mage_col_indices, mageCollisionAttributes);
+
+    const std::vector<float> debug_vertices = {
+        // positions        // colors
+        -1.f, -1.f, 0.0f, 
+         1.f, -1.f, 0.0f,
+         1.f,  1.f, 0.0f, 
+        -1.f,  1.f, 0.0f,
+    };
+
+    const std::vector<uint32_t> debug_indices = {
+        0, 1, 2,
+        2, 3, 0
+    };
+
+    const std::vector<VertexAttribute> debug_attributes = {
+        {3, GL_FLOAT, GL_FALSE, "position"}
+    };
+    AssetId debugId = assetManager.loadMesh("debug", debug_vertices, debug_indices, debug_attributes);
 
     // Player
     AssetId mageTextureId = assetManager.loadTexture("mage-idle", textures_path("mage-idle") + ".png");

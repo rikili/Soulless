@@ -330,6 +330,42 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		// 	  << ", index count: " << mesh->indexCount << std::endl;
 	}
 
+	for (const Entity& debug_entity : registry.debug_requests.entities)
+	{
+		DebugRequest& debug = registry.debug_requests.get(debug_entity);
+
+		mat4 transform = mat4(1.0f);
+		transform = translate(transform, vec3({ debug.position, 1.0f }) );
+		transform = rotate(transform, debug.angle, glm::vec3(0.0f, 0.0f, 1.0f));
+		transform = scale(transform, vec3(debug.collider, 1.0f));
+
+		const Shader* shader = this->asset_manager.getShader("debug");
+		const GLuint shaderProgram = shader->program;
+		glUseProgram(shaderProgram);
+
+		const GLint colorLoc = glGetUniformLocation(shaderProgram, "color_override");
+		glUniform3fv(colorLoc, 1, glm::value_ptr(debug.color));
+
+		const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+		const GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(registry.viewMatrix));
+		const GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(registry.projectionMatrix));
+		gl_has_errors();
+
+		const Mesh* debug_mesh = asset_manager.getMesh("debug");
+
+		glBindVertexArray(debug_mesh->vao);
+		GLenum draw_type = GL_LINE_LOOP;
+		if (debug.type == DebugType::fill)
+		{
+			draw_type = GL_TRIANGLES;
+		}
+		glDrawElements(draw_type, debug_mesh->indexCount, GL_UNSIGNED_INT, 0);
+		gl_has_errors();
+	}
+	
 	// TODO: does this work with the camera????
 	if (globalOptions.showFps) {
 		drawText(std::to_string(globalOptions.fps), "deutsch", window_width_px - 100.0f, window_height_px - 50.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));

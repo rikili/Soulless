@@ -3,6 +3,7 @@
 
 #include "ecs.hpp"
 #include "general_components.hpp"
+#include "collision_registry.hpp"
 
 class ECSRegistry
 {
@@ -27,10 +28,14 @@ public:
 	ComponentContainer<Animation> animations;
 	ComponentContainer<Camera> cameras;
 	ComponentContainer<Tile> tiles;
-
+	ComponentContainer<DebugRequest> debug_requests;
+	ComponentContainer<MeshCollider> mesh_colliders;
+	CollisionRegistry collision_registry;
+  
 	mat4 viewMatrix;
 	mat4 projectionMatrix;
 
+	bool game_over = false;
 	bool debug = false;
 
 	// constructor that adds all containers for looping over them
