@@ -42,6 +42,8 @@ bool SoundManager::initialize() {
     registerSound(SoundEffect::VILLAGER_DAMAGE, "villager_damage.wav");
     registerSound(SoundEffect::PITCHFORK_DAMAGE, "pitchfork_damage.wav");
     registerSound(SoundEffect::PLAYER_DEFEATED, "player_defeated.wav");
+    registerSound(SoundEffect::LIGHTNING, "lightning.wav");
+    registerSound(SoundEffect::WATER, "water.wav");
 
     return true;
 }

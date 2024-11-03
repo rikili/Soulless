@@ -191,6 +191,19 @@ void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mo
     }
 }
 
+SoundEffect convertSpellToSoundEffect(SpellType spellType) {
+    switch (spellType) {
+        case SpellType::FIRE:
+            return SoundEffect::FIRE;
+        case SpellType::WATER:
+            return SoundEffect::WATER;
+        case SpellType::LIGHTNING:
+            return SoundEffect::LIGHTNING;
+        default:
+            throw std::invalid_argument("Unknown SpellType");
+    }
+}
+
 void InputHandler::cast_player_spell(double x, double y, bool is_left)
 {
     Entity& player_ent = registry.players.entities[0];
@@ -206,7 +219,7 @@ void InputHandler::cast_player_spell(double x, double y, bool is_left)
     create_player_projectile(player_ent, x, y, spell);
 
     SoundManager* soundManager = SoundManager::getSoundManager();
-    soundManager->playSound(SoundEffect::FIRE);
+    soundManager->playSound(convertSpellToSoundEffect(spell));
 
     invoke_player_cooldown(player, is_left);
 }

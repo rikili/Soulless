@@ -10,6 +10,8 @@ enum class SoundEffect {
     FIRE,
     VILLAGER_DAMAGE,
     PITCHFORK_DAMAGE,
+    LIGHTNING,
+    WATER,
     PLAYER_DEFEATED
 };
 
