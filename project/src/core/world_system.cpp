@@ -23,18 +23,19 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	if (!registry.players.has(player_mage) || registry.game_over) {
 		printf("\n----------------\nGame Over! Resetting...\n----------------\n");
 		registry.game_over = false;
+		registry.clear_all_components();
 		this->restartGame();
 		return true;
 	}
 
-	this->handle_animations();
 	this->handle_projectiles(elapsed_ms_since_last_update);
 	this->handle_enemy_attacks(elapsed_ms_since_last_update);
 	this->handle_enemy_logic(elapsed_ms_since_last_update);
 	this->handle_movements(elapsed_ms_since_last_update);
 	this->collision_system->detect_collisions();
 	this->collision_system->resolve_collisions();
-
+	this->handle_animations();
+	this->handle_health_bars();
 	this->handle_timers(elapsed_ms_since_last_update);
 	registry.collision_registry.clear_collisions();
 	return true;
@@ -44,6 +45,33 @@ void WorldSystem::set_renderer(RenderSystem* renderer)
 {
 	this->renderer = renderer;
 }
+
+void WorldSystem::handle_health_bars() {
+
+	// For each healthbar
+	for (Entity& entity : registry.healthBars.entities) {
+
+		// Needed to get entity to which the healthbar is assigned
+		HealthBar& healthbar = registry.healthBars.get(entity);
+
+		// Check to ensure healthbar is assigned and has been given a position
+		if (healthbar.assigned && registry.motions.has(entity)) {
+
+			// Update healthbar position to match the entity it's assigned to
+			Entity assignedTo = healthbar.assignedTo;
+			if (!registry.motions.has(assignedTo)) {
+				printd("Error updating health bar: it is assigned to an entity without a motion component\n");
+				return;
+			}
+			registry.motions.get(entity).position.x = registry.motions.get(assignedTo).position.x;
+			registry.motions.get(entity).position.y = registry.motions.get(assignedTo).position.y + HEALTH_BAR_Y_OFFSET;
+		}
+		else {
+			printd("Error updating health bar: it is either unassigned or does not have a motion component.\n");
+		}
+	}
+}
+
 
 void WorldSystem::handle_animations() {
 	Motion& playerMotion = registry.motions.get(player_mage);
@@ -55,7 +83,7 @@ void WorldSystem::handle_animations() {
 		playerRR.texture = "mage-attack";
 	}
 	else {
-		
+
 		if (playerMotion.velocity.x == 0 && playerMotion.velocity.y == 0) {
 			playerRR.texture = "mage-idle";
 		}
@@ -69,11 +97,11 @@ void WorldSystem::handle_animations() {
 
 		playerAnimation.initializeAtRow((int)playerMotion.currentDirection);
 	}
-	
+
 	// printd("Current: %d\n", playerMotion.currentDirection);
 
-	
-	
+
+
 }
 /**
  * @brief Handle projectiles to reduce their range at each step and mark for
@@ -159,7 +187,7 @@ void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
 void WorldSystem::computeNewDirection(Entity e) {
 	Motion& motion = registry.motions.get(e);
 	motion.oldDirection = motion.currentDirection;
-	
+
 
 	float xVel = motion.velocity.x;
 	float yVel = motion.velocity.y;
@@ -226,6 +254,16 @@ void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
 			{
 				registry.onHits.remove(hit_ent);
 			}
+		}
+	}
+
+	for (Entity& healed_ent : registry.onHeals.entities)
+	{
+		OnHeal& heal = registry.onHeals.get(healed_ent);
+		heal.heal_time -= elapsed_ms_since_last_update;
+		if (heal.heal_time < 0)
+		{
+			registry.onHeals.remove(healed_ent);
 		}
 	}
 
@@ -408,6 +446,14 @@ Entity WorldSystem::createPlayer() {
 	Health& health = registry.healths.emplace(player);
 	health.health = PLAYER_HEALTH;
 	health.maxHealth = PLAYER_MAX_HEALTH;
+
+	auto healthBar = Entity();
+	Motion& healthBarMotion = registry.motions.emplace(healthBar);
+	healthBarMotion.position = { window_width_px / 2.0f, window_height_px / 2.0f + HEALTH_BAR_Y_OFFSET};
+	healthBarMotion.scale = { 0.5, 0.5 };
+
+	HealthBar& healthBarComp = registry.healthBars.emplace(healthBar);
+	healthBarComp.assignHealthBar(player);
 	// TODO: Add resistances here!
 
 	// Player& player_component = registry.players.emplace(player);
@@ -426,11 +472,18 @@ Entity WorldSystem::createPlayer() {
 	request.shader = "animatedsprite";
 	request.type = PLAYER;
 
+	RenderRequest& healthBarRequest = registry.render_requests.emplace(healthBar);
+	healthBarRequest.mesh = "sprite";
+	healthBarRequest.texture = "healthbar";
+	healthBarRequest.shader = "healthbar";
+	healthBarRequest.type = PLAYER;
+
 	MeshCollider& collider = registry.mesh_colliders.emplace(player);
 	collider.mesh = "mage_collider";
 
 	return player;
 }
+
 
 void WorldSystem::createEnemy(EnemyType type, vec2 position, vec2 velocity)
 {
@@ -547,12 +600,15 @@ void WorldSystem::createKnight(vec2 position, vec2 velocity)
 
 void WorldSystem::loadBackgroundObjects() {
 	createBackgroundObject({ window_width_px / 4, window_height_px / 4 }, { 0.75, 0.75 }, "tree", false);
+
 	Entity campfire = createBackgroundObject({ window_width_px / 2, window_height_px / 2 + 50.f }, { 0.5, 0.5 }, "campfire", true);
 	Animation& campfireAnimation = registry.animations.emplace(campfire);
 	campfireAnimation.frameTime = 100.f;
 	campfireAnimation.spriteCols = 6;
 	campfireAnimation.spriteRows = 1;
 	campfireAnimation.frameCount = 6;
+	Interactable& campfireInteractable = registry.interactables.emplace(campfire);
+	campfireInteractable.type = InteractableType::HEALER;
 }
 
 Entity WorldSystem::createBackgroundObject(vec2 position, vec2 scale, AssetId texture, bool animate)

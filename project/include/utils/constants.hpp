@@ -54,6 +54,7 @@ enum class EntityState
 // --- Player Constants ---
 const float PLAYER_HEALTH = 100.f;
 const float PLAYER_MAX_HEALTH = 100.f;
+const float PLAYER_HEAL_COOLDOWN = 10000.f;
 
 // --- Player Spells ---
 
@@ -111,6 +112,15 @@ const float KNIGHT_RANGE = 35.f; // Melee range
 const float KNIGHT_DAMAGE = 15.f;
 const float SWORD_VELOCITY = 0.35f;
 const float SWORD_DAMAGE = 35.f;
+
+// --- World Interactables ---
+enum class InteractableType
+{
+    HEALER
+};
+
+// --- Offsets ---
+const float HEALTH_BAR_Y_OFFSET = -30.f;
 
 // Draw order (largest number = frontmost)
 enum

@@ -32,6 +32,16 @@ struct Health
     ResistanceModifier resistance_modifier;
 };
 
+struct HealthBar
+{
+    Entity assignedTo{};
+    bool assigned = false;
+    void assignHealthBar(Entity& ent) {
+        this->assignedTo = ent;
+        assigned = true;
+    }
+};
+
 // Damage Component
 struct Damage
 {
@@ -59,6 +69,10 @@ struct Projectile {
     float range = 0;
 };
 
+struct Interactable {
+    InteractableType type;
+};
+
 // Timed Component
 struct Timed { }; // include temporary effects and counters
 
@@ -75,6 +89,12 @@ struct OnHit
 {
     float invincibility_timer = 0;
     bool invicibilityShader = false;
+};
+
+// Structure to store information on being healed
+struct OnHeal
+{
+    float heal_time = 0;
 };
 
 // Structure to store entities marked to die
