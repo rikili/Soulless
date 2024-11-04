@@ -21,7 +21,7 @@ bool WorldSystem::is_over() const {
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	if (!registry.players.has(player_mage) || registry.game_over) {
-		printf("\n----------------\nGame Over! Resetting...\n----------------\n");
+		printd("\n----------------\nGame Over! Resetting...\n----------------\n");
 		registry.game_over = false;
 		registry.clear_all_components();
 		this->restartGame();
@@ -43,6 +43,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 }
 
 void WorldSystem::handle_ai(float elapsed_ms_since_last_update) {
+
+	if (registry.game_over) {
+		return;
+	}
+
 	for (Entity& entity : registry.ai_systems.entities) {
 		AI_SYSTEM::tickForEntity(&entity, elapsed_ms_since_last_update);
 	}
@@ -697,5 +702,5 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 		}
 	}
 
-	
+
 }
