@@ -23,6 +23,12 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
     auto fleeFromPlayer = new ActionNode(
         [entity = *entity](float elapsed_ms) {
             // Could play hurt animation or other feedback
+            if (!registry.motions.has(entity)) {
+                return NodeState::FAILURE;
+            }
+            if (registry.players.size() == 0) {
+                return NodeState::FAILURE;
+            }
             auto& motion = registry.motions.get(entity);
             auto& enemy = registry.enemies.get(entity);
 
@@ -68,18 +74,30 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
     // 2. Check if in range -> attack
  auto inRangeCheck = new ConditionNode(
     [entity = *entity](float elapsed_ms) {
-            auto& motion = registry.motions.get(entity);
-            Entity player_mage = registry.players.entities[0];
-            auto& player_motion = registry.motions.get(player_mage);
-            auto& enemy = registry.enemies.get(entity);
-            float range = enemy.range;
-            float distance = glm::distance(motion.position, player_motion.position);
+        if (!registry.motions.has(entity)) {
+            return false;
+        }
+        if (registry.players.size() == 0) {
+            return false;
+        }
+        auto& motion = registry.motions.get(entity);
+        Entity player_mage = registry.players.entities[0];
+        auto& player_motion = registry.motions.get(player_mage);
+        auto& enemy = registry.enemies.get(entity);
+        float range = enemy.range;
+        float distance = glm::distance(motion.position, player_motion.position);
             return distance < range;
         }
     );
     
     auto attackAction = new ActionNode(
         [entity = *entity](float elapsed_ms) {
+            if (!registry.enemies.has(entity)) {
+                return NodeState::FAILURE;
+            }
+            if (registry.players.size() == 0) {
+                return NodeState::FAILURE;
+            }
             Enemy& enemy = registry.enemies.get(entity);
             Entity player_mage = registry.players.entities[0];
 
@@ -104,10 +122,13 @@ auto moveToPlayer = new ActionNode(
         if (!registry.motions.has(entity)) {
             return NodeState::FAILURE;
         }
+        if (registry.players.size() == 0) {
+            return NodeState::FAILURE;
+        }
         auto& motion = registry.motions.get(entity);
         auto& enemy = registry.enemies.get(entity);
 
-            Entity player_mage = registry.players.entities[0];
+        Entity player_mage = registry.players.entities[0];
             if (!registry.motions.has(player_mage)) {
                 return NodeState::FAILURE;
             }
@@ -138,7 +159,7 @@ auto moveToPlayer = new ActionNode(
             motion.velocity = direction_normalized * speed;
             return NodeState::RUNNING;  // Keep moving
         },
-        3000.0f,
+        0.0f,
         false
     );
 
