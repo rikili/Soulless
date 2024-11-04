@@ -50,7 +50,7 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
             }
 
             vec2 direction_normalized = glm::normalize(motion.position - player_motion.position);
-            motion.velocity = direction_normalized * FARMER_VELOCITY * 1.2f;
+            motion.velocity = direction_normalized * FARMER_VELOCITY * 0.9f; // wounded farmer
 
 
             // Recover health
@@ -122,7 +122,6 @@ auto moveToPlayer = new ActionNode(
 
             // Move towards player
             float speed = 0.0f;
-            float enemy_velocity_modifier = ENEMY_BASIC_VELOCITY;
             EnemyType type = enemy.type;
             switch (type) {
                 case EnemyType::FARMER:
@@ -135,7 +134,6 @@ auto moveToPlayer = new ActionNode(
                     speed = KNIGHT_VELOCITY;
                     break;
             }
-            speed *= enemy_velocity_modifier;
             vec2 direction_normalized = glm::normalize(player_motion.position - motion.position);
             motion.velocity = direction_normalized * speed;
             return NodeState::RUNNING;  // Keep moving

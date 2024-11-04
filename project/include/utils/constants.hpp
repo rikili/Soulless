@@ -117,13 +117,12 @@ enum class EnemyType
 };
 
 // --- Enemy Constants ---
-const float ENEMY_BASIC_VELOCITY = 0.05f;
 const float ENEMY_BASIC_RANGE = 100.f;
 
 // Farmer + Pitchfork
 const float FARMER_HEALTH = 30.f;
 const float FARMER_COOLDOWN = 4000.f;
-const float FARMER_VELOCITY = 0.20f;
+const float FARMER_VELOCITY = 0.04f;
 const float FARMER_RANGE = 200.f;
 const float FARMER_DAMAGE = 5.f;
 const float PITCHFORK_VELOCITY = 0.25f;
@@ -132,8 +131,8 @@ const float PITCHFORK_DAMAGE = 10.f;
 // Archer + Arrow
 const float ARCHER_HEALTH = 50.f;
 const float ARCHER_COOLDOWN = 2500.f;
-const float ARCHER_VELOCITY = 0.07f;
-const float ARCHER_RANGE = 500.f;
+const float ARCHER_VELOCITY = 0.03f;
+const float ARCHER_RANGE = 400.f;
 const float ARCHER_DAMAGE = 5.f;
 const float ARROW_VELOCITY = 0.35f;
 const float ARROW_DAMAGE = 20.f;
@@ -141,7 +140,7 @@ const float ARROW_DAMAGE = 20.f;
 // Knight + Sword
 const float KNIGHT_HEALTH = 200.f;
 const float KNIGHT_COOLDOWN = 3000.f;
-const float KNIGHT_VELOCITY = 0.05f;
+const float KNIGHT_VELOCITY = 0.01f;
 const float KNIGHT_RANGE = 35.f; // Melee range
 const float KNIGHT_DAMAGE = 15.f;
 const float SWORD_VELOCITY = 0.35f;
