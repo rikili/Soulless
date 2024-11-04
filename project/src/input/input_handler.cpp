@@ -155,11 +155,18 @@ void invoke_player_cooldown(Player& player, bool is_left)
 
 void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mods)
 {
-    if (isTutorialOn())
-    {
-        globalOptions.tutorial = false;
+    if (isTutorialOn()) {
         SoundManager* soundManager = SoundManager::getSoundManager();
-        soundManager->playMusic(Song::MAIN);
+        if (!globalOptions.pause)
+        {
+            soundManager->playMusic(Song::MAIN);
+        }
+        else
+        {
+            soundManager->toggleMusic();
+        }
+        globalOptions.tutorial = false;
+        globalOptions.pause = false;
         return;
     }
 

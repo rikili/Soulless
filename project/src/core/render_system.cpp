@@ -175,7 +175,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 
 		drawText("Survive as long as you can!", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
 
-		std::string message = "Press SPACE key to ";
+		std::string message = "Press SPACE or click to ";
 		std::string start = globalOptions.pause ? "resume." : "start.";
 		drawText(message + start, "deutsch", window_width_px / 2.0f, tutFontSize * 1.5, 1.0f, color);
 		return;
