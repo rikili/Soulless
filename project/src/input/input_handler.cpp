@@ -320,19 +320,16 @@ void InputHandler::updateVelocity()
     auto& motion_registry = registry.motions;
     Motion& playerMotion = motion_registry.get(player);
 
-
     int verticalDir = activeMoveKeys.count(GLFW_KEY_S) - activeMoveKeys.count(GLFW_KEY_W);
     int horizontalDir = activeMoveKeys.count(GLFW_KEY_D) - activeMoveKeys.count(GLFW_KEY_A);
 
-    float maxSpeed = 0.5f; // TODO: get this from component
-
     if (horizontalDir != 0 || verticalDir != 0)
     {
-        float normalizedSpeed = maxSpeed;
+        float normalizedSpeed = PLAYER_VELOCITY;
 
         if (horizontalDir != 0 && verticalDir != 0)
         {
-            normalizedSpeed = sqrt((maxSpeed * maxSpeed) / 2);
+            normalizedSpeed = sqrt((PLAYER_VELOCITY * PLAYER_VELOCITY) / 2);
         }
 
         playerMotion.velocity.x = horizontalDir * normalizedSpeed;

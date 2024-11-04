@@ -29,7 +29,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	}
 
 	this->handle_projectiles(elapsed_ms_since_last_update);
-	this->handle_enemy_attacks(elapsed_ms_since_last_update);
 	this->handle_enemy_logic(elapsed_ms_since_last_update);
 	this->handle_movements(elapsed_ms_since_last_update);
 	this->collision_system->detect_collisions();
@@ -37,9 +36,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	this->handle_animations();
 	this->handle_health_bars();
 	this->handle_timers(elapsed_ms_since_last_update);
+	this->handle_ai(elapsed_ms_since_last_update);
 	this->handle_spell_states(elapsed_ms_since_last_update);
 	registry.collision_registry.clear_collisions();
 	return true;
+}
+
+void WorldSystem::handle_ai(float elapsed_ms_since_last_update) {
+	for (Entity& entity : registry.ai_systems.entities) {
+		AI_SYSTEM::tickForEntity(&entity, elapsed_ms_since_last_update);
+	}
 }
 
 void WorldSystem::set_renderer(RenderSystem* renderer)
@@ -375,100 +381,6 @@ void WorldSystem::handle_spell_states(float elapsed_ms_since_last_update)
 	}
 }
 
-/**
- * @brief In charge of enemies using their attacks when they are in range and
- * off cooldown
- * @param elapsed_ms_since_last_update
- */
-void WorldSystem::handle_enemy_attacks(float elapsed_ms_since_last_update)
-{
-	for (Entity& enemy_ent : registry.enemies.entities)
-	{
-		Enemy& enemy = registry.enemies.get(enemy_ent);
-		Motion& enemy_motion = registry.motions.get(enemy_ent);
-		Motion& player_motion = registry.motions.get(player_mage);
-
-		// printd("Distance between player and enemy: %f\n",
-		// glm::distance(enemy_motion.position, player_motion.position));
-
-		if (enemy.cooldown <= 0 && (glm::distance(enemy_motion.position, player_motion.position) <= enemy.range)) {
-			create_enemy_projectile(enemy_ent);
-			invoke_enemy_cooldown(enemy_ent);
-		}
-	}
-}
-
-void WorldSystem::create_enemy_projectile(Entity& enemy_ent)
-{
-	Entity projectile_ent;
-	Projectile& projectile = registry.projectiles.emplace(projectile_ent);
-	Motion& projectile_motion = registry.motions.emplace(projectile_ent);
-	Deadly& deadly = registry.deadlies.emplace(projectile_ent);
-	Damage& damage = registry.damages.emplace(projectile_ent);
-	RenderRequest& request = registry.render_requests.emplace(projectile_ent);
-	Motion& enemy_motion = registry.motions.get(enemy_ent);
-	Enemy& enemy = registry.enemies.get(enemy_ent);
-
-	deadly.to_player = true;
-
-	projectile_motion.scale = { 0.525f, 0.525f };
-	projectile_motion.position = enemy_motion.position;
-	projectile_motion.angle = enemy_motion.angle;
-
-	float attack_velocity;
-	float attack_damage;
-	std::string attack_texture;
-	switch (enemy.type) {
-	case EnemyType::FARMER:
-		attack_velocity = PITCHFORK_VELOCITY;
-		attack_damage = PITCHFORK_DAMAGE;
-		attack_texture = "pitchfork";
-		break;
-	case EnemyType::ARCHER:
-		attack_velocity = ARROW_VELOCITY;
-		attack_damage = ARROW_DAMAGE;
-		attack_texture = "arrow";
-		break;
-	case EnemyType::KNIGHT:
-		attack_velocity = KNIGHT_VELOCITY;
-		attack_damage = SWORD_DAMAGE;
-		attack_texture = "filler";
-		break;
-	default: // Should not happen but just in case
-		attack_velocity = PITCHFORK_VELOCITY;
-		attack_damage = PITCHFORK_DAMAGE;
-		attack_texture = "pitchfork";
-		break;
-	}
-
-	projectile.type = DamageType::elementless;
-	projectile.range = enemy.range;
-	projectile_motion.velocity = vec2({ cos(enemy_motion.angle), sin(enemy_motion.angle) }) * attack_velocity;
-	damage.value = attack_damage;
-
-	request.mesh = "sprite";
-	request.texture = attack_texture;
-	request.shader = "sprite";
-	request.type = PROJECTILE;
-}
-
-void WorldSystem::invoke_enemy_cooldown(Entity& enemy_ent)
-{
-	Enemy& enemy = registry.enemies.get(enemy_ent);
-	EnemyType enemy_type = enemy.type;
-
-	switch (enemy_type) {
-	case EnemyType::FARMER:
-		enemy.cooldown = FARMER_COOLDOWN;
-		break;
-	case EnemyType::ARCHER:
-		enemy.cooldown = ARCHER_COOLDOWN;
-		break;
-	case EnemyType::KNIGHT:
-		enemy.cooldown = KNIGHT_COOLDOWN;
-		break;
-	}
-}
 
 /**
  * Initialize the game world
@@ -606,6 +518,8 @@ void WorldSystem::createFarmer(vec2 position, vec2 velocity)
 	request.texture = "farmer";
 	request.shader = "sprite";
 	request.type = ENEMY;
+
+	AI_SYSTEM::initAIComponent(&enemy);
 }
 
 void WorldSystem::createArcher(vec2 position, vec2 velocity)
@@ -637,6 +551,8 @@ void WorldSystem::createArcher(vec2 position, vec2 velocity)
 	request.texture = "archer";
 	request.shader = "sprite";
 	request.type = ENEMY;
+
+	AI_SYSTEM::initAIComponent(&enemy);
 }
 
 void WorldSystem::createKnight(vec2 position, vec2 velocity)
@@ -668,6 +584,8 @@ void WorldSystem::createKnight(vec2 position, vec2 velocity)
 	request.texture = "knight";
 	request.shader = "sprite";
 	request.type = ENEMY;
+
+	AI_SYSTEM::initAIComponent(&enemy);
 }
 
 void WorldSystem::loadBackgroundObjects() {
@@ -779,37 +697,5 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 		}
 	}
 
-	// Reorient enemies towards the player
-	for (const auto& enemy : registry.enemies.entities)
-	{
-		Motion& motion = registry.motions.get(enemy);
-		const Enemy& enemy_component = registry.enemies.get(enemy);
-		const vec2* position = &motion.position;
-		const vec2 des = registry.motions.get(player_mage).position;
-		vec2 distance = { des.x - position->x, des.y - position->y };
-		if (enemy_component.range <=
-			sqrt(distance.x * distance.x + distance.y * distance.y))
-		{
-			float enemy_velocity_modifier = ENEMY_BASIC_VELOCITY;
-
-			switch (enemy_component.type)
-			{
-			case EnemyType::FARMER:
-				enemy_velocity_modifier = FARMER_VELOCITY;
-				break;
-			case EnemyType::ARCHER:
-				enemy_velocity_modifier = ARCHER_VELOCITY;
-				break;
-			case EnemyType::KNIGHT:
-				enemy_velocity_modifier = KNIGHT_VELOCITY;
-				break;
-			}
-
-			const vec2 velocity = glm::normalize(distance) * enemy_velocity_modifier;
-			motion.velocity = velocity;
-		}
-		else {
-			motion.velocity = { 0, 0 };
-		}
-	}
+	
 }

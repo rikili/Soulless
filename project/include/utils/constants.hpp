@@ -11,6 +11,9 @@ const float ARCHER_SPAWN_INTERVAL_MS = 16000.f;
 const float KNIGHT_SPAWN_INTERVAL_MS = 20000.f;
 const unsigned int QUEUE_SIZE = 8;
 
+constexpr float LOW_HEALTH_THRESHOLD = 30.0f;
+constexpr float HEALTH_RECOVERY_RATE = 0.2f;
+
 const float ENEMY_INVINCIBILITY_TIMER = 800.f;
 const float PLAYER_INVINCIBILITY_TIMER = 1500.f;
 
@@ -56,6 +59,7 @@ enum class EntityState
 const float PLAYER_HEALTH = 100.f;
 const float PLAYER_MAX_HEALTH = 100.f;
 const float PLAYER_HEAL_COOLDOWN = 10000.f;
+const float PLAYER_VELOCITY = 0.2f;
 
 // --- Player Spells ---
 
@@ -70,7 +74,7 @@ enum class SpellType
 };
 
 const float FIRE_DAMAGE = 25.f;
-const float FIRE_VELOCITY = 1.f;
+const float FIRE_VELOCITY = 0.8f;
 const float FIRE_RANGE = 250.f;
 const vec2 FIRE_SCALE = { 0.3, 0.3 };
 const float FIRE_SCALE_FACTOR = 3.f;
@@ -117,9 +121,9 @@ const float ENEMY_BASIC_VELOCITY = 0.05f;
 const float ENEMY_BASIC_RANGE = 100.f;
 
 // Farmer + Pitchfork
-const float FARMER_HEALTH = 25.f;
+const float FARMER_HEALTH = 30.f;
 const float FARMER_COOLDOWN = 4000.f;
-const float FARMER_VELOCITY = 0.10f;
+const float FARMER_VELOCITY = 0.20f;
 const float FARMER_RANGE = 200.f;
 const float FARMER_DAMAGE = 5.f;
 const float PITCHFORK_VELOCITY = 0.25f;

@@ -4,6 +4,7 @@
 #include "ecs.hpp"
 #include "general_components.hpp"
 #include "collision_registry.hpp"
+#include "ai/ai_system.hpp"
 
 class ECSRegistry
 {
@@ -35,7 +36,7 @@ public:
 	ComponentContainer<DebugRequest> debug_requests;
 	ComponentContainer<MeshCollider> mesh_colliders;
 	CollisionRegistry collision_registry;
-  
+	ComponentContainer<AIComponent> ai_systems;
 	mat4 viewMatrix;
 	mat4 projectionMatrix;
 
@@ -66,6 +67,8 @@ public:
 		registry_list.push_back(&cameras);
 		registry_list.push_back(&static_render_requests);
 		registry_list.push_back(&tiles);
+		registry_list.push_back(&ai_systems);
+
 	}
 
 	void clear_all_components() const
