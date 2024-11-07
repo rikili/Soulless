@@ -23,7 +23,7 @@ InputHandler::InputHandler() {}
 bool isPlayerDead()
 {
     Entity& player_ent = registry.players.entities[0];
-    return registry.deaths.has(player_ent);
+    return registry.deaths.has(player_ent) || registry.game_over;
 }
 
 bool isTutorialOn()

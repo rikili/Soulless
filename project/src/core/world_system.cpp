@@ -411,6 +411,10 @@ void WorldSystem::restartGame() {
 	this->createTileGrid();
 	loadBackgroundObjects();
 	this->renderer->initializeCamera();
+
+	// Reset enemy spawn timers (rework this if needed)
+	archer_spawn_timer = 60000.f;
+	knight_spawn_timer = 120000.f;
 }
 
 void WorldSystem::createTileGrid() {
