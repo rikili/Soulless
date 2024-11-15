@@ -9,14 +9,13 @@ public:
     static constexpr float TILE_HEIGHT = 32.0f;
     
     // Spacing multipliers for isometric view
-    static constexpr float ISO_SPACING_X = 1.2f;  // Increased horizontal spacing
-    static constexpr float ISO_SPACING_Y = 1.1f;  // Increased vertical spacing
+    static constexpr float ISO_SPACING_X = 1.0f;  // Increased horizontal spacing
+    static constexpr float ISO_SPACING_Y = 0.9f;  // Increased vertical spacing
     
     // Calculated isometric dimensions
     static constexpr float ISO_TILE_WIDTH = TILE_WIDTH * ISO_SPACING_X;
     static constexpr float ISO_TILE_HEIGHT = TILE_HEIGHT * ISO_SPACING_Y;
 
-    // Core position conversion with adjusted spacing
     static vec2 getIsometricPosition(int col, int row, bool isIsometricOverride = false) {
         if (isIsometricOverride || IS_ISOMETRIC) {
             float x = (col * ISO_TILE_WIDTH)  + (row * ISO_TILE_HEIGHT /2);
@@ -29,7 +28,6 @@ public:
         }
     }
 
-    // Convert screen position to grid coordinates (adjusted for new spacing)
     static vec2 screenToGrid(vec2 screenPos) {
         
         float col = (screenPos.x / (TILE_WIDTH * ISO_SPACING_X * 0.5f) + 
@@ -39,7 +37,6 @@ public:
         return {col , row};
     }
 
-    // Get the dimensions of a grid that would cover the screen (adjusted for spacing)
     static vec2 getGridDimensions(float screenWidth, float screenHeight) {
         if (IS_ISOMETRIC) { 
             int cols = static_cast<int>(screenWidth / (ISO_TILE_WIDTH ));

@@ -5,16 +5,13 @@
 AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
     AIComponent aiComponent;
     
-    // Create root selector (tries each behaviour in order)
     auto root = new ControlNode(ControlNode::ControlType::SELECTOR);
     
-    // 1. Check if health is low -> don't move
     auto healthCheck = new ConditionNode(
-        [entity = *entity](float elapsed_ms) {  // Capture entity value
+        [entity = *entity](float elapsed_ms) {  
             if (!registry.healths.has(entity)) {
                 return false;
             }
-            // Get health from entity's health component
             auto& health = registry.healths.get(entity);
             return health.health <= LOW_HEALTH_THRESHOLD;
         }
@@ -22,7 +19,6 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
     
     auto fleeFromPlayer = new ActionNode(
         [entity = *entity](float elapsed_ms) {
-            // Could play hurt animation or other feedback
             if (!registry.motions.has(entity)) {
                 return NodeState::FAILURE;
             }
@@ -57,8 +53,6 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
 
             vec2 direction_normalized = glm::normalize(motion.position - player_motion.position);
             motion.velocity = direction_normalized * FARMER_VELOCITY * 0.9f; // wounded farmer
-
-
             // Recover health
             auto& health = registry.healths.get(entity);
             health.health += HEALTH_RECOVERY_RATE * elapsed_ms / 1000.0f;
@@ -71,7 +65,6 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
     lowHealthSequence->children.push_back(healthCheck);
     lowHealthSequence->children.push_back(fleeFromPlayer);
     
-    // 2. Check if in range -> attack
  auto inRangeCheck = new ConditionNode(
     [entity = *entity](float elapsed_ms) {
         if (!registry.motions.has(entity)) {
@@ -99,13 +92,11 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
                 return NodeState::FAILURE;
             }
             Enemy& enemy = registry.enemies.get(entity);
-            Entity player_mage = registry.players.entities[0];
 
             if (enemy.cooldown <= 0) {
                 create_enemy_projectile(entity);
                 invoke_enemy_cooldown(entity);
             }
-            // This could trigger animation, spawn projectile, etc.
             return NodeState::SUCCESS;
         },
         0.0f,
@@ -116,7 +107,6 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
     attackSequence->children.push_back(inRangeCheck);
     attackSequence->children.push_back(attackAction);
     
-    // 3. Move towards player (fallback behavior)
 auto moveToPlayer = new ActionNode(
     [entity = *entity](float elapsed_ms) {
         if (!registry.motions.has(entity)) {
@@ -141,7 +131,6 @@ auto moveToPlayer = new ActionNode(
                 return NodeState::SUCCESS;
             }
 
-            // Move towards player
             float speed = 0.0f;
             EnemyType type = enemy.type;
             switch (type) {
@@ -157,21 +146,19 @@ auto moveToPlayer = new ActionNode(
             }
             vec2 direction_normalized = glm::normalize(player_motion.position - motion.position);
             motion.velocity = direction_normalized * speed;
-            return NodeState::RUNNING;  // Keep moving
+            return NodeState::RUNNING;  
         },
         0.0f,
         false
     );
 
     
-    // Build the complete tree
     root->children.push_back(lowHealthSequence);
     root->children.push_back(attackSequence);
     root->children.push_back(moveToPlayer);
     
     aiComponent.root = root;
     
-    // Add to registry
     registry.ai_systems.emplace(*entity, aiComponent);
     return registry.ai_systems.get(*entity);
 }
@@ -225,7 +212,7 @@ void AI_SYSTEM::create_enemy_projectile(const Entity& enemy_ent)
 		attack_damage = SWORD_DAMAGE;
 		attack_texture = "filler";
 		break;
-	default: // Should not happen but just in case
+	default:  
 		attack_velocity = PITCHFORK_VELOCITY;
 		attack_damage = PITCHFORK_DAMAGE;
 		attack_texture = "pitchfork";

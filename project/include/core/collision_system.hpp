@@ -1,12 +1,15 @@
 #pragma once
-#include "render_system.hpp"
+#include "isystems/IRenderSystem.hpp"
+#include "core/common.hpp"
+#include <glm/gtc/matrix_transform.hpp>
+
 
 
 class CollisionSystem
 {
 
 public:
-    explicit CollisionSystem(RenderSystem* renderer);
+    explicit CollisionSystem(IRenderSystem* renderer);
     void init();
     void detect_collisions();
     void resolve_collisions();
@@ -14,6 +17,6 @@ public:
     void applyHealing(Entity target);
 
 private:
-    RenderSystem* renderer;
+    IRenderSystem* renderer;
     bool is_mesh_colliding(const Entity& player, const Entity& other_entity);
 };

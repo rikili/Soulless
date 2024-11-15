@@ -40,70 +40,72 @@ glm::vec3 spellTypeToColor(SpellType spell) {
  * @return true: if the render system is initialized successfully
  * @return false: if the render system is not initialized successfully
  */
-bool RenderSystem::initialize(InputHandler& input_handler, const int width, const int height, const char* title)
+bool RenderSystem::initialize(IInputHandler& input_handler, const int width, const int height, const char* title)
 {
-	glm::mat4 iso = glm::mat4(1.0f);
-	iso = glm::rotate(iso, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));  // X rotation
-	iso = glm::rotate(iso, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Y rotation
+   glm::mat4 iso = glm::mat4(1.0f);
+   iso = glm::rotate(iso, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));  // X rotation
+   iso = glm::rotate(iso, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // Y rotation
+   
+   projectionMatrix = glm::ortho(0.f, (float)window_width_px * zoomFactor,
+       (float)window_height_px * zoomFactor, 0.f, -1.f, 1.f);
+   registry.projectionMatrix = projectionMatrix;
+   
+   initializeCamera();
 
-	// Combine with orthographic projection
-	projectionMatrix = glm::ortho(0.f, (float)window_width_px * zoomFactor,
-		(float)window_height_px * zoomFactor, 0.f, -1.f, 1.f);
-	registry.projectionMatrix = projectionMatrix;
+   if (!glfwInit()) { // Initialize the window
+       exit(EXIT_FAILURE);
+   }
+   
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+   glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+   #if __APPLE__
+   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+   #endif
+   glfwWindowHint(GLFW_RESIZABLE, 0);
 
-	initializeCamera();
+   this->window = glfwCreateWindow(width, height, title, nullptr, nullptr);
+   if (!this->window) {
+       glfwTerminate();
+       exit(EXIT_FAILURE);
+   }
 
-	// Most of the code below is just boilerplate code to create a window
-	if (!glfwInit()) { 	// Initialize the window
-		exit(EXIT_FAILURE);
-	}
+   glfwSetWindowUserPointer(this->window, this);
 
-	// Create a windowed mode window and its OpenGL context -------------------------
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-#if __APPLE__
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-	glfwWindowHint(GLFW_RESIZABLE, 0);
-	// ------------------------------------------------------------------------------
+   auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) {
+       ((RenderSystem*)glfwGetWindowUserPointer(wnd))->input_handler->onKey(_0, _1, _2, _3);
+   };
 
-	this->window = glfwCreateWindow(width, height, title, nullptr, nullptr);
-	if (!this->window) {
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
+   auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) {
+       ((RenderSystem*)glfwGetWindowUserPointer(wnd))->input_handler->onMouseMove({ _0, _1 });
+   };
 
-	glfwSetWindowUserPointer(this->window, this);
+   auto mouse_button_redirect = [](GLFWwindow* wnd, int _1, int _2, int _3) {
+       ((RenderSystem*)glfwGetWindowUserPointer(wnd))->input_handler->onMouseKey(wnd, _1, _2, _3);
+   };
 
-	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) {
-		((RenderSystem*)glfwGetWindowUserPointer(wnd))->input_handler.onKey(_0, _1, _2, _3);
-		};
+   glfwSetKeyCallback(window, key_redirect);
+   glfwSetCursorPosCallback(window, cursor_pos_redirect);
+   glfwSetMouseButtonCallback(window, mouse_button_redirect);
 
-	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) {
-		((RenderSystem*)glfwGetWindowUserPointer(wnd))->input_handler.onMouseMove({ _0, _1 });
-		};
+   glfwMakeContextCurrent(this->window);
+   glfwSwapInterval(1);
 
-	auto mouse_button_redirect = [](GLFWwindow* wnd, int _1, int _2, int _3) {
-		((RenderSystem*)glfwGetWindowUserPointer(wnd))->input_handler.onMouseKey(wnd, _1, _2, _3);
-		};
+   const int is_fine = gl3w_init();
+   if (is_fine) {
+	   fprintf(stderr, "failed to initialize OpenGL\n");
+	   return false;
+   }
+   assert(is_fine == 0);
 
-	glfwSetKeyCallback(window, key_redirect);
-	glfwSetCursorPosCallback(window, cursor_pos_redirect);
-	glfwSetMouseButtonCallback(window, mouse_button_redirect);
+   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+   glClear(GL_COLOR_BUFFER_BIT);
+   glfwSwapBuffers(this->window);
 
-	glfwMakeContextCurrent(this->window);
-	glfwSwapInterval(1);
+   this->input_handler = &input_handler;
 
-	const int is_fine = gl3w_init();
-	assert(is_fine == 0);
-
-	// Set initial window colour
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glfwSwapBuffers(this->window);
-	return true;
+   return true;
 }
 
 /**
@@ -153,8 +155,8 @@ void RenderSystem::drawFrame(float elapsed_ms)
 	// sprites back to front
 
 	if (globalOptions.tutorial) {
-		float titleFontSize = this->asset_manager.getFont("king")->size;
-		float tutFontSize = this->asset_manager.getFont("deutsch")->size;
+		float titleFontSize = this->asset_manager->getFont("king")->size;
+		float tutFontSize = this->asset_manager->getFont("deutsch")->size;
 		float currentY = window_height_px - titleFontSize;
 		drawText("Soulless", "king", window_width_px / 2.0f, currentY, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 		currentY -= titleFontSize * 1.2;
@@ -209,7 +211,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		}
 
 		if (render_request.shader != "") {
-			const Shader* shader = this->asset_manager.getShader(render_request.shader);
+			const Shader* shader = this->asset_manager->getShader(render_request.shader);
 			if (!shader)
 			{
 				printf("Could not find shader with id %s\n", render_request.shader.c_str());
@@ -246,7 +248,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 					transform = rotate(transform, (float)M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
 				}
 
-				const Texture* texture = this->asset_manager.getTexture(render_request.texture);
+				const Texture* texture = this->asset_manager->getTexture(render_request.texture);
 				if (!texture)
 				{
 					std::cerr << "Texture with id " << render_request.texture << " not found!" << std::endl;
@@ -325,7 +327,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 			gl_has_errors();
 		}
 
-		const Mesh* mesh = this->asset_manager.getMesh(render_request.mesh);
+		const Mesh* mesh = this->asset_manager->getMesh(render_request.mesh);
 
 		if (!mesh)
 		{
@@ -342,13 +344,8 @@ void RenderSystem::drawFrame(float elapsed_ms)
 			std::cerr << "OpenGL error: " << error << std::endl;
 
 		}
-
-		// 	std::cout << "Drawing entity " << entity << " at position ("
-		// 	  << motion.position.x << ", " << motion.position.y
-		// 	  << ") with scale (" << motion.scale.x << ", " << motion.scale.y << ")" << std::endl;
-		// 	std::cout << "Mesh vertex count: " << mesh->vertexCount
-		// 	  << ", index count: " << mesh->indexCount << std::endl;
 	}
+
 
 	for (const Entity& debug_entity : registry.debug_requests.entities)
 	{
@@ -359,7 +356,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		transform = rotate(transform, debug.angle, glm::vec3(0.0f, 0.0f, 1.0f));
 		transform = scale(transform, vec3(debug.collider, 1.0f));
 
-		const Shader* shader = this->asset_manager.getShader("debug");
+		const Shader* shader = this->asset_manager->getShader("debug");
 		const GLuint shaderProgram = shader->program;
 		glUseProgram(shaderProgram);
 
@@ -374,7 +371,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(registry.projectionMatrix));
 		gl_has_errors();
 
-		const Mesh* debug_mesh = asset_manager.getMesh("debug");
+		const Mesh* debug_mesh = asset_manager->getMesh("debug");
 
 		glBindVertexArray(debug_mesh->vao);
 		GLenum draw_type = GL_LINE_LOOP;
@@ -416,7 +413,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 // source: inclass SimpleGL-3
 // the x,y values should be the position we want the center of our text to be
 void RenderSystem::drawText(const std::string& text, const std::string& fontName, float x, float y, float scale, const glm::vec3& color) {
-	Font* font = this->asset_manager.getFont(fontName);
+	Font* font = this->asset_manager->getFont(fontName);
 	float textWidth = getTextWidth(text, fontName, scale);
 
 	x = x - textWidth / 2;
@@ -430,7 +427,7 @@ void RenderSystem::drawText(const std::string& text, const std::string& fontName
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	const Shader* fontShader = this->asset_manager.getShader("font");
+	const Shader* fontShader = this->asset_manager->getShader("font");
 	GLuint m_font_shaderProgram = fontShader->program;
 	glUseProgram(m_font_shaderProgram);
 
@@ -463,9 +460,6 @@ void RenderSystem::drawText(const std::string& text, const std::string& fontName
 	GLint transformLoc =
 		glGetUniformLocation(m_font_shaderProgram, "transform");
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
-
-
-
 	glBindVertexArray(font->vao);
 
 	std::string::const_iterator c;
@@ -503,7 +497,7 @@ void RenderSystem::drawText(const std::string& text, const std::string& fontName
 }
 
 float RenderSystem::getTextWidth(const std::string& text, const std::string& fontName, float scale) {
-	const Font* font = this->asset_manager.getFont(fontName);
+	const Font* font = this->asset_manager->getFont(fontName);
 	float width = 0.0f;
 	for (char c : text) {
 		auto it = font->m_ftCharacters.find(c);
@@ -527,70 +521,32 @@ void RenderSystem::updateCameraPosition(float x, float y) {
 
 
 void RenderSystem::drawBackgroundObjects() {
-	float zoom = zoomFactor;
-	zoom = 1.0f * zoomFactor; // TODO: Fix zoom
-
-	for (const auto& render_request : registry.static_render_requests.entities) {
-		RenderRequest& request = registry.static_render_requests.get(render_request);
-
-		Tile& tile = registry.tiles.get(render_request);
-
-		if (tile.position.x < 0 || tile.position.x > window_width_px || tile.position.y < 0 || tile.position.y > window_height_px) {
-			continue;
-		}
-
-		const Mesh* mesh = this->asset_manager.getMesh(request.mesh);
-		if (!mesh) {
-			std::cerr << "Mesh with id " << request.mesh << " not found!" << std::endl;
-			std::cerr << "Skipping rendering of this mesh" << std::endl;
-			continue;
-		}
-
-		const Shader* shader = this->asset_manager.getShader(request.shader);
-		if (!shader)
-		{
-			printf("Could not find shader with id %s\n", request.shader.c_str());
-			printf("Skipping rendering of this shader\n");
-			continue;
-		}
-		const GLuint shaderProgram = shader->program;
-		glUseProgram(shaderProgram);
+	for (const auto& sub_renderer : sub_renderers) {
+		sub_renderer.second->render(this);
+	}
+}
 
 
+void RenderSystem::updateRenderOrder(ComponentContainer<RenderRequest>& render_requests) {
+	sorted_indices.clear();
+	sorted_indices.reserve(render_requests.components.size());
 
-		mat4 transform = mat4(1.0f);
-		transform = translate(transform, glm::vec3(tile.position, 0.0f));
-		transform = scale(transform, vec3(tile.scale * 100.f * zoom, 1.0f));
+	for (size_t i = 0; i < render_requests.components.size(); ++i) {
+		RenderRequest& request = render_requests.components[i];
 
-		const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
-
-		const GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
-		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(registry.projectionMatrix));
-
-		const GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(registry.viewMatrix));
-
-		gl_has_errors();
-
-		const Texture* texture = this->asset_manager.getTexture(request.texture);
-		if (!texture) {
-			std::cerr << "Texture with id " << request.texture << " not found!" << std::endl;
-			continue;
-		}
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture->handle);
-		glUniform1i(glGetUniformLocation(shaderProgram, "image"), 0);
-
-		gl_has_errors();
-
-
-		glBindVertexArray(mesh->vao);
-		glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
-
-
+		// sort by using request type and render_y
+		float combined_value = request.type * 10000.0f + request.smooth_position.render_y;
+		sorted_indices.emplace_back(i, combined_value);
 	}
 
+	std::sort(sorted_indices.begin(), sorted_indices.end(),
+		[&render_requests](const RenderIndex& a, const RenderIndex& b) {
+			const auto& request_a = render_requests.components[a.index];
+			const auto& request_b = render_requests.components[b.index];
 
+			if (request_a.type != request_b.type) {
+				return request_a.type < request_b.type;
+			}
+			return a.render_y < b.render_y;
+	});
 }

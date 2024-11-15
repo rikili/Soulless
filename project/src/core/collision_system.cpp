@@ -3,7 +3,7 @@
 #include "sound/sound_manager.hpp"
 #include <glm/ext/matrix_clip_space.hpp>
 
-CollisionSystem::CollisionSystem(RenderSystem* renderer)
+CollisionSystem::CollisionSystem(IRenderSystem* renderer)
 {
     this->renderer = renderer;
 }
@@ -154,7 +154,7 @@ void CollisionSystem::detect_collisions()
             draw_vertices(entity, *renderer->getMesh("mage_collider")); // can fetch mesh from component as well
         }
 
-        bool collided = false;
+        // bool collided = false;
         for (const Entity& other_entity : registry.motions.entities)
         {
             if (entity == other_entity) continue;
@@ -231,7 +231,7 @@ void CollisionSystem::resolve_collisions()
 
         if (projectile.type != DamageType::water) continue;
 
-        const Deadly& deadly = registry.deadlies.get(barrier_entity);
+        // const Deadly& deadly = registry.deadlies.get(barrier_entity);
         std::unordered_set<Entity> other_entities = registry.collision_registry.get_collision_by_ent(barrier_entity);
 
         for (const Entity& other_entity : other_entities)
@@ -298,7 +298,7 @@ void CollisionSystem::resolve_collisions()
     for (const Entity& interactable_entity : registry.interactables.entities)
     {
         std::unordered_set<Entity> other_entities = registry.collision_registry.get_collision_by_ent(interactable_entity);
-        const Interactable& interactable = registry.interactables.get(interactable_entity);
+        // const Interactable& interactable = registry.interactables.get(interactable_entity);
         for (const Entity& other_entity : other_entities)
         {
             if (!registry.collision_registry.check_collision(interactable_entity, other_entity)) continue;

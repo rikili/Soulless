@@ -129,8 +129,8 @@ void InputHandler::onMouseMove(vec2 mouse_position)
     Entity& player = registry.players.entities[0];
     Motion& playerMotion = registry.motions.get(player);
 
-    Entity& camera = registry.cameras.entities[0];
-    Camera& cameraEntity = registry.cameras.get(camera);
+    // Entity& camera = registry.cameras.entities[0];
+    // Camera& cameraEntity = registry.cameras.get(camera);
 
     float xNDC = (2.f * mouse_position.x) / window_width_px - 1.f;
     float yNDC = 1.f - (2.f * mouse_position.y) / window_height_px;
@@ -185,12 +185,12 @@ void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mo
         switch (button)
         {
         case GLFW_MOUSE_BUTTON_LEFT:
-            printd("Left mouse button pressed.\n");
+            // printd("Left mouse button pressed.\n");
             cast_player_spell(this->worldMousePosition.x, this->worldMousePosition.y, true);
             break;
         case GLFW_MOUSE_BUTTON_RIGHT:
             // TODO: Shoot spell 2
-            printd("Right mouse button pressed.\n");
+            // printd("Right mouse button pressed.\n");
             break;
         default:
             break;

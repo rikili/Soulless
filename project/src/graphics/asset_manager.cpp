@@ -75,19 +75,17 @@ AssetId AssetManager::loadBackgroundTexture(const std::string& name, const std::
     auto texture = std::make_shared<Texture>();
     int width, height, channels;
     
-    // Load the image data
     unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
     if (data) {
         glGenTextures(1, &texture->handle);
         glBindTexture(GL_TEXTURE_2D, texture->handle);
         
-        // Set parameters BEFORE uploading the texture data
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // Changed from LINEAR
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Changed from LINEAR
         
-        // Use sRGB format for the texture
+        // had issues with format of the image, so changed to GL_SRGB
         GLenum internalFormat = GL_SRGB;
         GLenum format = GL_RGB;
         if (channels == 4) {
@@ -95,7 +93,6 @@ AssetId AssetManager::loadBackgroundTexture(const std::string& name, const std::
             format = GL_RGBA;
         }
         
-        // Upload the texture with sRGB format
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
         
@@ -142,7 +139,6 @@ AssetId AssetManager::loadShader(const std::string& name, const std::string& ver
     shader->vertexPath = vertexPath;
     shader->fragmentPath = fragmentPath;
 
-    // Read vertex shader
     std::string vertexCode;
     std::ifstream vShaderFile(vertexPath);
     if (vShaderFile.is_open()) {
@@ -155,7 +151,6 @@ AssetId AssetManager::loadShader(const std::string& name, const std::string& ver
         return "";
     }
 
-    // Read fragment shader
     std::string fragmentCode;
     std::ifstream fShaderFile(fragmentPath);
     if (fShaderFile.is_open()) {
@@ -168,25 +163,20 @@ AssetId AssetManager::loadShader(const std::string& name, const std::string& ver
         return "";
     }
 
-    // Compile shaders
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     const char* vShaderCode = vertexCode.c_str();
     glShaderSource(vertexShader, 1, &vShaderCode, NULL);
     glCompileShader(vertexShader);
-    // Check for compile errors...
 
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     const char* fShaderCode = fragmentCode.c_str();
     glShaderSource(fragmentShader, 1, &fShaderCode, NULL);
     glCompileShader(fragmentShader);
-    // Check for compile errors...
 
-    // Link shaders
     shader->program = glCreateProgram();
     glAttachShader(shader->program, vertexShader);
     glAttachShader(shader->program, fragmentShader);
     glLinkProgram(shader->program);
-    // Check for linking errors...
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
@@ -246,13 +236,11 @@ AssetId AssetManager::loadFont(const std::string& name, const std::string& path,
           face->glyph->bitmap.buffer
         );
 
-        // set texture options
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        // now store character for later use
         Character character = {
           texture,
           glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
@@ -268,14 +256,12 @@ AssetId AssetManager::loadFont(const std::string& name, const std::string& path,
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
 
-    // bind buffers
     glBindVertexArray(font->vao);
     glBindBuffer(GL_ARRAY_BUFFER, font->vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
 
-    // release buffers
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 

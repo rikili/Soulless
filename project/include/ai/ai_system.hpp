@@ -39,10 +39,7 @@ struct Node {
     NodeType type;
     std::vector<Node*> children;
     
-    // Virtual destructor for proper cleanup
     virtual ~Node() = default;
-    
-    // Virtual tick function that all nodes must implement
     virtual NodeState tick(float elapsed_ms) = 0;
 };
 
@@ -94,35 +91,32 @@ NodeState tickSelector(float elapsed_ms) {
         NodeState state = children[currentChild]->tick(elapsed_ms);
         
         if (state == NodeState::RUNNING) {
-            // Child isn't done yet, keep running this same child next frame
+            // Child isn't done yet, keep running
             return NodeState::RUNNING;
         }
         
         if (state == NodeState::SUCCESS) {
-            // Found a successful child, we're done!
-            currentChild = 0;  // Reset for next time
+            currentChild = 0; 
             return NodeState::SUCCESS;
         }
         
-        // This child failed, try next one
         currentChild++;
     }
     
-    // All children failed
-    currentChild = 0;  // Reset for next time
+    currentChild = 0;  
     return NodeState::FAILURE;
 }
     
     NodeState tickParallel(float elapsed_ms) {
-        // Implementation for parallel...
+        // not sure how it would work tbh but i think it's a common thing
         printd("Parallel tick - not implemented\n");
         return NodeState::SUCCESS;
     }
 };
 
 struct ConditionNode : public Node {
-    std::function<bool(float)> condition;    // The condition to check
-    bool expectedValue = true;          // What we're checking for
+    std::function<bool(float)> condition;   
+    bool expectedValue = true;         
     
     ConditionNode(std::function<bool(float)> conditionFn, bool expected = true) {
         this->type = NodeType::CONDITION;
@@ -138,13 +132,11 @@ struct ConditionNode : public Node {
 };
 
 
-// Action nodes have actual game behaviors
 struct ActionNode : public Node {
-    float duration = 0;         // How long this action should run
-    float elapsedTime = 0;     // Current running time
-    bool isInterruptible;      // Can this action be interrupted?
+    float duration = 0;         
+    float elapsedTime = 0;     
+    bool isInterruptible;     
     
-    // Function pointer or lambda for the actual behavior
     std::function<NodeState(float)> action;
     
     ActionNode(std::function<NodeState(float)> actionFn, 
@@ -157,12 +149,10 @@ struct ActionNode : public Node {
     }
     
 NodeState tick(float elapsed_ms) override {
-    // First check if we're starting fresh
     if (state == NodeState::READY) {
         elapsedTime = 0;
     }
 
-    // Handle duration tracking BEFORE running action
     if (duration > 0) {
         elapsedTime += elapsed_ms;
         // printf("Duration: %f\n", duration);
@@ -172,16 +162,14 @@ NodeState tick(float elapsed_ms) override {
         if (elapsedTime >= duration) {
             // printf("Ran too long\n");
             elapsedTime = 0;
-            state = NodeState::READY;  // Reset for next time
+            state = NodeState::READY;  
             return NodeState::SUCCESS;
         }
-        state = NodeState::RUNNING;  // Keep it running
+        state = NodeState::RUNNING; 
     }
 
-    // Run the action after updating elapsed time
     NodeState actionState = action(elapsed_ms);
     
-    // If no duration specified, use action's state
     if (duration <= 0) {
         state = actionState;
         return actionState;

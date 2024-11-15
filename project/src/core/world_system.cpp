@@ -5,7 +5,7 @@
 #include "utils/isometric_helper.hpp"
 #include "graphics/tile_generator.hpp"
 
-WorldSystem::WorldSystem(RenderSystem* renderer)
+WorldSystem::WorldSystem(IRenderSystem* renderer)
 {
 	this->renderer = renderer;
 	this->collision_system = new CollisionSystem(renderer);
@@ -14,7 +14,7 @@ WorldSystem::WorldSystem(RenderSystem* renderer)
 WorldSystem::~WorldSystem() {}
 
 // Should the game be over ?
-bool WorldSystem::is_over() const {
+bool WorldSystem::isOver() const {
 	return bool(glfwWindowShouldClose(window));
 }
 
@@ -28,21 +28,21 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		return true;
 	}
 
-	this->handle_projectiles(elapsed_ms_since_last_update);
+	this->handleProjectiles(elapsed_ms_since_last_update);
 	this->handle_enemy_logic(elapsed_ms_since_last_update);
-	this->handle_movements(elapsed_ms_since_last_update);
+	this->handleMovements(elapsed_ms_since_last_update);
 	this->collision_system->detect_collisions();
 	this->collision_system->resolve_collisions();
-	this->handle_animations();
-	this->handle_health_bars();
-	this->handle_timers(elapsed_ms_since_last_update);
-	this->handle_ai(elapsed_ms_since_last_update);
-	this->handle_spell_states(elapsed_ms_since_last_update);
+	this->handleAnimations();
+	this->handleHealthBars();
+	this->handleTimers(elapsed_ms_since_last_update);
+	this->handleAI(elapsed_ms_since_last_update);
+	this->handleSpellStates(elapsed_ms_since_last_update);
 	registry.collision_registry.clear_collisions();
 	return true;
 }
 
-void WorldSystem::handle_ai(float elapsed_ms_since_last_update) {
+void WorldSystem::handleAI(float elapsed_ms_since_last_update) {
 
 	if (registry.game_over) {
 		return;
@@ -53,12 +53,12 @@ void WorldSystem::handle_ai(float elapsed_ms_since_last_update) {
 	}
 }
 
-void WorldSystem::set_renderer(RenderSystem* renderer)
+void WorldSystem::setRenderer(IRenderSystem* renderer)
 {
 	this->renderer = renderer;
 }
 
-void WorldSystem::handle_health_bars() {
+void WorldSystem::handleHealthBars() {
 
 	// For each healthbar
 	for (Entity& entity : registry.healthBars.entities) {
@@ -85,7 +85,7 @@ void WorldSystem::handle_health_bars() {
 }
 
 
-void WorldSystem::handle_animations() {
+void WorldSystem::handleAnimations() {
 	Motion& playerMotion = registry.motions.get(player_mage);
 	Animation& playerAnimation = registry.animations.get(player_mage);
 	RenderRequest& playerRR = registry.render_requests.get(player_mage);
@@ -120,7 +120,7 @@ void WorldSystem::handle_animations() {
  * deletion if they are out of range
  * @param
  */
-void WorldSystem::handle_projectiles(float elapsed_ms_since_last_update)
+void WorldSystem::handleProjectiles(float elapsed_ms_since_last_update)
 {
 	for (Entity& projectile_ent : registry.projectiles.entities)
 	{
@@ -155,7 +155,7 @@ void WorldSystem::handle_projectiles(float elapsed_ms_since_last_update)
  * component
  * @param elapsed_ms_since_last_update
  */
-void WorldSystem::handle_movements(float elapsed_ms_since_last_update)
+void WorldSystem::handleMovements(float elapsed_ms_since_last_update)
 {
 	ComponentContainer<Motion>& motions_registry = registry.motions;
 	Motion& player_motion = motions_registry.get(player_mage);
@@ -262,7 +262,7 @@ void WorldSystem::computeNewDirection(Entity e) {
  * @brief In charge of updating timers and their side effects
  * @param elapsed_ms_since_last_update
  */
-void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
+void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 {
 
 	for (Entity& hit_ent : registry.onHits.entities)
@@ -329,7 +329,7 @@ void WorldSystem::handle_timers(float elapsed_ms_since_last_update)
  * @brief Handle spell states. Update spells and their states based on timers.
  * @param elapsed_ms_since_last_update
  */
-void WorldSystem::handle_spell_states(float elapsed_ms_since_last_update)
+void WorldSystem::handleSpellStates(float elapsed_ms_since_last_update)
 {
 	for (Entity& spell_ent : registry.spellStates.entities) {
 		SpellState& spell_state = registry.spellStates.get(spell_ent);
@@ -392,10 +392,6 @@ void WorldSystem::handle_spell_states(float elapsed_ms_since_last_update)
  */
 void WorldSystem::initialize() {
 	restartGame();
-
-	// DEBUG: still enemy/projectile
-	//this->createEnemy(EnemyType::FARMER, {100, 100}, {0, 0});
-	//create_enemy_projectile(registry.enemies.entities[0]);
 }
 
 void WorldSystem::restartGame() {
@@ -418,12 +414,15 @@ void WorldSystem::restartGame() {
 }
 
 void WorldSystem::createTileGrid() {
-	vec2 gridDim = IsometricGrid::getGridDimensions(window_width_px, window_height_px);
-	int numCols = static_cast<int>(gridDim.x) * 2;
-	int numRows = static_cast<int>(gridDim.y) * 2;
-
-	TileGenerator tileGenerator(numCols, numRows, true);
-	tileGenerator.generateTiles();
+	int w, h;
+	glfwGetFramebufferSize(renderer->getGLWindow(), &w, &h);
+	vec2 gridDim = IsometricGrid::getGridDimensions(w, h);
+	int numCols = static_cast<int>(gridDim.x);
+	int numRows = static_cast<int>(gridDim.y);
+	BatchRenderer *batchRenderer = new BatchRenderer();
+	TileGenerator tileGenerator(numCols, numRows, w, h, true);
+	tileGenerator.generateTiles(batchRenderer);
+	renderer->addSubRenderer("tiles", batchRenderer);
 }
 
 Entity WorldSystem::createPlayer() {
@@ -431,7 +430,7 @@ Entity WorldSystem::createPlayer() {
 
 	Player& player_component = registry.players.emplace(player);
 	player_component.spell_queue = SpellQueue();
-	// TODO: Add player initialization code here!
+
 
 	Motion& motion = registry.motions.emplace(player);
 	motion.position = { window_width_px / 2.0f,
@@ -598,7 +597,7 @@ void WorldSystem::createKnight(vec2 position, vec2 velocity)
 }
 
 void WorldSystem::loadBackgroundObjects() {
-	createBackgroundObject({ window_width_px / 4, window_height_px / 4 }, { 0.75, 0.75 }, "tree", false);
+	// createBackgroundObject({ window_width_px / 4, window_height_px / 4 }, { 0.75, 0.75 }, "tree", false);
 
 	Entity campfire = createBackgroundObject({ window_width_px / 2, window_height_px / 2 + 50.f }, { 0.5, 0.5 }, "campfire", true);
 	Animation& campfireAnimation = registry.animations.emplace(campfire);
@@ -707,4 +706,16 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 	}
 
 
+}
+
+
+void WorldSystem::setSpawnTimers(float farmer, float archer, float knight) {
+	this->farmer_spawn_timer = farmer;
+	this->archer_spawn_timer = archer;
+	this->knight_spawn_timer = knight;
+}
+
+
+Entity WorldSystem::getPlayer()  const {
+	return player_mage;
 }
