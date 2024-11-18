@@ -63,10 +63,7 @@ struct Enemy {
 };
 
 struct Player {
-    DamageType right_hand;
-    DamageType left_hand;
     float cooldown = -1.f;
-    unsigned int health_gauge = 0;
     SpellQueue spell_queue;
 };
 
@@ -207,10 +204,25 @@ struct GlobalOptions {
     bool pause = false;
     int fps = 0;
     bool showFps = false;
+    bool loadingOldGame = false;
 };
 
 extern GlobalOptions globalOptions;
 
+struct EnemySpawnTimers {
+   float farmer = 0.0f;
+   float archer = 60000.0f;
+   float knight = 120000.0f;
+
+   std::unordered_map<std::string, float&> asMap() {
+       return {
+           {"farmer", farmer},
+           {"archer", archer},
+           {"knight", knight}
+       };
+   }
+};
+extern EnemySpawnTimers enemySpawnTimers;
 
 enum TileType {
     GRASS1,

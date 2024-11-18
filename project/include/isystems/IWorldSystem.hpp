@@ -16,6 +16,7 @@ public:
     virtual bool isOver() const = 0;
     virtual void initialize() = 0;
     virtual void restartGame() = 0;
+    virtual void reloadGame() = 0;
 
     virtual void handleAI(float elapsed_ms) = 0;
     virtual void handleProjectiles(float elapsed_ms) = 0;
@@ -27,9 +28,4 @@ public:
 
     virtual Entity getPlayer() const = 0;
     virtual void setRenderer(IRenderSystem* renderer) = 0;
-
-    virtual float getFarmerSpawnTimer() const = 0;
-    virtual float getArcherSpawnTimer() const = 0;
-    virtual float getKnightSpawnTimer() const = 0;
-    virtual void setSpawnTimers(float farmer, float archer, float knight) = 0;
 };

@@ -169,10 +169,16 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		drawText("Aim with your mouse.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
 		currentY -= tutFontSize * 1.5;
 
-		drawText("Left click to shoot.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
+		drawText("Left click to shoot first spell. Right click for second.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
 		currentY -= tutFontSize * 1.5;
 
-		drawText("Press shift + t to pause/show tutorial.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
+		drawText("Press q to drop first spell. Press e to drop second.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
+		currentY -= tutFontSize * 1.5;
+
+		drawText("Press T to pause/show Tutorial.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
+		currentY -= tutFontSize * 1.5;
+
+		drawText("While paused, press s to save or l to load game.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
 		currentY -= tutFontSize * 1.5;
 
 		drawText("Survive as long as you can!", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
@@ -525,7 +531,6 @@ void RenderSystem::drawBackgroundObjects() {
 		sub_renderer.second->render(this);
 	}
 }
-
 
 void RenderSystem::updateRenderOrder(ComponentContainer<RenderRequest>& render_requests) {
 	sorted_indices.clear();

@@ -17,6 +17,7 @@ public:
    bool isOver() const override;
    void initialize() override;
    void restartGame() override;
+   void reloadGame() override;
    
    void handleAI(float elapsed_ms) override;
    void handleProjectiles(float elapsed_ms) override;
@@ -28,11 +29,6 @@ public:
 
    Entity getPlayer() const override;
    void setRenderer(IRenderSystem* renderer) override;
-   
-   float getFarmerSpawnTimer() const override { return farmer_spawn_timer; }
-   float getArcherSpawnTimer() const override { return archer_spawn_timer; }
-   float getKnightSpawnTimer() const override { return knight_spawn_timer; }
-   void setSpawnTimers(float farmer, float archer, float knight) override;
 
    void createTileGrid();
 
@@ -41,9 +37,6 @@ private:
    Entity createPlayer();
    void computeNewDirection(Entity e);
    void createEnemy(EnemyType type, vec2 position, vec2 velocity);
-   void createFarmer(vec2 position, vec2 velocity);
-   void createArcher(vec2 position, vec2 velocity);
-   void createKnight(vec2 position, vec2 velocity);
    Entity createBackgroundObject(vec2 position, vec2 scale, AssetId texture, bool animate);
    void handle_enemy_logic(float elapsed_ms_since_last_update);
 
@@ -53,8 +46,4 @@ private:
    CollisionSystem* collision_system;
    // IInputHandler* input_handler;
    Entity player_mage;
-
-   float farmer_spawn_timer = 0.0f;
-   float archer_spawn_timer = 60000.0f;
-   float knight_spawn_timer = 120000.0f;
 };

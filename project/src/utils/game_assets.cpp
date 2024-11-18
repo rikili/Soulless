@@ -14,7 +14,7 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     assets.shaders["font"] = assetManager.loadShader("font", shader_path("font") + ".vs.glsl", shader_path("font") + ".fs.glsl");
 
     // fonts
-    AssetId deutschFont = assetManager.loadFont("deutsch", font_path("deutsch") + ".ttf", 48.0f);
+    AssetId deutschFont = assetManager.loadFont("deutsch", font_path("deutsch") + ".ttf", 36.0f);
     assets.fonts["deutsch"] = deutschFont;
 
     AssetId kingFont = assetManager.loadFont("king", font_path("kingthings") + ".ttf", 148.0f);

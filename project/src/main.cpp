@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
        frames++;
        auto currentTime = std::chrono::high_resolution_clock::now();
        float timeDifference = static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastTime).count());
-       
+
        if (timeDifference >= 1000.0f) {
            globalOptions.fps = frames / (timeDifference / 1000.0f);
            frames = 0;
@@ -67,6 +67,11 @@ int main(int argc, char* argv[])
        glfwSwapBuffers(window);  // (4) swap front and back buffers
        glfwPollEvents();  // (5) poll for and process events
        registry.debug_requests.clear();
+
+       if (globalOptions.loadingOldGame) {
+           world.reloadGame();
+           globalOptions.loadingOldGame = false;
+       }
    }
    
    // TODO: Add cleanup code here*

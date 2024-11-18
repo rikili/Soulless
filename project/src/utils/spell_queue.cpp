@@ -118,3 +118,12 @@ SpellType SpellQueue::getRandomSpell() {
   int index = dist(rng);
   return spells[index];
 }
+
+/**
+ * Replace a specified spell in the queue
+ */
+void SpellQueue::replaceSpell(int position, SpellType spell) {
+    if (position >= 0 && position < static_cast<int>(queue.size())) {
+        queue[position] = spell;
+    }
+}

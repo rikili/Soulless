@@ -22,6 +22,7 @@ public:
 	void collectSpell(SpellType spell);
 	SpellType useSpell(bool is_first);
 	void discardSpell(bool is_first);
+	void replaceSpell(int position, SpellType spell);
 	const std::deque<SpellType>& getQueue() const;
 
 private:

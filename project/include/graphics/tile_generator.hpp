@@ -46,6 +46,7 @@ private:
                 {
                     float sum = 0.0f;
                     int count = 0;
+
                     for (int dr = -1; dr <= 1; dr++)
                     {
                         for (int dc = -1; dc <= 1; dc++)

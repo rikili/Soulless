@@ -64,7 +64,6 @@ public:
         return sub_renderers;
     }
 
-
 private:
     struct RenderIndex {
         size_t index;

@@ -9,6 +9,8 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
+#include "utils/serializer.hpp"
+
 /*
 - player slots for spell 1 and spell 2 (component) ? (needs to hold some spells)
 - handle player movement (physics.cpp?)
@@ -40,18 +42,30 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
 {
     SoundManager* soundManager = SoundManager::getSoundManager();
 
-    if (isTutorialOn() && key == GLFW_KEY_SPACE)
+    if (action == GLFW_PRESS && key == GLFW_KEY_L && (globalOptions.pause || globalOptions.tutorial) && !globalOptions.loadingOldGame) {
+        printd("Loading game\n");
+        globalOptions.loadingOldGame = true;
+    }
+
+    if (action == GLFW_PRESS && key == GLFW_KEY_S && (globalOptions.pause || globalOptions.tutorial) && !globalOptions.loadingOldGame && !registry.deaths.has(registry.players.entities[0])) {
+        printd("Saving game\n");
+        Serializer::serialize();
+    }
+
+    if (isTutorialOn() || globalOptions.pause)
     {
-        if (!globalOptions.pause)
-        {
-            soundManager->playMusic(Song::MAIN);
+        if (key == GLFW_KEY_SPACE && !globalOptions.loadingOldGame) {
+            if (!globalOptions.pause)
+            {
+                soundManager->playMusic(Song::MAIN);
+            }
+            else
+            {
+                soundManager->toggleMusic();
+            }
+            globalOptions.tutorial = false;
+            globalOptions.pause = false;
         }
-        else
-        {
-            soundManager->toggleMusic();
-        }
-        globalOptions.tutorial = false;
-        globalOptions.pause = false;
         return;
     }
 
@@ -112,6 +126,7 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
         case GLFW_KEY_K:
             registry.debug = !registry.debug;
             break;
+
         case GLFW_KEY_J:
             registry.game_over = true;
         default:
@@ -155,7 +170,7 @@ void invoke_player_cooldown(Player& player, bool is_left)
 
 void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mods)
 {
-    if (isTutorialOn()) {
+    if (isTutorialOn() && !globalOptions.loadingOldGame) {
         SoundManager* soundManager = SoundManager::getSoundManager();
         if (!globalOptions.pause)
         {
@@ -313,8 +328,6 @@ void InputHandler::invoke_player_cooldown(Player& player, bool is_left)
 
 void InputHandler::updateVelocity()
 {
-    // TODO: get global player
-    // Entity player = player_wizard;
     auto player = registry.players.entities[0];
 
     auto& motion_registry = registry.motions;

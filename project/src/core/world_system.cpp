@@ -4,6 +4,8 @@
 #include "sound/sound_manager.hpp"
 #include "utils/isometric_helper.hpp"
 #include "graphics/tile_generator.hpp"
+#include "utils/serializer.hpp"
+#include "utils/enemy_factory.hpp"
 
 WorldSystem::WorldSystem(IRenderSystem* renderer)
 {
@@ -399,7 +401,7 @@ void WorldSystem::restartGame() {
 	{
 		registry.clear_all_components();
 	}
-	if (!globalOptions.tutorial) {
+	if (!globalOptions.tutorial && !globalOptions.pause) {
 		SoundManager* soundManager = SoundManager::getSoundManager();
 		soundManager->playMusic(Song::MAIN);
 	}
@@ -409,8 +411,14 @@ void WorldSystem::restartGame() {
 	this->renderer->initializeCamera();
 
 	// Reset enemy spawn timers (rework this if needed)
-	archer_spawn_timer = 60000.f;
-	knight_spawn_timer = 120000.f;
+	enemySpawnTimers.farmer = 0.0f;
+	enemySpawnTimers.archer = 60000.f;
+	enemySpawnTimers.knight = 120000.f;
+}
+
+void WorldSystem::reloadGame() {
+	restartGame();
+	Serializer::deserialize();
 }
 
 void WorldSystem::createTileGrid() {
@@ -483,117 +491,15 @@ void WorldSystem::createEnemy(EnemyType type, vec2 position, vec2 velocity)
 
 	switch (enemy_type) {
 	case EnemyType::FARMER:
-		createFarmer(position, velocity);
+		EnemyFactory::createFarmer(registry, position, velocity);
 		break;
 	case EnemyType::ARCHER:
-		createArcher(position, velocity);
+		EnemyFactory::createArcher(registry, position, velocity);
 		break;
 	case EnemyType::KNIGHT:
-		createKnight(position, velocity);
+		EnemyFactory::createKnight(registry, position, velocity);
 		break;
 	}
-}
-
-
-
-void WorldSystem::createFarmer(vec2 position, vec2 velocity)
-{
-	Entity enemy;
-
-	Enemy& enemy_component = registry.enemies.emplace(enemy);
-	enemy_component.type = EnemyType::FARMER;
-	enemy_component.range = FARMER_RANGE;
-	enemy_component.cooldown = FARMER_COOLDOWN;
-
-	Motion& motion = registry.motions.emplace(enemy);
-	motion.position = position;
-	motion.velocity = velocity;
-	motion.scale = { 0.5f, 0.5f };
-
-	Health& health = registry.healths.emplace(enemy);
-	health.health = FARMER_HEALTH;
-	health.maxHealth = FARMER_HEALTH;
-
-	Deadly& deadly = registry.deadlies.emplace(enemy);
-	deadly.to_projectile = true;
-	deadly.to_player = true;
-
-	Damage& damage = registry.damages.emplace(enemy);
-	damage.value = FARMER_DAMAGE;
-
-	RenderRequest& request = registry.render_requests.emplace(enemy);
-	request.mesh = "sprite";
-	request.texture = "farmer";
-	request.shader = "sprite";
-	request.type = ENEMY;
-
-	AI_SYSTEM::initAIComponent(&enemy);
-}
-
-void WorldSystem::createArcher(vec2 position, vec2 velocity)
-{
-	Entity enemy;
-
-	Enemy& enemy_component = registry.enemies.emplace(enemy);
-	enemy_component.type = EnemyType::ARCHER;
-	enemy_component.range = ARCHER_RANGE;
-	enemy_component.cooldown = ARCHER_COOLDOWN;
-
-	Motion& motion = registry.motions.emplace(enemy);
-	motion.position = position;
-	motion.velocity = velocity;
-	motion.scale = { 0.5f, 0.5f };
-
-	Health& health = registry.healths.emplace(enemy);
-	health.health = ARCHER_HEALTH;
-	health.maxHealth = ARCHER_HEALTH;
-
-	Deadly& deadly = registry.deadlies.emplace(enemy);
-	deadly.to_projectile = true;
-
-	Damage& damage = registry.damages.emplace(enemy);
-	damage.value = ARCHER_DAMAGE;
-
-	RenderRequest& request = registry.render_requests.emplace(enemy);
-	request.mesh = "sprite";
-	request.texture = "archer";
-	request.shader = "sprite";
-	request.type = ENEMY;
-
-	AI_SYSTEM::initAIComponent(&enemy);
-}
-
-void WorldSystem::createKnight(vec2 position, vec2 velocity)
-{
-	Entity enemy;
-
-	Enemy& enemy_component = registry.enemies.emplace(enemy);
-	enemy_component.type = EnemyType::KNIGHT;
-	enemy_component.range = KNIGHT_RANGE;
-	enemy_component.cooldown = KNIGHT_COOLDOWN;
-
-	Motion& motion = registry.motions.emplace(enemy);
-	motion.position = position;
-	motion.velocity = velocity;
-	motion.scale = { 0.5f, 0.5f };
-
-	Health& health = registry.healths.emplace(enemy);
-	health.health = KNIGHT_HEALTH;
-	health.maxHealth = KNIGHT_HEALTH;
-
-	Deadly& deadly = registry.deadlies.emplace(enemy);
-	deadly.to_projectile = true;
-
-	Damage& damage = registry.damages.emplace(enemy);
-	damage.value = KNIGHT_DAMAGE;
-
-	RenderRequest& request = registry.render_requests.emplace(enemy);
-	request.mesh = "sprite";
-	request.texture = "knight";
-	request.shader = "sprite";
-	request.type = ENEMY;
-
-	AI_SYSTEM::initAIComponent(&enemy);
 }
 
 void WorldSystem::loadBackgroundObjects() {
@@ -641,13 +547,13 @@ Entity WorldSystem::createBackgroundObject(vec2 position, vec2 scale, AssetId te
  */
 void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 {
-	this->farmer_spawn_timer -= elapsed_ms_since_last_update;
-	this->archer_spawn_timer -= elapsed_ms_since_last_update;
-	this->knight_spawn_timer -= elapsed_ms_since_last_update;
+	enemySpawnTimers.farmer -= elapsed_ms_since_last_update;
+	enemySpawnTimers.archer -= elapsed_ms_since_last_update;
+	enemySpawnTimers.knight -= elapsed_ms_since_last_update;
 
-	const bool should_spawn_farmer = this->farmer_spawn_timer <= 0;
-	const bool should_spawn_archer = this->archer_spawn_timer <= 0;
-	const bool should_spawn_knight = this->knight_spawn_timer <= 0;
+	const bool should_spawn_farmer = enemySpawnTimers.farmer <= 0;
+	const bool should_spawn_archer = enemySpawnTimers.archer <= 0;
+	const bool should_spawn_knight = enemySpawnTimers.knight <= 0;
 
 	if (should_spawn_farmer || should_spawn_archer || should_spawn_knight)
 	{
@@ -690,31 +596,23 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 		const vec2 position = { candidate_x, candidate_y };
 
 		if (should_spawn_farmer) {
-			this->farmer_spawn_timer = FARMER_SPAWN_INTERVAL_MS;
+			enemySpawnTimers.farmer = FARMER_SPAWN_INTERVAL_MS;
 			this->createEnemy(EnemyType::FARMER, position, { 0, 0 });
 		}
 
 		if (should_spawn_archer) {
-			this->archer_spawn_timer = ARCHER_SPAWN_INTERVAL_MS;
+			enemySpawnTimers.archer = ARCHER_SPAWN_INTERVAL_MS;
 			this->createEnemy(EnemyType::ARCHER, position, { 0, 0 });
 		}
 
 		if (should_spawn_knight) {
-			this->knight_spawn_timer = KNIGHT_SPAWN_INTERVAL_MS;
+			enemySpawnTimers.knight = KNIGHT_SPAWN_INTERVAL_MS;
 			this->createEnemy(EnemyType::KNIGHT, position, { 0, 0 });
 		}
 	}
 
 
 }
-
-
-void WorldSystem::setSpawnTimers(float farmer, float archer, float knight) {
-	this->farmer_spawn_timer = farmer;
-	this->archer_spawn_timer = archer;
-	this->knight_spawn_timer = knight;
-}
-
 
 Entity WorldSystem::getPlayer()  const {
 	return player_mage;

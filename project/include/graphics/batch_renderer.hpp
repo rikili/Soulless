@@ -1,13 +1,17 @@
 #pragma once
+
 #include <vector>
 #include <map>
 #include <string>
 #include "glm/glm.hpp"
 #include <glm/gtc/type_ptr.hpp>
+
 #include "core/common.hpp"
 #include "isystems/IRenderSystem.hpp"
 #include "isystems/ISubRenderer.hpp"
 #include "isystems/IAssetManager.hpp"
+
+#include "entities/ecs_registry.hpp"
 
 struct BatchVertex {
     glm::vec3 position;
