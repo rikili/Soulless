@@ -213,6 +213,11 @@ void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mo
     }
 }
 
+void InputHandler::reset()
+{
+    activeMoveKeys.clear();
+}
+
 SoundEffect convertSpellToSoundEffect(SpellType spellType) {
     switch (spellType) {
         case SpellType::FIRE:

@@ -16,6 +16,8 @@ public:
 
 	void onMouseKey(GLFWwindow* window, int button, int action, int mods);
 
+	void reset();
+
 private:
 	// keeps track of pressed movement keys (up, right, left, down) 
 	std::unordered_set<int> activeMoveKeys;

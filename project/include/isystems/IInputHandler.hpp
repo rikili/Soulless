@@ -20,4 +20,6 @@ public:
         int button,
         int action,
         int mods) = 0;
+
+    virtual void reset() = 0;
 };

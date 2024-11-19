@@ -46,10 +46,9 @@ int main(int argc, char* argv[])
        t = now;
        
        if (!globalOptions.tutorial) {
+           if (registry.game_over) input_handler->reset();
            world.step(elapsed_ms);  // (2) Update the game state
-           if (registry.game_over) {
-               continue;
-           }
+           if (registry.game_over) continue;
        }
        
        renderer->drawFrame(elapsed_ms);  // (3) Re-render the scene (where the magic happens)
