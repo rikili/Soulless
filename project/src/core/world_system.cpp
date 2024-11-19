@@ -40,6 +40,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	this->handleTimers(elapsed_ms_since_last_update);
 	this->handleAI(elapsed_ms_since_last_update);
 	this->handleSpellStates(elapsed_ms_since_last_update);
+	
 	registry.collision_registry.clear_collisions();
 	return true;
 }
@@ -68,54 +69,79 @@ void WorldSystem::handleHealthBars() {
 		// Needed to get entity to which the healthbar is assigned
 		HealthBar& healthbar = registry.healthBars.get(entity);
 
-		// Check to ensure healthbar is assigned and has been given a position
-		if (healthbar.assigned && registry.motions.has(entity)) {
+		// Check to ensure healthbar is assigned
+		if (healthbar.assigned) {
 
 			// Update healthbar position to match the entity it's assigned to
 			Entity assignedTo = healthbar.assignedTo;
+
+			// If enemy has died during collision, destroy its health bar
+			if (registry.deaths.has(assignedTo) && registry.enemies.has(assignedTo)) {
+				registry.remove_all_components_of(entity);
+			}
+
 			if (!registry.motions.has(assignedTo)) {
 				printd("Error updating health bar: it is assigned to an entity without a motion component\n");
 				return;
 			}
-			registry.motions.get(entity).position.x = registry.motions.get(assignedTo).position.x;
-			registry.motions.get(entity).position.y = registry.motions.get(assignedTo).position.y + HEALTH_BAR_Y_OFFSET;
+			healthbar.position.x = registry.motions.get(assignedTo).position.x;
+			healthbar.position.y = registry.motions.get(assignedTo).position.y + HEALTH_BAR_Y_OFFSET;
 		}
 		else {
-			printd("Error updating health bar: it is either unassigned or does not have a motion component.\n");
+			printd("Error updating health bar: it is unassigned.\n");
 		}
 	}
 }
 
+std::string peToString(Entity e) {
 
-void WorldSystem::handleAnimations() {
-	Motion& playerMotion = registry.motions.get(player_mage);
-	Animation& playerAnimation = registry.animations.get(player_mage);
-	RenderRequest& playerRR = registry.render_requests.get(player_mage);
-
-	if (playerAnimation.state == EntityState::ATTACKING) {
-		playerAnimation.oneTime = true;
-		playerRR.texture = "mage-attack";
+	if (registry.players.has(e)) {
+		return "mage";
+	}
+	else if (registry.enemies.has(e)) {
+		switch (registry.enemies.get(e).type) {
+		case EnemyType::KNIGHT: return "knight";
+		case EnemyType::ARCHER: return "archer";
+		case EnemyType::PALADIN: return "paladin";
+		default: return "unknown";
+		}
 	}
 	else {
-
-		if (playerMotion.velocity.x == 0 && playerMotion.velocity.y == 0) {
-			playerRR.texture = "mage-idle";
-		}
-		else {
-			playerRR.texture = "mage-walk";
-		}
-
-		if (playerMotion.currentDirection == playerMotion.oldDirection) {
-			return;
-		}
-
-		playerAnimation.initializeAtRow((int)playerMotion.currentDirection);
+		return "invalid";
 	}
 
+}
+void WorldSystem::handleAnimations() {
+	for (Entity e : registry.animations.entities) {
+		if (!registry.players.has(e) && !registry.enemies.has(e)) {
+			continue;
+		}
+
+		Motion& motion = registry.motions.get(e);
+		Animation& animation = registry.animations.get(e);
+		RenderRequest& rr = registry.render_requests.get(e);
+
+		if (animation.state == EntityState::ATTACKING) {
+			animation.oneTime = true;
+			rr.texture = peToString(e) + "-attack";
+		}
+		else {
+
+			if (motion.velocity.x == 0 && motion.velocity.y == 0) {
+				rr.texture = peToString(e) + "-idle";
+			}
+			else {
+				rr.texture = peToString(e) + "-walk";
+			}
+
+			if (motion.currentDirection == motion.oldDirection) {
+				continue;
+			}
+
+			animation.initializeAtRow((int)motion.currentDirection);
+		}
+	}
 	// printd("Current: %d\n", playerMotion.currentDirection);
-
-
-
 }
 /**
  * @brief Handle projectiles to reduce their range at each step and mark for
@@ -172,6 +198,7 @@ void WorldSystem::handleMovements(float elapsed_ms_since_last_update)
 			float x_offset = motion.collider.x * motion.scale.x;
 			float y_offset = motion.collider.y * motion.scale.y;
 			motion.position = glm::clamp(motion.position + motion.velocity * elapsed_ms_since_last_update, { x_offset, y_offset }, { window_width_px - x_offset, window_height_px - y_offset });
+			computeNewDirection(entity);
 		}
 
 		// not a player nor enemy
@@ -197,17 +224,18 @@ void WorldSystem::handleMovements(float elapsed_ms_since_last_update)
 			// printd("Enemy angle towards player: %f\n", motion.angle);
 		}
 
-		// Only player for now, can be expanded
-		if (registry.players.has(entity)) {
-			computeNewDirection(entity);
-		}
-
 		RenderRequest& render_request = registry.render_requests.get(entity);
 		render_request.smooth_position.update(motion.position.y);
 	}
 }
 
 void WorldSystem::computeNewDirection(Entity e) {
+
+	// Do not recompute direction while attack animation is in progress, otherwise the direction of that animation will be lost before it's finished
+	if (registry.animations.has(e) && registry.animations.get(e).state == EntityState::ATTACKING) {
+		return;
+	}
+
 	Motion& motion = registry.motions.get(e);
 	motion.oldDirection = motion.currentDirection;
 
@@ -411,9 +439,9 @@ void WorldSystem::restartGame() {
 	this->renderer->initializeCamera();
 
 	// Reset enemy spawn timers (rework this if needed)
-	enemySpawnTimers.farmer = 0.0f;
+	enemySpawnTimers.knight = 0.0f;
 	enemySpawnTimers.archer = 60000.f;
-	enemySpawnTimers.knight = 120000.f;
+	enemySpawnTimers.paladin = 120000.f;
 }
 
 void WorldSystem::reloadGame() {
@@ -451,12 +479,10 @@ Entity WorldSystem::createPlayer() {
 	health.maxHealth = PLAYER_MAX_HEALTH;
 
 	auto healthBar = Entity();
-	Motion& healthBarMotion = registry.motions.emplace(healthBar);
-	healthBarMotion.position = { window_width_px / 2.0f, window_height_px / 2.0f + HEALTH_BAR_Y_OFFSET };
-	healthBarMotion.scale = { 0.5, 0.5 };
-
 	HealthBar& healthBarComp = registry.healthBars.emplace(healthBar);
 	healthBarComp.assignHealthBar(player);
+	healthBarComp.position = { motion.position.x, motion.position.y - HEALTH_BAR_Y_OFFSET };
+
 	// TODO: Add resistances here!
 
 	Animation& animation = registry.animations.emplace(player);
@@ -472,12 +498,6 @@ Entity WorldSystem::createPlayer() {
 	request.shader = "animatedsprite";
 	request.type = PLAYER;
 
-	RenderRequest& healthBarRequest = registry.render_requests.emplace(healthBar);
-	healthBarRequest.mesh = "sprite";
-	healthBarRequest.texture = "healthbar";
-	healthBarRequest.shader = "healthbar";
-	healthBarRequest.type = PLAYER;
-
 	MeshCollider& collider = registry.mesh_colliders.emplace(player);
 	collider.mesh = "mage_collider";
 
@@ -490,14 +510,14 @@ void WorldSystem::createEnemy(EnemyType type, vec2 position, vec2 velocity)
 	EnemyType enemy_type = type;
 
 	switch (enemy_type) {
-	case EnemyType::FARMER:
-		EnemyFactory::createFarmer(registry, position, velocity);
+	case EnemyType::KNIGHT:
+		EnemyFactory::createKnight(registry, position, velocity);
 		break;
 	case EnemyType::ARCHER:
 		EnemyFactory::createArcher(registry, position, velocity);
 		break;
-	case EnemyType::KNIGHT:
-		EnemyFactory::createKnight(registry, position, velocity);
+	case EnemyType::PALADIN:
+		EnemyFactory::createPaladin(registry, position, velocity);
 		break;
 	}
 }
@@ -547,15 +567,15 @@ Entity WorldSystem::createBackgroundObject(vec2 position, vec2 scale, AssetId te
  */
 void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 {
-	enemySpawnTimers.farmer -= elapsed_ms_since_last_update;
-	enemySpawnTimers.archer -= elapsed_ms_since_last_update;
 	enemySpawnTimers.knight -= elapsed_ms_since_last_update;
+	enemySpawnTimers.archer -= elapsed_ms_since_last_update;
+	enemySpawnTimers.paladin -= elapsed_ms_since_last_update;
 
-	const bool should_spawn_farmer = enemySpawnTimers.farmer <= 0;
-	const bool should_spawn_archer = enemySpawnTimers.archer <= 0;
 	const bool should_spawn_knight = enemySpawnTimers.knight <= 0;
+	const bool should_spawn_archer = enemySpawnTimers.archer <= 0;
+	const bool should_spawn_paladin = enemySpawnTimers.paladin <= 0;
 
-	if (should_spawn_farmer || should_spawn_archer || should_spawn_knight)
+	if (should_spawn_knight || should_spawn_archer || should_spawn_paladin)
 	{
 		std::random_device rd;	// Random device
 		std::mt19937 gen(rd()); // Mersenne Twister generator
@@ -595,9 +615,9 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 		}
 		const vec2 position = { candidate_x, candidate_y };
 
-		if (should_spawn_farmer) {
-			enemySpawnTimers.farmer = FARMER_SPAWN_INTERVAL_MS;
-			this->createEnemy(EnemyType::FARMER, position, { 0, 0 });
+		if (should_spawn_knight) {
+			enemySpawnTimers.knight = KNIGHT_SPAWN_INTERVAL_MS;
+			this->createEnemy(EnemyType::KNIGHT, position, { 0, 0 });
 		}
 
 		if (should_spawn_archer) {
@@ -605,9 +625,9 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 			this->createEnemy(EnemyType::ARCHER, position, { 0, 0 });
 		}
 
-		if (should_spawn_knight) {
-			enemySpawnTimers.knight = KNIGHT_SPAWN_INTERVAL_MS;
-			this->createEnemy(EnemyType::KNIGHT, position, { 0, 0 });
+		if (should_spawn_paladin) {
+			enemySpawnTimers.paladin = PALADIN_SPAWN_INTERVAL_MS;
+			this->createEnemy(EnemyType::PALADIN, position, { 0, 0 });
 		}
 	}
 

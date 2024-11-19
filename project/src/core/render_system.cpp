@@ -216,6 +216,14 @@ void RenderSystem::drawFrame(float elapsed_ms)
 			continue;
 		}
 
+		Camera& gameCamera = registry.cameras.get(camera);
+		if (motion.position.x < gameCamera.position.x - RENDER_PAST_SCREEN_OFFSET
+			|| motion.position.x > gameCamera.position.x + window_width_px / 2.0 + RENDER_PAST_SCREEN_OFFSET
+			|| motion.position.y < gameCamera.position.y - RENDER_PAST_SCREEN_OFFSET
+			|| motion.position.y > gameCamera.position.y + window_height_px / 2.0 + RENDER_PAST_SCREEN_OFFSET) {
+			continue;
+		}
+
 		if (render_request.shader != "") {
 			const Shader* shader = this->asset_manager->getShader(render_request.shader);
 			if (!shader)
@@ -249,7 +257,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 			transform = scale(transform, vec3(motion.scale * 100.f * zoomFactor, 1.0f));
 
 
-			if (render_request.shader == "sprite" || render_request.shader == "animatedsprite" || render_request.shader == "healthbar") {
+			if (render_request.shader == "sprite" || render_request.shader == "animatedsprite") {
 				if (registry.players.has(entity) && registry.deaths.has(entity)) {
 					transform = rotate(transform, (float)M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
 				}
@@ -282,7 +290,6 @@ void RenderSystem::drawFrame(float elapsed_ms)
 								animation.state = EntityState::IDLE;
 								animation.frameTime = DEFAULT_LOOP_TIME;
 								animation.oneTime = false;
-								return;
 							}
 						}
 					}
@@ -310,14 +317,6 @@ void RenderSystem::drawFrame(float elapsed_ms)
 					glUniform1i(glGetUniformLocation(shaderProgram, "SPRITE_COLS"), animation.spriteCols);
 					glUniform1i(glGetUniformLocation(shaderProgram, "SPRITE_ROWS"), animation.spriteRows);
 					glUniform1i(glGetUniformLocation(shaderProgram, "NUM_SPRITES"), animation.spriteCount);
-				}
-
-				if (render_request.shader == "healthbar") {
-					if (!registry.healthBars.has(entity) || !registry.healthBars.get(entity).assigned) {
-						assert("Healthbar shader can only be used on entities with an assigned HealthBar component.\n");
-					}
-					Health& health = registry.healths.get(registry.healthBars.get(entity).assignedTo);
-					glUniform1f(glGetUniformLocation(shaderProgram, "proportionFilled"), health.health / 100.f);
 				}
 			}
 
@@ -352,6 +351,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		}
 	}
 
+	drawHealthBars();
 
 	for (const Entity& debug_entity : registry.debug_requests.entities)
 	{
@@ -395,16 +395,16 @@ void RenderSystem::drawFrame(float elapsed_ms)
 	}
 
 	// makes it kinda slow
-	for (Entity entity : registry.enemies.entities) {
-		if (registry.healths.has(entity) && registry.motions.has(entity)) {
-			Motion& motion = registry.motions.get(entity);
-			Health& health = registry.healths.get(entity);
+	//for (Entity entity : registry.enemies.entities) {
+	//	if (registry.healths.has(entity) && registry.motions.has(entity)) {
+	//		Motion& motion = registry.motions.get(entity);
+	//		Health& health = registry.healths.get(entity);
 
-			int percentage = static_cast<int>((health.health / health.maxHealth) * 100);
+	//		int percentage = static_cast<int>((health.health / health.maxHealth) * 100);
 
-			drawText(std::to_string(percentage) + "%", "healthFont", motion.position.x, motion.position.y - 55.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-		}
-	}
+	//		drawText(std::to_string(percentage) + "%", "healthFont", motion.position.x, motion.position.y - 55.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+	//	}
+	//}
 
 	Player& playerObj = registry.players.get(player);
 	SpellQueue& spell_queue = playerObj.spell_queue;
@@ -517,11 +517,11 @@ float RenderSystem::getTextWidth(const std::string& text, const std::string& fon
 
 
 void RenderSystem::updateCameraPosition(float x, float y) {
-	Camera& cameraEntity = registry.cameras.get(camera);
-	cameraEntity.position.x = x;
-	cameraEntity.position.y = y;
+	Camera& gameCamera = registry.cameras.get(camera);
+	gameCamera.position.x = x;
+	gameCamera.position.y = y;
 
-	viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraEntity.position, 0.0f));
+	viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-gameCamera.position, 0.0f));
 	registry.viewMatrix = viewMatrix;
 }
 
@@ -529,6 +529,77 @@ void RenderSystem::updateCameraPosition(float x, float y) {
 void RenderSystem::drawBackgroundObjects() {
 	for (const auto& sub_renderer : sub_renderers) {
 		sub_renderer.second->render(this);
+	}
+}
+
+void RenderSystem::drawHealthBars() {
+	
+	for (Entity e : registry.healthBars.entities) {
+		
+		if (!registry.healthBars.has(e) || !registry.healthBars.get(e).assigned) {
+			assert("Healthbar shader can only be used on entities with an assigned HealthBar component.\n");
+		}
+
+		HealthBar& healthBar = registry.healthBars.get(e);
+
+		const Shader* shader = this->asset_manager->getShader("healthbar");
+		if (!shader)
+		{
+			printf("Could not find shader with id healthbar\n");
+			printf("Skipping rendering of this shader\n");
+			continue;
+		}
+		const GLuint shaderProgram = shader->program;
+		glUseProgram(shaderProgram);
+
+		const Texture* texture = this->asset_manager->getTexture("healthbar");
+		if (!texture)
+		{
+			std::cerr << "Texture with id healthbar not found!" << std::endl;
+			continue;
+		}
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture->handle);
+		glUniform1i(glGetUniformLocation(shader->program, "image"), 0);
+
+		if (!registry.healths.has(healthBar.assignedTo)) {
+			printd("Entity %d has a health bar, but no health component.\n", healthBar.assignedTo);
+			continue;
+		}
+		Health& health = registry.healths.get(healthBar.assignedTo);
+
+		glUniform1f(glGetUniformLocation(shaderProgram, "proportionFilled"), health.health / health.maxHealth);
+
+		mat4 transform = mat4(1.0f);
+		transform = translate(transform, glm::vec3(healthBar.position, 0.0f));
+		transform = scale(transform, glm::vec3(healthBar.scale * 100.f * zoomFactor, 1.0f));
+		mat4 projection = projectionMatrix;
+		mat4 view = viewMatrix;
+
+		const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+		const GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		const GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+		const Mesh* mesh = this->asset_manager->getMesh("sprite");
+
+		if (!mesh)
+		{
+			std::cerr << "Mesh with id sprite not found!" << std::endl;
+			std::cerr << "Skipping rendering of this mesh" << std::endl;
+			continue;
+		}
+
+		glBindVertexArray(mesh->vao);
+		glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
+
+		GLenum error = glGetError();
+		if (error != GL_NO_ERROR) {
+			std::cerr << "OpenGL error: " << error << std::endl;
+
+		}
 	}
 }
 

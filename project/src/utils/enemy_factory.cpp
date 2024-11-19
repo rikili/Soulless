@@ -25,11 +25,16 @@ Entity createEnemy(
     Motion& motion = registry.motions.emplace(enemy);
     motion.position = position;
     motion.velocity = velocity;
-    motion.scale = { 0.5f, 0.5f }; // Default scale
+    motion.scale = { 1.0f, 1.0f }; // Default scale
 
     Health& health_component = registry.healths.emplace(enemy);
     health_component.health = health;
     health_component.maxHealth = maxHealth;
+
+    auto healthBar = Entity();
+    HealthBar& healthBarComp = registry.healthBars.emplace(healthBar);
+    healthBarComp.assignHealthBar(enemy);
+    healthBarComp.position = { motion.position.x, motion.position.y - HEALTH_BAR_Y_OFFSET };
 
     Deadly& deadly = registry.deadlies.emplace(enemy);
     deadly.to_projectile = true;
@@ -38,15 +43,38 @@ Entity createEnemy(
     Damage& damage_component = registry.damages.emplace(enemy);
     damage_component.value = damage;
 
+    Animation& animation = registry.animations.emplace(enemy);
+    animation.spriteCols = 15;
+    animation.spriteRows = 8;
+    animation.spriteCount = 120;
+    animation.frameCount = 15;
+    animation.initializeAtFrame(0.0f);
+
     RenderRequest& request = registry.render_requests.emplace(enemy);
     request.mesh = "sprite";
     request.texture = texture;
-    request.shader = "sprite";
+    request.shader = "animatedsprite";
     request.type = ENEMY;
 
     AI_SYSTEM::initAIComponent(&enemy);
 
     return enemy;
+}
+
+Entity createPaladin(ECSRegistry& registry, vec2 position, vec2 velocity) {
+    return createEnemy(
+        registry, 
+        EnemyType::PALADIN, 
+        position, 
+        velocity, 
+        PALADIN_RANGE, 
+        PALADIN_COOLDOWN, 
+        PALADIN_HEALTH, 
+        PALADIN_HEALTH, 
+        PALADIN_DAMAGE, 
+        "paladin-idle",
+        false
+    );
 }
 
 Entity createKnight(ECSRegistry& registry, vec2 position, vec2 velocity) {
@@ -60,23 +88,7 @@ Entity createKnight(ECSRegistry& registry, vec2 position, vec2 velocity) {
         KNIGHT_HEALTH, 
         KNIGHT_HEALTH, 
         KNIGHT_DAMAGE, 
-        "knight",
-        false
-    );
-}
-
-Entity createFarmer(ECSRegistry& registry, vec2 position, vec2 velocity) {
-    return createEnemy(
-        registry, 
-        EnemyType::FARMER, 
-        position, 
-        velocity, 
-        FARMER_RANGE, 
-        FARMER_COOLDOWN, 
-        FARMER_HEALTH, 
-        FARMER_HEALTH, 
-        FARMER_DAMAGE, 
-        "farmer", 
+        "knight-idle", 
         true
     );
 }
@@ -92,12 +104,28 @@ Entity createArcher(ECSRegistry& registry, vec2 position, vec2 velocity) {
         ARCHER_HEALTH, 
         ARCHER_HEALTH, 
         ARCHER_DAMAGE, 
-        "archer",
+        "archer-idle",
         false
     );
 }
 
 // used for reloadability
+Entity createPaladin(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health) {
+    return createEnemy(
+        registry, 
+        EnemyType::PALADIN, 
+        position, 
+        velocity, 
+        PALADIN_RANGE, 
+        cooldown,
+        health,
+        PALADIN_HEALTH,
+        PALADIN_DAMAGE, 
+        "paladin-idle",
+        false
+    );
+}
+
 Entity createKnight(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health) {
     return createEnemy(
         registry, 
@@ -109,23 +137,7 @@ Entity createKnight(ECSRegistry& registry, vec2 position, vec2 velocity, float c
         health,
         KNIGHT_HEALTH,
         KNIGHT_DAMAGE, 
-        "knight",
-        false
-    );
-}
-
-Entity createFarmer(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health) {
-    return createEnemy(
-        registry, 
-        EnemyType::FARMER, 
-        position, 
-        velocity, 
-        FARMER_RANGE, 
-        cooldown,
-        health,
-        FARMER_HEALTH,
-        FARMER_DAMAGE, 
-        "farmer", 
+        "knight-idle", 
         true
     );
 }
@@ -141,7 +153,7 @@ Entity createArcher(ECSRegistry& registry, vec2 position, vec2 velocity, float c
         health,
         ARCHER_HEALTH,
         ARCHER_DAMAGE, 
-        "archer",
+        "archer-idle",
         false
     );
 }

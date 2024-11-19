@@ -115,14 +115,32 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     assets.textures["mage-attack"] = mageAttackTextureId;
 
     // Enemies
-    AssetId farmerTextureId = assetManager.loadTexture("farmer", textures_path("farmer") + ".png");
-    assets.textures["farmer"] = farmerTextureId;
+    AssetId knightTextureId = assetManager.loadTexture("knight-idle", textures_path("knight-idle") + ".png");
+    assets.textures["knight-idle"] = knightTextureId;
 
-    AssetId archerTextureId = assetManager.loadTexture("archer", textures_path("archer") + ".png");
-    assets.textures["archer"] = archerTextureId;
+    AssetId knightWalkTextureId = assetManager.loadTexture("knight-walk", textures_path("knight-walk") + ".png");
+    assets.textures["knight-walk"] = knightWalkTextureId;
 
-    AssetId knightTextureId = assetManager.loadTexture("knight", textures_path("knight") + ".png");
-    assets.textures["knight"] = knightTextureId;
+    AssetId knightAttackTextureId = assetManager.loadTexture("knight-attack", textures_path("knight-attack") + ".png");
+    assets.textures["knight-attack"] = knightAttackTextureId;
+
+    AssetId archerTextureId = assetManager.loadTexture("archer-idle", textures_path("archer-idle") + ".png");
+    assets.textures["archer-idle"] = archerTextureId;
+
+    AssetId archerWalkTextureId = assetManager.loadTexture("archer-walk", textures_path("archer-walk") + ".png");
+    assets.textures["archer-walk"] = archerWalkTextureId;
+
+    AssetId archerAttackTextureId = assetManager.loadTexture("archer-attack", textures_path("archer-attack") + ".png");
+    assets.textures["archer-attack"] = archerAttackTextureId;
+
+    AssetId paladinTextureId = assetManager.loadTexture("paladin-idle", textures_path("paladin-idle") + ".png");
+    assets.textures["paladin-idle"] = paladinTextureId;
+
+    AssetId paladinWalkTextureId = assetManager.loadTexture("paladin-walk", textures_path("paladin-walk") + ".png");
+    assets.textures["paladin-walk"] = paladinWalkTextureId;
+
+    AssetId paladinAttackTextureId = assetManager.loadTexture("paladin-attack", textures_path("paladin-attack") + ".png");
+    assets.textures["paladin-attack"] = paladinAttackTextureId;
 
     // Projectiles / Spells
     AssetId fireballTextureId = assetManager.loadTexture("fireball", textures_path("fireball") + ".png");
@@ -146,7 +164,7 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId arrowTextureId = assetManager.loadTexture("arrow", textures_path("arrow") + ".png");
     assets.textures["arrow"] = arrowTextureId;
 
-    // Used for knight's MELEE sword slash
+    // Used for paladin's MELEE sword slash
     AssetId fillerTextureId = assetManager.loadTexture("filler", textures_path("filler") + ".png");
     assets.textures["filler"] = fillerTextureId;
 

@@ -73,6 +73,7 @@ private:
 
     void updateCameraPosition(float x, float y);
     void drawBackgroundObjects();
+    void drawHealthBars();
 
     std::vector<RenderIndex> sorted_indices;
     Entity screen_state_entity;

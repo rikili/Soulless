@@ -15,11 +15,11 @@ namespace EnemyFactory {
         bool deadlyToPlayer = false
     );
 
+    Entity createPaladin(ECSRegistry& registry, vec2 position, vec2 velocity);
+    Entity createPaladin(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health);
+
     Entity createKnight(ECSRegistry& registry, vec2 position, vec2 velocity);
     Entity createKnight(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health);
-
-    Entity createFarmer(ECSRegistry& registry, vec2 position, vec2 velocity);
-    Entity createFarmer(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health);
 
     Entity createArcher(ECSRegistry& registry, vec2 position, vec2 velocity);
     Entity createArcher(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health);

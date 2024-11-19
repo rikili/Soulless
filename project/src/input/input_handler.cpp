@@ -160,7 +160,7 @@ void InputHandler::onMouseMove(vec2 mouse_position)
     // printd("CAMERA: %f, %f\n", cameraEntity.position.x, cameraEntity.position.y);
     // printd("MOUSE x: %f, y: %f \n", world.x, world.y);
 
-    playerMotion.angle = find_closest_angle(dx, dy);
+    playerMotion.angle = atan2(dy, dx);
 }
 
 void invoke_player_cooldown(Player& player, bool is_left)
@@ -260,7 +260,7 @@ void InputHandler::create_player_projectile(Entity& player_ent, double x, double
     Animation& player_animation = registry.animations.get(player_ent);
     player_animation.state = EntityState::ATTACKING;
     player_animation.frameTime = 30.f;
-    player_motion.currentDirection = angleToDirection(player_motion.angle);
+    player_motion.currentDirection = angleToDirection(find_closest_angle(player_motion.angle));
     player_animation.initializeAtRow((int)player_motion.currentDirection);
 
     projectile_motion.position = player_motion.position;

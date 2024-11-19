@@ -1,6 +1,6 @@
 #include "ai/ai_system.hpp"
 #include "entities/ecs_registry.hpp"
-
+#include "utils/angle_functions.hpp"
 
 AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
     AIComponent aiComponent;
@@ -46,13 +46,13 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
             }
 
             EnemyType type = enemy.type;
-            if (type != EnemyType::FARMER) {
+            if (type != EnemyType::KNIGHT) {
                 motion.velocity = {0, 0};
                 return NodeState::SUCCESS;
             }
 
             vec2 direction_normalized = glm::normalize(motion.position - player_motion.position);
-            motion.velocity = direction_normalized * FARMER_VELOCITY * 0.9f; // wounded farmer
+            motion.velocity = direction_normalized * KNIGHT_VELOCITY * 0.9f; // wounded knight
             // Recover health
             auto& health = registry.healths.get(entity);
             health.health += HEALTH_RECOVERY_RATE * elapsed_ms / 1000.0f;
@@ -134,14 +134,14 @@ auto moveToPlayer = new ActionNode(
             float speed = 0.0f;
             EnemyType type = enemy.type;
             switch (type) {
-                case EnemyType::FARMER:
-                    speed = FARMER_VELOCITY;
+                case EnemyType::KNIGHT:
+                    speed = KNIGHT_VELOCITY;
                     break;
                 case EnemyType::ARCHER:
                     speed = ARCHER_VELOCITY;
                     break;
-                case EnemyType::KNIGHT:
-                    speed = KNIGHT_VELOCITY;
+                case EnemyType::PALADIN:
+                    speed = PALADIN_VELOCITY;
                     break;
             }
             vec2 direction_normalized = glm::normalize(player_motion.position - motion.position);
@@ -187,6 +187,12 @@ void AI_SYSTEM::create_enemy_projectile(const Entity& enemy_ent)
 	Motion& enemy_motion = registry.motions.get(enemy_ent);
 	Enemy& enemy = registry.enemies.get(enemy_ent);
 
+    Animation& enemy_animation = registry.animations.get(enemy_ent);
+    enemy_animation.state = EntityState::ATTACKING;
+    enemy_animation.frameTime = 30.f;
+    enemy_motion.currentDirection = angleToDirection(find_closest_angle(enemy_motion.angle));
+    enemy_animation.initializeAtRow((int)enemy_motion.currentDirection);
+
 	deadly.to_player = true;
 
 	projectile_motion.scale = { 0.525f, 0.525f };
@@ -197,7 +203,7 @@ void AI_SYSTEM::create_enemy_projectile(const Entity& enemy_ent)
 	float attack_damage;
 	std::string attack_texture;
 	switch (enemy.type) {
-	case EnemyType::FARMER:
+	case EnemyType::KNIGHT:
 		attack_velocity = PITCHFORK_VELOCITY;
 		attack_damage = PITCHFORK_DAMAGE;
 		attack_texture = "pitchfork";
@@ -207,8 +213,8 @@ void AI_SYSTEM::create_enemy_projectile(const Entity& enemy_ent)
 		attack_damage = ARROW_DAMAGE;
 		attack_texture = "arrow";
 		break;
-	case EnemyType::KNIGHT:
-		attack_velocity = KNIGHT_VELOCITY;
+	case EnemyType::PALADIN:
+		attack_velocity = PALADIN_VELOCITY;
 		attack_damage = SWORD_DAMAGE;
 		attack_texture = "filler";
 		break;
@@ -236,14 +242,14 @@ void AI_SYSTEM::invoke_enemy_cooldown(const Entity& enemy_ent)
 	EnemyType enemy_type = enemy.type;
 
 	switch (enemy_type) {
-	case EnemyType::FARMER:
-		enemy.cooldown = FARMER_COOLDOWN;
+	case EnemyType::KNIGHT:
+		enemy.cooldown = KNIGHT_COOLDOWN;
 		break;
 	case EnemyType::ARCHER:
 		enemy.cooldown = ARCHER_COOLDOWN;
 		break;
-	case EnemyType::KNIGHT:
-		enemy.cooldown = KNIGHT_COOLDOWN;
+	case EnemyType::PALADIN:
+		enemy.cooldown = PALADIN_COOLDOWN;
 		break;
 	}
 }

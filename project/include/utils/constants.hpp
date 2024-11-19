@@ -6,9 +6,9 @@ using glm::vec2;
 
 // --- Game Logic Constants ---
 const unsigned int MAX_ENEMIES = 50;
-const float FARMER_SPAWN_INTERVAL_MS = 8000.f;
+const float KNIGHT_SPAWN_INTERVAL_MS = 8000.f;
 const float ARCHER_SPAWN_INTERVAL_MS = 16000.f;
-const float KNIGHT_SPAWN_INTERVAL_MS = 20000.f;
+const float PALADIN_SPAWN_INTERVAL_MS = 20000.f;
 const unsigned int QUEUE_SIZE = 8;
 
 constexpr float LOW_HEALTH_THRESHOLD = 30.0f;
@@ -111,20 +111,20 @@ const int ICE_SHARD_COUNT = 4;
 // --- Enemy Types ---
 enum class EnemyType
 {
-    FARMER,
+    KNIGHT,
     ARCHER,
-    KNIGHT
+    PALADIN
 };
 
 // --- Enemy Constants ---
 const float ENEMY_BASIC_RANGE = 100.f;
 
-// Farmer + Pitchfork
-const float FARMER_HEALTH = 30.f;
-const float FARMER_COOLDOWN = 4000.f;
-const float FARMER_VELOCITY = 0.04f;
-const float FARMER_RANGE = 200.f;
-const float FARMER_DAMAGE = 5.f;
+// Knight + Pitchfork
+const float KNIGHT_HEALTH = 30.f;
+const float KNIGHT_COOLDOWN = 4000.f;
+const float KNIGHT_VELOCITY = 0.04f;
+const float KNIGHT_RANGE = 200.f;
+const float KNIGHT_DAMAGE = 5.f;
 const float PITCHFORK_VELOCITY = 0.25f;
 const float PITCHFORK_DAMAGE = 10.f;
 
@@ -137,12 +137,12 @@ const float ARCHER_DAMAGE = 5.f;
 const float ARROW_VELOCITY = 0.35f;
 const float ARROW_DAMAGE = 20.f;
 
-// Knight + Sword
-const float KNIGHT_HEALTH = 200.f;
-const float KNIGHT_COOLDOWN = 3000.f;
-const float KNIGHT_VELOCITY = 0.01f;
-const float KNIGHT_RANGE = 35.f; // Melee range
-const float KNIGHT_DAMAGE = 15.f;
+// Paladin + Sword
+const float PALADIN_HEALTH = 200.f;
+const float PALADIN_COOLDOWN = 3000.f;
+const float PALADIN_VELOCITY = 0.025f;
+const float PALADIN_RANGE = 35.f; // Melee range
+const float PALADIN_DAMAGE = 15.f;
 const float SWORD_VELOCITY = 0.35f;
 const float SWORD_DAMAGE = 35.f;
 
@@ -154,6 +154,7 @@ enum class InteractableType
 
 // --- Offsets ---
 const float HEALTH_BAR_Y_OFFSET = -30.f;
+const float RENDER_PAST_SCREEN_OFFSET = 25.f;
 
 // Draw order (largest number = frontmost)
 enum

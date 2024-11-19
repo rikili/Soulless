@@ -46,6 +46,9 @@ struct HealthBar
         this->assignedTo = ent;
         assigned = true;
     }
+
+    vec2 position;
+    vec2 scale = { 0.5f ,0.5f };
 };
 
 // Damage Component
@@ -210,15 +213,15 @@ struct GlobalOptions {
 extern GlobalOptions globalOptions;
 
 struct EnemySpawnTimers {
-   float farmer = 0.0f;
+   float knight = 0.0f;
    float archer = 60000.0f;
-   float knight = 120000.0f;
+   float paladin = 120000.0f;
 
    std::unordered_map<std::string, float&> asMap() {
        return {
-           {"farmer", farmer},
+           {"knight", knight},
            {"archer", archer},
-           {"knight", knight}
+           {"knight", paladin}
        };
    }
 };
