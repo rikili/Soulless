@@ -150,6 +150,9 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId lightning3TextureId = assetManager.loadTexture("lightning3", textures_path("lightning3") + ".png");
     assets.textures["lightning3"] = lightning3TextureId;
 
+    AssetId iceTextureId = assetManager.loadTexture("ice", textures_path("ice") + ".png");
+    assets.textures["ice"] = iceTextureId;
+
     AssetId pitchforkTextureId = assetManager.loadTexture("pitchfork", textures_path("pitchfork") + ".png");
     assets.textures["pitchfork"] = pitchforkTextureId;
 

@@ -314,7 +314,8 @@ void CollisionSystem::resolve_collisions()
 
 void CollisionSystem::applyDamage(Entity attacker, Entity victim)
 {
-    if (registry.onHits.has(victim) || registry.deaths.has(attacker) || registry.deaths.has(victim))
+    // if player is victim in invincibility state OR attacker is dead OR victim is dead
+    if ((registry.onHits.has(victim) && registry.players.has(victim)) || registry.deaths.has(attacker) || registry.deaths.has(victim))
     {
         if (registry.projectiles.has(attacker) && !registry.deaths.has(attacker)) {
             registry.deaths.emplace(attacker);
@@ -357,16 +358,20 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
             }
 
             health.health -= damage.value;
-            OnHit& hit = registry.onHits.emplace(victim);
-            if (registry.players.has(victim))
-            {
-                printd("Player has been hit! Remaining health: %f\n", health.health);
-                hit.invincibility_timer = PLAYER_INVINCIBILITY_TIMER;
+            if (!registry.onHits.has(victim)) {
+                OnHit& hit = registry.onHits.emplace(victim);
+
+                if (registry.players.has(victim))
+                {
+                    printd("Player has been hit! Remaining health: %f\n", health.health);
+                    hit.invincibility_timer = PLAYER_INVINCIBILITY_TIMER;
+                }
+                else
+                {
+                    hit.invincibility_timer = ENEMY_INVINCIBILITY_TIMER;
+                }
             }
-            else
-            {
-                hit.invincibility_timer = ENEMY_INVINCIBILITY_TIMER;
-            }
+
         }
     }
     // projectile <-> projectile -- projectiles don't have health

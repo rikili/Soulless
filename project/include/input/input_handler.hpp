@@ -3,6 +3,7 @@
 #include <unordered_set>
 #include "core/common.hpp"
 #include "entities/ecs_registry.hpp"
+#include "utils/spell_factory.hpp"
 
 #include "isystems/IInputHandler.hpp"
 
@@ -25,6 +26,6 @@ private:
 
 	void updateVelocity();
 	void cast_player_spell(double x, double y, bool is_left);
-	void create_player_projectile(Entity& player_ent, double x, double y, SpellType spell);
+	void drop_player_spell(bool is_left);
 	void invoke_player_cooldown(Player& player, bool is_left);
 };

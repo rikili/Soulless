@@ -19,10 +19,14 @@ SpellQueue::SpellQueue() {
   collectedSpells[SpellType::FIRE] = 1;
   collectedSpells[SpellType::WATER] = 1;
   collectedSpells[SpellType::LIGHTNING] = 1;
+  collectedSpells[SpellType::ICE] = 1;
 
   for (int i = 0; i < QUEUE_SIZE; i++) {
     addSpell();
   }
+
+  firstSpell = getRandomSpell();
+  secondSpell = getRandomSpell();
 }
 
 SpellQueue::~SpellQueue() {}
@@ -45,38 +49,40 @@ void SpellQueue::collectSpell(SpellType spell) {
  * @return Type of spell used
  */
 SpellType SpellQueue::useSpell(bool is_first) {
-  SpellType spell;
+  SpellType new_spell = queue.front();
+  queue.pop_front();
+  addSpell(); // update queue
+
+  SpellType used_spell;
   if (is_first) {
-    // use first spell
-    spell = queue.front();
-    queue.pop_front();
+    used_spell = firstSpell;
+    firstSpell = new_spell;
   }
   else {
-    std::deque<SpellType>::iterator it = queue.begin();
-    it++; // move iterator to second item
-    spell = *it;
-    queue.erase(it);
+    used_spell = secondSpell;
+    secondSpell = new_spell;
   }
-  addSpell();
-  return spell;
+
+  return used_spell;
 }
 
 /**
- * Discards the first or second spell in the queue.
+ * Replaces players first (left) or second (right) spell.
  * Adds a random spell to the queue.
  *
  * @param is_first Whether to discard the first or second spell from the queue
  */
 void SpellQueue::discardSpell(bool is_first) {
+  SpellType new_spell = queue.front();
+  queue.pop_front();
+  addSpell(); // update queue
+
   if (is_first) {
-    queue.pop_front();
+    firstSpell = new_spell;
   }
   else {
-    std::deque<SpellType>::iterator it = queue.begin();
-    it++; // move iterator to second item
-    queue.erase(it);
+    secondSpell = new_spell;
   }
-  addSpell();
 }
 
 /**
@@ -123,7 +129,7 @@ SpellType SpellQueue::getRandomSpell() {
  * Replace a specified spell in the queue
  */
 void SpellQueue::replaceSpell(int position, SpellType spell) {
-    if (position >= 0 && position < static_cast<int>(queue.size())) {
-        queue[position] = spell;
-    }
+  if (position >= 0 && position < static_cast<int>(queue.size())) {
+    queue[position] = spell;
+  }
 }

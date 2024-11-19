@@ -12,7 +12,8 @@ enum class SoundEffect {
     PITCHFORK_DAMAGE,
     LIGHTNING,
     WATER,
-    PLAYER_DEFEATED
+    PLAYER_DEFEATED,
+    DISCARD_SPELL
 };
 
 enum class Song {

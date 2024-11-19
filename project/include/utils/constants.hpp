@@ -9,7 +9,7 @@ const unsigned int MAX_ENEMIES = 50;
 const float KNIGHT_SPAWN_INTERVAL_MS = 8000.f;
 const float ARCHER_SPAWN_INTERVAL_MS = 16000.f;
 const float PALADIN_SPAWN_INTERVAL_MS = 20000.f;
-const unsigned int QUEUE_SIZE = 8;
+const unsigned int QUEUE_SIZE = 7;
 
 constexpr float LOW_HEALTH_THRESHOLD = 30.0f;
 constexpr float HEALTH_RECOVERY_RATE = 0.2f;
@@ -101,9 +101,13 @@ const float LIGHTNING_CASTING_LIFETIME = 500.f; // Lightning cast lasts 0.5 seco
 const float LIGHTNING_CHARGING_LIFETIME = 500.f; // Lightning cast lasts 0.5 seconds before changing state
 const float LIGHTNING_ACTIVE_LIFETIME = 250.f; // Lightning bolt lasts 0.25 seconds before disappearing
 
-const float ICE_VELOCITY = 1.f;
-const float ICE_DEGREE_DIFFERENCE = 15.f;
-const int ICE_SHARD_COUNT = 4;
+const float ICE_DAMAGE = 10.f;
+const float ICE_SPEED = 0.4f;
+const float ICE_RANGE = 100.f;
+const vec2 ICE_SCALE = { 0.2, 0.2 };
+const vec2 ICE_COLLIDER = { 13.f, 13.f };
+const int ICE_SHARD_COUNT = 5;
+const float ICE_DEGREE_DIFFERENCE = 10.f;
 
 // LIGHTNING
 // PLASMA

@@ -29,7 +29,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		this->restartGame();
 		return true;
 	}
-	
+
 	this->handleProjectiles(elapsed_ms_since_last_update);
 	this->handle_enemy_logic(elapsed_ms_since_last_update);
 	this->handleMovements(elapsed_ms_since_last_update);
@@ -153,6 +153,7 @@ void WorldSystem::handleProjectiles(float elapsed_ms_since_last_update)
 		Projectile& projectile = registry.projectiles.get(projectile_ent);
 		Motion& motion = registry.motions.get(projectile_ent);
 		Deadly& deadly = registry.deadlies.get(projectile_ent);
+
 		projectile.range -= sqrt(motion.velocity.x * motion.velocity.x + motion.velocity.y * motion.velocity.y) * elapsed_ms_since_last_update;
 
 		if (deadly.to_enemy && projectile.type == DamageType::fire)
@@ -330,10 +331,16 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 	for (Entity& player_ent : registry.players.entities)
 	{
 		Player& player = registry.players.get(player_ent);
-		player.cooldown -= elapsed_ms_since_last_update;
-		if (player.cooldown < 0)
+		player.leftCooldown -= elapsed_ms_since_last_update;
+		player.rightCooldown -= elapsed_ms_since_last_update;
+
+		if (player.leftCooldown < 0)
 		{
-			player.cooldown = 0;
+			player.leftCooldown = 0;
+		}
+		if (player.rightCooldown < 0)
+		{
+			player.rightCooldown = 0;
 		}
 	}
 
@@ -449,7 +456,7 @@ void WorldSystem::createTileGrid() {
 	vec2 gridDim = IsometricGrid::getGridDimensions(w, h);
 	int numCols = static_cast<int>(gridDim.x);
 	int numRows = static_cast<int>(gridDim.y);
-	auto *batchRenderer = new BatchRenderer();
+	auto* batchRenderer = new BatchRenderer();
 	TileGenerator tileGenerator(numCols, numRows, w, h, true);
 	tileGenerator.generateTiles(batchRenderer);
 	batchRenderer->finalizeBatches();

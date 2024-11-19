@@ -44,6 +44,7 @@ bool SoundManager::initialize() {
     registerSound(SoundEffect::PLAYER_DEFEATED, "player_defeated.wav");
     registerSound(SoundEffect::LIGHTNING, "lightning.wav");
     registerSound(SoundEffect::WATER, "water.wav");
+    registerSound(SoundEffect::DISCARD_SPELL, "discard_spell.wav");
 
     return true;
 }
@@ -52,7 +53,8 @@ void SoundManager::playSound(SoundEffect effect) {
     auto soundEffect = soundEffects.find(effect);
     if (soundEffect != soundEffects.end()) {
         Mix_PlayChannel(-1, soundEffect->second, 0);
-    } else {
+    }
+    else {
         printd("Sound effect not found!\n");
     }
 }
@@ -65,7 +67,8 @@ void SoundManager::playMusic(Song song) {
     if (music.find(song) != music.end()) {
         Mix_PlayMusic(music[song], -1);
         musicPlaying = true;
-    } else {
+    }
+    else {
         std::cerr << "Song not found!" << std::endl;
     }
 }
@@ -74,7 +77,8 @@ void SoundManager::toggleMusic() {
     if (musicPlaying) {
         Mix_PauseMusic();
         musicPlaying = false;
-    } else {
+    }
+    else {
         Mix_ResumeMusic();
         musicPlaying = true;
     }
@@ -96,22 +100,24 @@ void SoundManager::removeSoundManager() {
     Mix_CloseAudio();
 }
 
-void SoundManager::registerSound(SoundEffect effect, const char *filePath) {
-    Mix_Chunk *chunk = Mix_LoadWAV(audio_path(filePath).c_str());
+void SoundManager::registerSound(SoundEffect effect, const char* filePath) {
+    Mix_Chunk* chunk = Mix_LoadWAV(audio_path(filePath).c_str());
 
     if (chunk == nullptr) {
         printd("Failed to load sound %s with error %s\n", filePath, Mix_GetError());
-    } else {
+    }
+    else {
         soundEffects[effect] = chunk;
     }
 }
 
-void SoundManager::registerMusic(Song song, const char *filePath) {
-    Mix_Music *backgroundMusic = Mix_LoadMUS(audio_path(filePath).c_str());
+void SoundManager::registerMusic(Song song, const char* filePath) {
+    Mix_Music* backgroundMusic = Mix_LoadMUS(audio_path(filePath).c_str());
 
     if (backgroundMusic == nullptr) {
         printd("Failed to load sound %s with error %s\n", filePath, Mix_GetError());
-    } else {
+    }
+    else {
         music[song] = backgroundMusic;
     }
 }

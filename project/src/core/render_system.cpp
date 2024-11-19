@@ -42,70 +42,70 @@ glm::vec3 spellTypeToColor(SpellType spell) {
  */
 bool RenderSystem::initialize(IInputHandler& input_handler, const int width, const int height, const char* title)
 {
-   glm::mat4 iso = glm::mat4(1.0f);
-   iso = glm::rotate(iso, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));  // X rotation
-   iso = glm::rotate(iso, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // Y rotation
+	glm::mat4 iso = glm::mat4(1.0f);
+	iso = glm::rotate(iso, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));  // X rotation
+	iso = glm::rotate(iso, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // Y rotation
 
-   projectionMatrix = glm::ortho(0.f, (float)window_width_px * zoomFactor,
-       (float)window_height_px * zoomFactor, 0.f, -1.f, 1.f);
-   registry.projectionMatrix = projectionMatrix;
+	projectionMatrix = glm::ortho(0.f, (float)window_width_px * zoomFactor,
+		(float)window_height_px * zoomFactor, 0.f, -1.f, 1.f);
+	registry.projectionMatrix = projectionMatrix;
 
-   initializeCamera();
+	initializeCamera();
 
-   if (!glfwInit()) { // Initialize the window
-       exit(EXIT_FAILURE);
-   }
+	if (!glfwInit()) { // Initialize the window
+		exit(EXIT_FAILURE);
+	}
 
-   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-   glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-   #if __APPLE__
-   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-   #endif
-   glfwWindowHint(GLFW_RESIZABLE, 0);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#if __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+	glfwWindowHint(GLFW_RESIZABLE, 0);
 
-   this->window = glfwCreateWindow(width, height, title, nullptr, nullptr);
-   if (!this->window) {
-       glfwTerminate();
-       exit(EXIT_FAILURE);
-   }
+	this->window = glfwCreateWindow(width, height, title, nullptr, nullptr);
+	if (!this->window) {
+		glfwTerminate();
+		exit(EXIT_FAILURE);
+	}
 
-   glfwSetWindowUserPointer(this->window, this);
+	glfwSetWindowUserPointer(this->window, this);
 
-   auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) {
-       ((RenderSystem*)glfwGetWindowUserPointer(wnd))->input_handler->onKey(_0, _1, _2, _3);
-   };
+	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) {
+		((RenderSystem*)glfwGetWindowUserPointer(wnd))->input_handler->onKey(_0, _1, _2, _3);
+		};
 
-   auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) {
-       ((RenderSystem*)glfwGetWindowUserPointer(wnd))->input_handler->onMouseMove({ _0, _1 });
-   };
+	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) {
+		((RenderSystem*)glfwGetWindowUserPointer(wnd))->input_handler->onMouseMove({ _0, _1 });
+		};
 
-   auto mouse_button_redirect = [](GLFWwindow* wnd, int _1, int _2, int _3) {
-       ((RenderSystem*)glfwGetWindowUserPointer(wnd))->input_handler->onMouseKey(wnd, _1, _2, _3);
-   };
+	auto mouse_button_redirect = [](GLFWwindow* wnd, int _1, int _2, int _3) {
+		((RenderSystem*)glfwGetWindowUserPointer(wnd))->input_handler->onMouseKey(wnd, _1, _2, _3);
+		};
 
-   glfwSetKeyCallback(window, key_redirect);
-   glfwSetCursorPosCallback(window, cursor_pos_redirect);
-   glfwSetMouseButtonCallback(window, mouse_button_redirect);
+	glfwSetKeyCallback(window, key_redirect);
+	glfwSetCursorPosCallback(window, cursor_pos_redirect);
+	glfwSetMouseButtonCallback(window, mouse_button_redirect);
 
-   glfwMakeContextCurrent(this->window);
-   glfwSwapInterval(1);
+	glfwMakeContextCurrent(this->window);
+	glfwSwapInterval(1);
 
-   const int is_fine = gl3w_init();
-   if (is_fine) {
-	   fprintf(stderr, "failed to initialize OpenGL\n");
-	   return false;
-   }
-   assert(is_fine == 0);
+	const int is_fine = gl3w_init();
+	if (is_fine) {
+		fprintf(stderr, "failed to initialize OpenGL\n");
+		return false;
+	}
+	assert(is_fine == 0);
 
-   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-   glClear(GL_COLOR_BUFFER_BIT);
-   glfwSwapBuffers(this->window);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glfwSwapBuffers(this->window);
 
-   this->input_handler = &input_handler;
+	this->input_handler = &input_handler;
 
-   return true;
+	return true;
 }
 
 /**
@@ -409,12 +409,18 @@ void RenderSystem::drawFrame(float elapsed_ms)
 
 	Player& playerObj = registry.players.get(player);
 	SpellQueue& spell_queue = playerObj.spell_queue;
-	if (!spell_queue.getQueue().empty()) {
-		SpellType spell = spell_queue.getQueue().front();
-		std::string spellText = spellTypeToString(spell);
-		glm::vec3 color = spellTypeToColor(spell);
-		drawText(spellText, "spellFont", window_width_px / 2.0f, 30.0f, 1.0f, color);
-	}
+
+	// render text for left spell
+	SpellType leftSpell = spell_queue.getLeftSpell();
+	std::string spellText = spellTypeToString(leftSpell);
+	glm::vec3 color = spellTypeToColor(leftSpell);
+	drawText(spellText, "spellFont", (window_width_px / 2.0f) - 100, 30.0f, 1.0f, color);
+
+	// render text for right spell
+	SpellType rightSpell = spell_queue.getRightSpell();
+	spellText = spellTypeToString(rightSpell);
+	color = spellTypeToColor(rightSpell);
+	drawText(spellText, "spellFont", (window_width_px / 2.0f) + 100, 30.0f, 1.0f, color);
 }
 
 // source: inclass SimpleGL-3
@@ -531,7 +537,7 @@ void RenderSystem::drawParticles() {
 	const Mesh* mesh = this->asset_manager->getMesh("particle");
 	glBindVertexArray(mesh->vao);
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->instanceVBO);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Particle)* registry.particles.size(), registry.particles.components.data());
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Particle) * registry.particles.size(), registry.particles.components.data());
 
 	glDrawElementsInstanced(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0, registry.particles.size());
 	//printd("Current Particles: %d\n", registry.particles.size());
@@ -645,5 +651,5 @@ void RenderSystem::updateRenderOrder(ComponentContainer<RenderRequest>& render_r
 				return request_a.type < request_b.type;
 			}
 			return a.render_y < b.render_y;
-	});
+		});
 }

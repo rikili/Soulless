@@ -87,11 +87,11 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
             break;
         case GLFW_KEY_Q:
             printd("Q button pressed.\n");
-            // TODO: drop spell 1 and increase HP
+            drop_player_spell(true);
             break;
         case GLFW_KEY_E:
             printd("E button pressed.\n");
-            // TODO: drop spell 2 and increase HP
+            drop_player_spell(false);
             break;
             // TODO: NEED A NEW KEY FOR... interact with item on ground (unused for now)
         case GLFW_KEY_F:
@@ -163,11 +163,6 @@ void InputHandler::onMouseMove(vec2 mouse_position)
     playerMotion.angle = atan2(dy, dx);
 }
 
-void invoke_player_cooldown(Player& player, bool is_left)
-{
-    player.cooldown = 700;
-}
-
 void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mods)
 {
     if (isTutorialOn() && !globalOptions.loadingOldGame) {
@@ -204,8 +199,8 @@ void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mo
             cast_player_spell(this->worldMousePosition.x, this->worldMousePosition.y, true);
             break;
         case GLFW_MOUSE_BUTTON_RIGHT:
-            // TODO: Shoot spell 2
             // printd("Right mouse button pressed.\n");
+            cast_player_spell(this->worldMousePosition.x, this->worldMousePosition.y, false);
             break;
         default:
             break;
@@ -218,117 +213,75 @@ void InputHandler::reset()
     activeMoveKeys.clear();
 }
 
-SoundEffect convertSpellToSoundEffect(SpellType spellType) {
-    switch (spellType) {
-        case SpellType::FIRE:
-            return SoundEffect::FIRE;
-        case SpellType::WATER:
-            return SoundEffect::WATER;
-        case SpellType::LIGHTNING:
-            return SoundEffect::LIGHTNING;
-        default:
-            throw std::invalid_argument("Unknown SpellType");
+SoundEffect convertSpellToSoundEffect(SpellType spellType, bool drop) {
+    if (drop) {
+        return SoundEffect::DISCARD_SPELL;
     }
+
+    switch (spellType) {
+    case SpellType::FIRE:
+        return SoundEffect::FIRE;
+    case SpellType::WATER:
+        return SoundEffect::WATER;
+    case SpellType::LIGHTNING:
+        return SoundEffect::LIGHTNING;
+    case SpellType::ICE:
+        return SoundEffect::LIGHTNING; // TODO: Change to ice sound effect
+    default:
+        throw std::invalid_argument("Unknown SpellType");
+    }
+}
+
+void InputHandler::drop_player_spell(bool is_left) {
+    Entity& player_ent = registry.players.entities[0];
+    Player& player = registry.players.get(player_ent);
+    if ((is_left && player.leftCooldown) || (!is_left && player.rightCooldown)) {
+        return;
+    }
+
+    SpellQueue& spell_queue = player.spell_queue;
+    spell_queue.discardSpell(is_left);
+
+    Health& health = registry.healths.get(player_ent);
+    health.health = std::min(PLAYER_HEALTH, health.health + 2.5f);
+
+    SoundManager* soundManager = SoundManager::getSoundManager();
+    soundManager->playSound(convertSpellToSoundEffect(SpellType::COUNT, true));
+
+    invoke_player_cooldown(player, is_left);
 }
 
 void InputHandler::cast_player_spell(double x, double y, bool is_left)
 {
     Entity& player_ent = registry.players.entities[0];
     Player& player = registry.players.get(player_ent);
-    if (player.cooldown > 0)
-    {
+    if ((is_left && player.leftCooldown) || (!is_left && player.rightCooldown)) {
         return;
     }
 
     SpellQueue& spell_queue = player.spell_queue;
     SpellType spell = spell_queue.useSpell(is_left);
 
-    create_player_projectile(player_ent, x, y, spell);
+    SpellFactory::createSpellProjectile(registry, player_ent, spell, x, y);
 
     SoundManager* soundManager = SoundManager::getSoundManager();
-    soundManager->playSound(convertSpellToSoundEffect(spell));
+    soundManager->playSound(convertSpellToSoundEffect(spell, false));
 
     invoke_player_cooldown(player, is_left);
 }
 
-void InputHandler::create_player_projectile(Entity& player_ent, double x, double y, SpellType spell)
-{
-
-    const Entity projectile_ent;
-    Projectile& projectile = registry.projectiles.emplace(projectile_ent);
-    Motion& projectile_motion = registry.motions.emplace(projectile_ent);
-    Deadly& deadly = registry.deadlies.emplace(projectile_ent);
-    Damage& damage = registry.damages.emplace(projectile_ent);
-    RenderRequest& request = registry.render_requests.emplace(projectile_ent);
-    Motion& player_motion = registry.motions.get(player_ent);
-
-    Animation& player_animation = registry.animations.get(player_ent);
-    player_animation.state = EntityState::ATTACKING;
-    player_animation.frameTime = 30.f;
-    player_motion.currentDirection = angleToDirection(find_closest_angle(player_motion.angle));
-    player_animation.initializeAtRow((int)player_motion.currentDirection);
-
-    projectile_motion.position = player_motion.position;
-    projectile_motion.angle = player_motion.angle;
-    projectile_motion.velocity = vec2({ cos(player_motion.angle), sin(player_motion.angle) });
-
-    switch (spell) {
-    case SpellType::FIRE:
-        deadly.to_enemy = true;
-        projectile_motion.scale = FIRE_SCALE;
-        projectile_motion.collider = FIRE_COLLIDER;
-        projectile.type = DamageType::fire;
-        projectile.range = FIRE_RANGE;
-        damage.value = FIRE_DAMAGE;
-        request.texture = "fireball";
-        request.type = PROJECTILE;
-        break;
-    case SpellType::WATER:
-    {
-        deadly.to_projectile = true;
-        projectile_motion.scale = WATER_SCALE;
-        projectile_motion.collider = WATER_COLLIDER;
-        projectile.type = DamageType::water;
-        projectile.range = WATER_RANGE;
-        damage.value = WATER_DAMAGE;
-        SpellState& spellState = registry.spellStates.emplace(projectile_ent);
-        spellState.state = State::ACTIVE;
-        spellState.timer = WATER_LIFETIME;
-        request.texture = "barrier";
-        request.type = OVER_PLAYER;
-        break;
-    }
-    case SpellType::LIGHTNING:
-    {
-        // printd("Mouse position when casting lightning: %f, %f\n", x, y); 
-        projectile_motion.position = { x, y };
-        projectile_motion.angle = 0.f;
-        projectile_motion.scale = LIGHTNING_SCALE;
-        projectile_motion.collider = LIGHTNING_COLLIDER;
-        projectile.type = DamageType::lightning;
-        projectile.range = LIGHTNING_RANGE;
-        damage.value = LIGHTNING_CASTING_DAMAGE;
-        SpellState& spellState = registry.spellStates.emplace(projectile_ent);
-        spellState.state = State::CASTING;
-        spellState.timer = LIGHTNING_CASTING_LIFETIME;
-        request.texture = "lightning1";
-        request.type = PROJECTILE;
-        break;
-    }
-    case SpellType::ICE:
-        // TODO
-        break;
-    default: // Should not happen
-        break;
-    }
-
-    request.mesh = "sprite";
-    request.shader = "sprite";
-}
-
 void InputHandler::invoke_player_cooldown(Player& player, bool is_left)
 {
-    player.cooldown = 700;
+    float cooldown = 700.f;
+
+    if (is_left)
+    {
+        player.leftCooldown = cooldown;
+    }
+    else
+    {
+        player.rightCooldown = cooldown;
+    }
 }
 
 void InputHandler::updateVelocity()

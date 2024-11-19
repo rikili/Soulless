@@ -17,7 +17,7 @@ struct Motion {
     vec2 velocity = { 0, 0 };
     vec2 scale = { 1, 1 };
     vec2 collider = { 50, 50 };
-    
+
     float mass = 0;
     float speedModifier = 1.f;
     float angle = 0;
@@ -66,7 +66,8 @@ struct Enemy {
 };
 
 struct Player {
-    float cooldown = -1.f;
+    float leftCooldown = -1.f;
+    float rightCooldown = -1.f;
     SpellQueue spell_queue;
 };
 
@@ -213,17 +214,17 @@ struct GlobalOptions {
 extern GlobalOptions globalOptions;
 
 struct EnemySpawnTimers {
-   float knight = 0.0f;
-   float archer = 60000.0f;
-   float paladin = 120000.0f;
+    float knight = 0.0f;
+    float archer = 60000.0f;
+    float paladin = 120000.0f;
 
-   std::unordered_map<std::string, float&> asMap() {
-       return {
-           {"knight", knight},
-           {"archer", archer},
-           {"knight", paladin}
-       };
-   }
+    std::unordered_map<std::string, float&> asMap() {
+        return {
+            {"knight", knight},
+            {"archer", archer},
+            {"knight", paladin} // TODO: Will be fixed in Luca's branch
+        };
+    }
 };
 extern EnemySpawnTimers enemySpawnTimers;
 
@@ -293,7 +294,7 @@ struct Mesh {
 
 struct Texture {
     GLuint handle = 0;
-    glm::ivec2 dimensions{0, 0};
+    glm::ivec2 dimensions{ 0, 0 };
 };
 
 struct Shader {
@@ -305,7 +306,7 @@ struct Shader {
 struct Material {
     AssetId shader;
     AssetId texture;
-    glm::vec4 color{1.0f};
+    glm::vec4 color{ 1.0f };
     // Add other material properties as needed
 };
 

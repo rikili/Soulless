@@ -20,6 +20,8 @@ void Serializer::serialize() {
     playerData["motion"] = motionData;
 
     SpellQueue& spell_queue = player.spell_queue;
+    playerData["leftSpell"] = static_cast<int>(spell_queue.getLeftSpell());
+    playerData["rightSpell"] = static_cast<int>(spell_queue.getRightSpell());
     playerData["spellQueue"] = json::array();
     for (const SpellType& spell : spell_queue.getQueue()) {
         playerData["spellQueue"].push_back(static_cast<int>(spell));
@@ -91,6 +93,10 @@ void Serializer::deserialize() {
     health.health = std::stof(playerData["health"].get<std::string>());
 
     SpellQueue& spell_queue = player.spell_queue;
+
+    spell_queue.setLeftSpell(static_cast<SpellType>(playerData["leftSpell"].get<int>()));
+    spell_queue.setRightSpell(static_cast<SpellType>(playerData["rightSpell"].get<int>()));
+
     const auto& spellQueueData = playerData["spellQueue"];
     
     int pos = 0;
