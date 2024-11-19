@@ -34,13 +34,6 @@ public:
 	void setLeftSpell(SpellType spell) { firstSpell = spell; }
 	void setRightSpell(SpellType spell) { secondSpell = spell; }
 
-	SpellType getLeftSpell() const { return firstSpell; }
-	SpellType getRightSpell() const { return secondSpell; }
-
-	// Used for relodability
-	void setLeftSpell(SpellType spell) { firstSpell = spell; }
-	void setRightSpell(SpellType spell) { secondSpell = spell; }
-
 private:
 	SpellType firstSpell;
 	SpellType secondSpell;
