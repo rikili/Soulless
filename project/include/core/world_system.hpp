@@ -2,6 +2,7 @@
 #include "isystems/IWorldSystem.hpp"
 #include "isystems/IRenderSystem.hpp"
 #include "isystems/IInputHandler.hpp"
+#include "graphics/particle_system.hpp"
 #include "collision_system.hpp"
 #include "core/common.hpp"
 #define SDL_MAIN_HANDLED
@@ -18,7 +19,7 @@ public:
    void initialize() override;
    void restartGame() override;
    void reloadGame() override;
-   
+
    void handleAI(float elapsed_ms) override;
    void handleProjectiles(float elapsed_ms) override;
    void handleTimers(float elapsed_ms) override;
@@ -39,6 +40,8 @@ private:
    void createEnemy(EnemyType type, vec2 position, vec2 velocity);
    Entity createBackgroundObject(vec2 position, vec2 scale, AssetId texture, bool animate);
    void handle_enemy_logic(float elapsed_ms_since_last_update);
+   std::string peToString(Entity e);
+   void handleRain();
 
    // Mix_Music* background_music;
    GLFWwindow* window{};
@@ -46,4 +49,5 @@ private:
    CollisionSystem* collision_system;
    // IInputHandler* input_handler;
    Entity player_mage;
+   ParticleSystem particleSystem;
 };

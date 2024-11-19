@@ -12,6 +12,7 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     assets.shaders["animatedsprite"] = assetManager.loadShader("animatedsprite", shader_path("animatedsprite") + ".vs.glsl", shader_path("animatedsprite") + ".fs.glsl");
     assets.shaders["healthbar"] = assetManager.loadShader("healthbar", shader_path("healthbar") + ".vs.glsl", shader_path("healthbar") + ".fs.glsl");
     assets.shaders["font"] = assetManager.loadShader("font", shader_path("font") + ".vs.glsl", shader_path("font") + ".fs.glsl");
+    assets.shaders["particle"] = assetManager.loadShader("particle", shader_path("particle") + ".vs.glsl", shader_path("particle") + ".fs.glsl");
 
     // fonts
     AssetId deutschFont = assetManager.loadFont("deutsch", font_path("deutsch") + ".ttf", 36.0f);
@@ -26,35 +27,31 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId spellFont = assetManager.loadFont("spellFont", font_path("deutsch") + ".ttf", 32.0f);
     assets.fonts["spellFont"] = spellFont;
 
-    const std::vector<float> vertices = {
-        // positions        // colors           // texture coords
-        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f };
+    const std::vector<float> particleVertices = {     
+        // positions        // texture coords
+        -0.05f, -0.5f, 0.0f,  /*0.0f, 0.0f,*/
+        0.05f,  -0.5f, 0.0f,  /*1.0f, 0.0f,*/
+        0.05f,  0.5f,  0.0f,  /*1.0f, 1.0f,*/
+        -0.05f, 0.5f,  0.0f,  /*0.0f, 1.0f */};
 
-    const std::vector<uint32_t> indices = {
+    const std::vector<uint32_t> quadIndices = {
         0, 1, 2,
-        2, 3, 0 };
+        2, 3, 0};
 
-    const std::vector<VertexAttribute> attributes = {
-        {3, GL_FLOAT, GL_FALSE, "position"},
-        {3, GL_FLOAT, GL_FALSE, "color"},
-        {2, GL_FLOAT, GL_FALSE, "texCoord"} };
-    AssetId meshId = assetManager.loadMesh("basic", vertices, indices, attributes);
+    AssetId particleMeshId = assetManager.loadParticleMesh("particle", particleVertices, quadIndices);
 
     const std::vector<float> spriteVertices = {
-        // positions        // texture coords
-        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-        1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-        1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-        -1.0f, 1.0f, 0.0f, 0.0f, 1.0f };
+        // positions         // texture coords
+        -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+        1.0f,  -1.0f, 0.0f,  1.0f, 0.0f,
+        1.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+        -1.0f, 1.0f,  0.0f,  0.0f, 1.0f };
 
     const std::vector<VertexAttribute> spriteAttributes = {
         {3, GL_FLOAT, GL_FALSE, "position"},
         {2, GL_FLOAT, GL_FALSE, "texCoord"} };
 
-    AssetId spriteMeshId = assetManager.loadMesh("sprite", spriteVertices, indices, spriteAttributes);
+    AssetId spriteMeshId = assetManager.loadMesh("sprite", spriteVertices, quadIndices, spriteAttributes);
 
     const std::vector<float> mageCollisionVertices = {
         0.f, 1.f, 0.f,
@@ -94,15 +91,10 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
         -1.f,  1.f, 0.0f,
     };
 
-    const std::vector<uint32_t> debug_indices = {
-        0, 1, 2,
-        2, 3, 0
-    };
-
     const std::vector<VertexAttribute> debug_attributes = {
         {3, GL_FLOAT, GL_FALSE, "position"}
     };
-    AssetId debugId = assetManager.loadMesh("debug", debug_vertices, debug_indices, debug_attributes);
+    AssetId debugId = assetManager.loadMesh("debug", debug_vertices, quadIndices, debug_attributes);
 
     // Player
     AssetId mageTextureId = assetManager.loadTexture("mage-idle", textures_path("mage-idle") + ".png");
@@ -189,7 +181,7 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     const std::vector<VertexAttribute> bgAttributes = {
         {3, GL_FLOAT, GL_FALSE, "position"},
         {2, GL_FLOAT, GL_FALSE, "texCoord"} };
-    AssetId bgMeshId = assetManager.loadMesh("background", bgVertices, indices, bgAttributes);
+    AssetId bgMeshId = assetManager.loadMesh("background", bgVertices, quadIndices, bgAttributes);
 
     AssetId grassTextureId = assetManager.loadBackgroundTexture("grass1", textures_path("grass1") + ".png");
     assets.textures["grass1"] = grassTextureId;

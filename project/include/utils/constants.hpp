@@ -17,6 +17,8 @@ constexpr float HEALTH_RECOVERY_RATE = 0.2f;
 const float ENEMY_INVINCIBILITY_TIMER = 800.f;
 const float PLAYER_INVINCIBILITY_TIMER = 1500.f;
 
+const int MAX_PARTICLES = 10000;
+
 // --- Damage Types ---
 enum class DamageType
 {

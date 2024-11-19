@@ -33,6 +33,7 @@ public:
 	ComponentContainer<Animation> animations;
 	ComponentContainer<Camera> cameras;
 	ComponentContainer<Tile> tiles;
+	ComponentContainer<Particle> particles;
 	ComponentContainer<DebugRequest> debug_requests;
 	ComponentContainer<MeshCollider> mesh_colliders;
 	CollisionRegistry collision_registry;
@@ -67,6 +68,7 @@ public:
 		registry_list.push_back(&cameras);
 		registry_list.push_back(&static_render_requests);
 		registry_list.push_back(&tiles);
+		registry_list.push_back(&particles);
 		registry_list.push_back(&ai_systems);
 
 	}

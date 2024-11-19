@@ -24,6 +24,7 @@ public:
     virtual float getTextWidth(const std::string &text,
                                const std::string &fontName,
                                float scale) = 0;
+    virtual void drawParticles() = 0;
     virtual void setAssetManager(IAssetManager *asset_manager) = 0;
     virtual Mesh *getMesh(const AssetId &name) = 0;
     virtual IAssetManager &getAssetManager() = 0;

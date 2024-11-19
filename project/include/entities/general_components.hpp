@@ -246,7 +246,15 @@ struct Tile {
 
 };
 
+struct Particle {
+    // Do not change this order
+    vec2 position;
+    float size;
+    vec3 color = { .5f, .5f, .5f };
 
+    vec2 velocity;
+    float lifetime = 1000;
+};
 
 // source: inclass simpleGL-3
 struct Character {
@@ -275,6 +283,7 @@ struct Mesh {
     GLuint vao = 0;
     GLuint vbo = 0;
     GLuint ebo = 0;
+    GLuint instanceVBO = 0;
     size_t vertexCount = 0;
     size_t indexCount = 0;
     std::vector<float> vertices;

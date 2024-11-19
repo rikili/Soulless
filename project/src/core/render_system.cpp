@@ -45,17 +45,17 @@ bool RenderSystem::initialize(IInputHandler& input_handler, const int width, con
    glm::mat4 iso = glm::mat4(1.0f);
    iso = glm::rotate(iso, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));  // X rotation
    iso = glm::rotate(iso, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));  // Y rotation
-   
+
    projectionMatrix = glm::ortho(0.f, (float)window_width_px * zoomFactor,
        (float)window_height_px * zoomFactor, 0.f, -1.f, 1.f);
    registry.projectionMatrix = projectionMatrix;
-   
+
    initializeCamera();
 
    if (!glfwInit()) { // Initialize the window
        exit(EXIT_FAILURE);
    }
-   
+
    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -207,14 +207,14 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		Entity& entity = registry.render_requests.entities.at(render_index.index);
 		RenderRequest& render_request = registry.render_requests.get(entity);
 
-		Motion& motion = registry.motions.get(entity);
-
 		if (!registry.motions.has(entity))
 		{
 			std::cerr << "Entity " << entity << " does not have a motion component" << std::endl;
 			std::cerr << "Skipping rendering of this entity" << std::endl;
 			continue;
 		}
+
+		Motion& motion = registry.motions.get(entity);
 
 		Camera& gameCamera = registry.cameras.get(camera);
 		if (motion.position.x < gameCamera.position.x - RENDER_PAST_SCREEN_OFFSET
@@ -351,6 +351,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		}
 	}
 
+	drawParticles();
 	drawHealthBars();
 
 	for (const Entity& debug_entity : registry.debug_requests.entities)
@@ -515,6 +516,26 @@ float RenderSystem::getTextWidth(const std::string& text, const std::string& fon
 	return width;
 }
 
+void RenderSystem::drawParticles() {
+	const Shader* shader = this->asset_manager->getShader("particle");
+	const GLuint shaderProgram = shader->program;
+	glUseProgram(shaderProgram);
+
+	mat4 projection = projectionMatrix;
+	mat4 view = viewMatrix;
+	const GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+	const GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+	const Mesh* mesh = this->asset_manager->getMesh("particle");
+	glBindVertexArray(mesh->vao);
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->instanceVBO);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Particle)* registry.particles.size(), registry.particles.components.data());
+
+	glDrawElementsInstanced(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0, registry.particles.size());
+	//printd("Current Particles: %d\n", registry.particles.size());
+}
 
 void RenderSystem::updateCameraPosition(float x, float y) {
 	Camera& gameCamera = registry.cameras.get(camera);
@@ -533,9 +554,9 @@ void RenderSystem::drawBackgroundObjects() {
 }
 
 void RenderSystem::drawHealthBars() {
-	
+
 	for (Entity e : registry.healthBars.entities) {
-		
+
 		if (!registry.healthBars.has(e) || !registry.healthBars.get(e).assigned) {
 			assert("Healthbar shader can only be used on entities with an assigned HealthBar component.\n");
 		}

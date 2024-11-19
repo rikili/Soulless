@@ -25,6 +25,7 @@ public:
     ~AssetManager();
 
     AssetId loadMesh(const std::string& name, const std::vector<float>& vertices, const std::vector<uint32_t>& indices, const std::vector<VertexAttribute>& attributes);
+    AssetId loadParticleMesh(const std::string& name, const std::vector<float>& vertices, const std::vector<uint32_t>& indices);
     AssetId loadTexture(const std::string& name, const std::string& path);
     AssetId loadBackgroundTexture(const std::string& name, const std::string& path);
     AssetId loadShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);

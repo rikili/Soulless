@@ -29,7 +29,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		this->restartGame();
 		return true;
 	}
-
+	
 	this->handleProjectiles(elapsed_ms_since_last_update);
 	this->handle_enemy_logic(elapsed_ms_since_last_update);
 	this->handleMovements(elapsed_ms_since_last_update);
@@ -37,10 +37,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	this->collision_system->resolve_collisions();
 	this->handleAnimations();
 	this->handleHealthBars();
+	this->handleRain();
 	this->handleTimers(elapsed_ms_since_last_update);
 	this->handleAI(elapsed_ms_since_last_update);
 	this->handleSpellStates(elapsed_ms_since_last_update);
-	
+	particleSystem.updateParticles(elapsed_ms_since_last_update);
 	registry.collision_registry.clear_collisions();
 	return true;
 }
@@ -53,6 +54,16 @@ void WorldSystem::handleAI(float elapsed_ms_since_last_update) {
 
 	for (Entity& entity : registry.ai_systems.entities) {
 		AI_SYSTEM::tickForEntity(&entity, elapsed_ms_since_last_update);
+	}
+}
+
+void WorldSystem::handleRain() {
+	std::random_device rd;	// Random device
+	std::mt19937 gen(rd()); // Mersenne Twister generator
+	std::uniform_real_distribution<float> pos_distr(0, window_width_px);
+	std::uniform_real_distribution<float> vel_distr(0.1, 0.4);
+	for (int i = 0; i < 10; i++) {
+		particleSystem.emitParticle({ pos_distr(gen), 0 }, { 0, vel_distr(gen) }, 4000, 4);
 	}
 }
 
@@ -93,24 +104,6 @@ void WorldSystem::handleHealthBars() {
 	}
 }
 
-std::string peToString(Entity e) {
-
-	if (registry.players.has(e)) {
-		return "mage";
-	}
-	else if (registry.enemies.has(e)) {
-		switch (registry.enemies.get(e).type) {
-		case EnemyType::KNIGHT: return "knight";
-		case EnemyType::ARCHER: return "archer";
-		case EnemyType::PALADIN: return "paladin";
-		default: return "unknown";
-		}
-	}
-	else {
-		return "invalid";
-	}
-
-}
 void WorldSystem::handleAnimations() {
 	for (Entity e : registry.animations.entities) {
 		if (!registry.players.has(e) && !registry.enemies.has(e)) {
@@ -167,6 +160,7 @@ void WorldSystem::handleProjectiles(float elapsed_ms_since_last_update)
 			vec2 scale_factor = FIRE_SCALE + ((FIRE_RANGE - projectile.range) / FIRE_RANGE) * (FIRE_SCALE_FACTOR * FIRE_SCALE - FIRE_SCALE);
 			motion.scale.x = scale_factor.x;
 			motion.scale.y = scale_factor.y;
+			// particleSystem.emitParticle(motion.position, {-motion.velocity.x / 4, -motion.velocity.y / 4}, 100, 5);
 		}
 
 		if (projectile.range <= 0)
@@ -631,6 +625,25 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 		}
 	}
 
+
+}
+
+std::string WorldSystem::peToString(Entity e) {
+
+	if (registry.players.has(e)) {
+		return "mage";
+	}
+	else if (registry.enemies.has(e)) {
+		switch (registry.enemies.get(e).type) {
+		case EnemyType::KNIGHT: return "knight";
+		case EnemyType::ARCHER: return "archer";
+		case EnemyType::PALADIN: return "paladin";
+		default: return "unknown";
+		}
+	}
+	else {
+		return "invalid";
+	}
 
 }
 

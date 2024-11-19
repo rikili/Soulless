@@ -30,6 +30,8 @@ public:
                       const std::string& fontName, 
                       float scale) override;
 
+    void drawParticles() override;
+
     void setAssetManager(IAssetManager* asset_manager) override { 
         this->asset_manager = asset_manager; 
     }

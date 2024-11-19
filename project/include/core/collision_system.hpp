@@ -2,6 +2,7 @@
 #include "isystems/IRenderSystem.hpp"
 #include "core/common.hpp"
 #include <glm/gtc/matrix_transform.hpp>
+#include "graphics/particle_system.hpp"
 
 
 
@@ -18,5 +19,6 @@ public:
 
 private:
     IRenderSystem* renderer;
+    ParticleSystem particleSystem;
     bool is_mesh_colliding(const Entity& player, const Entity& other_entity);
 };

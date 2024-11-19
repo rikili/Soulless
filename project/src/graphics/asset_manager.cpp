@@ -70,6 +70,55 @@ AssetId AssetManager::loadMesh(const std::string& name, const std::vector<float>
     return name;
 }
 
+AssetId AssetManager::loadParticleMesh(const std::string& name, const std::vector<float>& vertices, const std::vector<uint32_t>& indices) {
+    auto mesh = std::make_shared<Mesh>();
+
+    glGenVertexArrays(1, &mesh->vao);
+    glGenBuffers(1, &mesh->vbo);
+
+    glBindVertexArray(mesh->vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    if (!indices.empty()) {
+        glGenBuffers(1, &mesh->ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32_t), indices.data(), GL_STATIC_DRAW);
+        mesh->indexCount = indices.size();
+    }
+
+    // Instance data (for each particle: position, color, size, lifetime)
+    glGenBuffers(1, &mesh->instanceVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->instanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * MAX_PARTICLES, nullptr, GL_DYNAMIC_DRAW);
+
+    // Position
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribDivisor(1, 1); // one per instance
+
+    // Size
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribDivisor(2, 1); // one per instance
+
+    // Color
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(3);
+    glVertexAttribDivisor(3, 1); // one per instance
+
+    glBindVertexArray(0);
+
+    mesh->vertices = vertices;
+    mesh->indices = indices;
+
+    meshes[name] = std::move(mesh);
+    return name;
+}
 
 AssetId AssetManager::loadBackgroundTexture(const std::string& name, const std::string& path) {
     auto texture = std::make_shared<Texture>();
@@ -268,7 +317,6 @@ AssetId AssetManager::loadFont(const std::string& name, const std::string& path,
     fonts[name] = std::move(font);
     return name;
 }
-
 
 AssetId AssetManager::createMaterial(const std::string& name, const AssetId& shader, const AssetId& texture) {
     auto material = std::make_shared<Material>();

@@ -342,6 +342,7 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
                 death.timer = 7000;
             }
             else {
+                // particleSystem.particleBurst(registry.motions.get(victim).position);
                 death.timer = 10;
             }
 

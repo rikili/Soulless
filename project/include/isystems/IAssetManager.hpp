@@ -18,6 +18,11 @@ public:
         const std::vector<uint32_t>& indices,
         const std::vector<VertexAttribute>& attributes) = 0;
 
+    virtual AssetId loadParticleMesh(
+        const std::string& name,
+        const std::vector<float>& vertices,
+        const std::vector<uint32_t>& indices) = 0;
+
     virtual AssetId loadTexture(
         const std::string& name,
         const std::string& path) = 0;
