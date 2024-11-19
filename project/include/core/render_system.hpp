@@ -66,6 +66,13 @@ public:
         return sub_renderers;
     }
 
+    ~RenderSystem() override {
+        for (auto& pair : sub_renderers) {
+            delete pair.second;
+        }
+        sub_renderers.clear();
+    }
+
 private:
     struct RenderIndex {
         size_t index;

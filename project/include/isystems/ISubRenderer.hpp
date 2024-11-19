@@ -5,5 +5,7 @@ class ISubRenderer {
     public:
         virtual ~ISubRenderer() = default;
         virtual void render(IRenderSystem* render_system) = 0;
+        virtual void finalizeBatches() = 0;
+
 
 };

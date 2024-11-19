@@ -35,7 +35,7 @@ private:
     };
 
     std::map<std::string, Batch> batches;
-    static const size_t MAX_BATCH_VERTICES = 20000;
+    static const size_t MAX_BATCH_VERTICES = 50000;
     std::vector<TileData> permanentTiles;
 
     void createBatchBuffers(Batch& batch);
@@ -47,6 +47,8 @@ private:
 public:
     BatchRenderer();
     virtual ~BatchRenderer() override;
+    void finalizeBatches() override;
+
     
     void addTile(const glm::vec2& position, const glm::vec2& scale, const std::string& texture);
     void clearAllTiles();

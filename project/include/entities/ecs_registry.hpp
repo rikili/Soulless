@@ -95,8 +95,15 @@ public:
 				printf("type %s\n", typeid(*reg).name());
 	}
 
-	void remove_all_components_of(Entity e) const
+	void remove_all_components_of(Entity e)
 	{
+		if (ai_systems.has(e)) {
+			auto& ai = ai_systems.get(e);
+			if (ai.root) {
+				AI_SYSTEM::cleanNodeTree(ai.root);
+			}
+		}
+
 		for (ContainerInterface* reg : registry_list)
 			reg->remove(e);
 	}

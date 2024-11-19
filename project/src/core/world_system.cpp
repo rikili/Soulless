@@ -449,9 +449,10 @@ void WorldSystem::createTileGrid() {
 	vec2 gridDim = IsometricGrid::getGridDimensions(w, h);
 	int numCols = static_cast<int>(gridDim.x);
 	int numRows = static_cast<int>(gridDim.y);
-	BatchRenderer *batchRenderer = new BatchRenderer();
+	auto *batchRenderer = new BatchRenderer();
 	TileGenerator tileGenerator(numCols, numRows, w, h, true);
 	tileGenerator.generateTiles(batchRenderer);
+	batchRenderer->finalizeBatches();
 	renderer->addSubRenderer("tiles", batchRenderer);
 }
 

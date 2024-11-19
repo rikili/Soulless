@@ -12,3 +12,10 @@ CMakeFiles/
 Makefile
 cmake_install.cmake
 soulless
+
+
+.ninja_deps
+.ninja_log
+build.ninja
+Testing/
+.cmake/

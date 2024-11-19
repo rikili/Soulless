@@ -8,13 +8,18 @@ BatchRenderer::~BatchRenderer() {
 }
 
 void BatchRenderer::cleanup() {
-    for (auto& pair : batches) {
-        if (pair.second.VAO != 0) {
-            glDeleteVertexArrays(1, &pair.second.VAO);
+    for (auto it = batches.begin(); it != batches.end(); ++it) {
+        auto& batch = it->second;
+        if (batch.VAO != 0) {
+            glDeleteVertexArrays(1, &batch.VAO);
+            batch.VAO = 0;
         }
-        if (pair.second.VBO != 0) {
-            glDeleteBuffers(1, &pair.second.VBO);
+        if (batch.VBO != 0) {
+            glDeleteBuffers(1, &batch.VBO);
+            batch.VBO = 0;
         }
+        batch.vertices.clear();
+        batch.vertexCount = 0;
     }
     batches.clear();
     permanentTiles.clear();
@@ -138,13 +143,13 @@ bool BatchRenderer::checkUniformLocation(GLint location, const char* uniformName
 void BatchRenderer::render(IRenderSystem* renderer) {
     GLint last_program;
     glGetIntegerv(GL_CURRENT_PROGRAM, &last_program);
-    
+
     GLint last_texture;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
-    
+
     GLint last_array_buffer;
     glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
-    
+
     GLint last_vertex_array;
     glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &last_vertex_array);
 
@@ -156,99 +161,77 @@ void BatchRenderer::render(IRenderSystem* renderer) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    for (auto& pair : batches) {
-        pair.second.vertices.clear();
-        pair.second.vertexCount = 0;
-    }
-
-    for (const auto& tile : permanentTiles) {
-        addTileToBatch(tile.position, tile.scale, tile.texture);
-    }
-
-    gl_has_errors();
-
     const glm::mat4& projectionMatrix = renderer->getProjectionMatrix();
     const glm::mat4& viewMatrix = renderer->getViewMatrix();
-    
-    glm::mat4 transformMatrix = glm::mat4(1.0f); 
+    glm::mat4 transformMatrix = glm::mat4(1.0f);
+
+    // Get shader once outside the loop
+    IAssetManager& asset_manager = renderer->getAssetManager();
+    const Shader* shader = asset_manager.getShader("sprite");
+    if (!validateShaderProgram(shader->program)) {
+        return;
+    }
+
+    glUseProgram(shader->program);
+    gl_has_errors();
+
+    GLint projectionLoc = glGetUniformLocation(shader->program, "projection");
+    GLint viewLoc = glGetUniformLocation(shader->program, "view");
+    GLint transformLoc = glGetUniformLocation(shader->program, "transform");
+    GLint textureLoc = glGetUniformLocation(shader->program, "image");
+
+    if (checkUniformLocation(projectionLoc, "projection")) {
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    }
+    if (checkUniformLocation(viewLoc, "view")) {
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+    }
+    if (checkUniformLocation(transformLoc, "transform")) {
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transformMatrix));
+    }
 
     // Render all batches
     for (auto& pair : batches) {
         Batch& batch = pair.second;
-        if (batch.vertices.empty()) continue;
-
-        IAssetManager& asset_manager = renderer->getAssetManager();
-        const Shader* shader = asset_manager.getShader("sprite");
-        if (!validateShaderProgram(shader->program)) {
-            continue;
-        }
-
-        glUseProgram(shader->program);
-        gl_has_errors();
-
-        glBindVertexArray(batch.VAO);
-        gl_has_errors();
-
-        GLint projectionLoc = glGetUniformLocation(shader->program, "projection");
-        if (checkUniformLocation(projectionLoc, "projection")) {
-            glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, 
-                             glm::value_ptr(projectionMatrix));
-        }
-
-        GLint viewLoc = glGetUniformLocation(shader->program, "view");
-        if (checkUniformLocation(viewLoc, "view")) {
-            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, 
-                             glm::value_ptr(viewMatrix));
-        }
-
-        GLint transformLoc = glGetUniformLocation(shader->program, "transform");
-        if (checkUniformLocation(transformLoc, "transform")) {
-            glUniformMatrix4fv(transformLoc, 1, GL_FALSE, 
-                             glm::value_ptr(transformMatrix));
-        }
+        if (batch.vertexCount == 0) continue;
 
         const Texture* texture = asset_manager.getTexture(batch.texture);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture->handle);
-        
+
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        
-        GLint textureLoc = glGetUniformLocation(shader->program, "image");
+
         if (checkUniformLocation(textureLoc, "image")) {
             glUniform1i(textureLoc, 0);
         }
 
-        gl_has_errors();
-
-        glBindBuffer(GL_ARRAY_BUFFER, batch.VBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0,
-                       batch.vertices.size() * sizeof(BatchVertex),
-                       batch.vertices.data());
-
-        gl_has_errors();
+        glBindVertexArray(batch.VAO);
 
         glDrawArrays(GL_TRIANGLES, 0, batch.vertexCount);
         gl_has_errors();
-
-        glBindVertexArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glUseProgram(0);
-
-        gl_has_errors();
     }
 
-    // Restore previous OpenGL state
     glUseProgram(last_program);
     glBindTexture(GL_TEXTURE_2D, last_texture);
     glBindBuffer(GL_ARRAY_BUFFER, last_array_buffer);
     glBindVertexArray(last_vertex_array);
-    
-    // Restore blend state
+
     if (!blend_enabled)
         glDisable(GL_BLEND);
     glBlendFunc(last_blend_src, last_blend_dst);
+}
+
+void BatchRenderer::finalizeBatches() {
+    for (auto& pair : batches) {
+        Batch& batch = pair.second;
+
+        glBindBuffer(GL_ARRAY_BUFFER, batch.VBO);
+        glBufferData(GL_ARRAY_BUFFER,
+                    batch.vertices.size() * sizeof(BatchVertex),
+                    batch.vertices.data(),
+                    GL_STATIC_DRAW);
+    }
 }

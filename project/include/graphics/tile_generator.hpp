@@ -72,7 +72,7 @@ private:
 
 public:
     TileGenerator(int rows, int cols, int w, int h,
-                  bool safetyMultiplier = true) : numRows(rows * (safetyMultiplier ? 2 : 1)),
+                  bool safetyMultiplier = true) : numRows(rows * (safetyMultiplier ? 3 : 1)),
                                                   numCols(cols * (safetyMultiplier ? 3 : 1)),
                                                   w(w), h(h), gen(rd()) {
         generateNoiseMap();
@@ -108,9 +108,9 @@ public:
                     else if (randNum < 84)
                         textureId = "grass4";
                     else if (randNum < 92)
-                        textureId = "grass2";
+                        textureId = "grass5";
                     else
-                        textureId = "grass1";
+                        textureId = "grass2";
                 }
                 else
                 {

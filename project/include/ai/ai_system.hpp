@@ -39,7 +39,12 @@ struct Node {
     NodeType type;
     std::vector<Node*> children;
     
-    virtual ~Node() = default;
+    virtual ~Node() {
+        // for (Node* child : children) {
+        //     delete child;
+        // }
+        // children.clear();
+    }
     virtual NodeState tick(float elapsed_ms) = 0;
 };
 
@@ -195,5 +200,6 @@ namespace AI_SYSTEM {
     void tickForEntity(Entity* entity, float elapsed_ms);
     void create_enemy_projectile(const Entity& enemy_ent);
     void invoke_enemy_cooldown(const Entity& enemy_ent);
+    void cleanNodeTree(Node* node);
 }
 

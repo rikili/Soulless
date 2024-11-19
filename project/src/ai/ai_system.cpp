@@ -253,3 +253,18 @@ void AI_SYSTEM::invoke_enemy_cooldown(const Entity& enemy_ent)
 		break;
 	}
 }
+
+
+void AI_SYSTEM::cleanNodeTree(Node* node)
+{
+    if (!node) {
+        return;
+    }
+
+    // Recursively clean up all child nodes
+    for (Node* child : node->children) {
+        cleanNodeTree(child);
+    }
+
+    delete node;
+}
