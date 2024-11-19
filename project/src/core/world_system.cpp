@@ -193,6 +193,17 @@ void WorldSystem::handleMovements(float elapsed_ms_since_last_update)
 			float x_offset = motion.collider.x * motion.scale.x;
 			float y_offset = motion.collider.y * motion.scale.y;
 			motion.position = glm::clamp(motion.position + motion.velocity * elapsed_ms_since_last_update, { x_offset, y_offset }, { window_width_px - x_offset, window_height_px - y_offset });
+
+			if (registry.enemies.has(entity))
+			{
+				// Enemy& enemy = registry.enemies.get(entity);
+				motion.angle = atan2(player_motion.position.y - motion.position.y,
+					player_motion.position.x - motion.position.x);
+
+				// printd("Enemy angle towards player: %f\n", motion.angle);
+			}
+
+
 			computeNewDirection(entity);
 		}
 
@@ -209,14 +220,6 @@ void WorldSystem::handleMovements(float elapsed_ms_since_last_update)
 			else {
 				motion.position += motion.velocity * elapsed_ms_since_last_update;
 			}
-		}
-
-		if (registry.enemies.has(entity))
-		{
-			// Enemy& enemy = registry.enemies.get(entity);
-			motion.angle = atan2(player_motion.position.y - motion.position.y,
-				player_motion.position.x - motion.position.x);
-			// printd("Enemy angle towards player: %f\n", motion.angle);
 		}
 
 		RenderRequest& render_request = registry.render_requests.get(entity);
@@ -458,6 +461,7 @@ void WorldSystem::restartGame() {
 	enemySpawnTimers.knight = 0.0f;
 	enemySpawnTimers.archer = 60000.f;
 	enemySpawnTimers.paladin = 120000.f;
+	enemySpawnTimers.slasher = 180000.f;
 }
 
 void WorldSystem::reloadGame() {
@@ -472,6 +476,7 @@ void WorldSystem::createTileGrid() {
 	int numCols = static_cast<int>(gridDim.x);
 	int numRows = static_cast<int>(gridDim.y);
 	auto* batchRenderer = new BatchRenderer();
+  
 	TileGenerator tileGenerator(numCols, numRows, w, h, true);
 	tileGenerator.generateTiles(batchRenderer);
 	batchRenderer->finalizeBatches();
@@ -536,6 +541,9 @@ void WorldSystem::createEnemy(EnemyType type, vec2 position, vec2 velocity)
 	case EnemyType::PALADIN:
 		EnemyFactory::createPaladin(registry, position, velocity);
 		break;
+	case EnemyType::SLASHER:
+		EnemyFactory::createSlasher(registry, position, velocity);
+		break;
 	}
 }
 
@@ -587,12 +595,14 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 	enemySpawnTimers.knight -= elapsed_ms_since_last_update;
 	enemySpawnTimers.archer -= elapsed_ms_since_last_update;
 	enemySpawnTimers.paladin -= elapsed_ms_since_last_update;
+	enemySpawnTimers.slasher -= elapsed_ms_since_last_update;
 
 	const bool should_spawn_knight = enemySpawnTimers.knight <= 0;
 	const bool should_spawn_archer = enemySpawnTimers.archer <= 0;
 	const bool should_spawn_paladin = enemySpawnTimers.paladin <= 0;
+	const bool should_spawn_slasher = enemySpawnTimers.slasher <= 0;
 
-	if (should_spawn_knight || should_spawn_archer || should_spawn_paladin)
+	if (should_spawn_knight || should_spawn_archer || should_spawn_paladin || should_spawn_slasher)
 	{
 		std::random_device rd;	// Random device
 		std::mt19937 gen(rd()); // Mersenne Twister generator
@@ -645,6 +655,11 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 		if (should_spawn_paladin) {
 			enemySpawnTimers.paladin = PALADIN_SPAWN_INTERVAL_MS;
 			this->createEnemy(EnemyType::PALADIN, position, { 0, 0 });
+		}
+
+		if (should_spawn_slasher) {
+			enemySpawnTimers.slasher = SLASHER_SPAWN_INTERVAL_MS;
+			this->createEnemy(EnemyType::SLASHER, position, { 0, 0 });
 		}
 	}
 }
@@ -729,6 +744,7 @@ std::string WorldSystem::peToString(Entity e) {
 		case EnemyType::KNIGHT: return "knight";
 		case EnemyType::ARCHER: return "archer";
 		case EnemyType::PALADIN: return "paladin";
+		case EnemyType::SLASHER: return "slasher";
 		default: return "unknown";
 		}
 	}

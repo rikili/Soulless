@@ -23,4 +23,7 @@ namespace EnemyFactory {
 
     Entity createArcher(ECSRegistry& registry, vec2 position, vec2 velocity);
     Entity createArcher(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health);
+
+    Entity createSlasher(ECSRegistry& registry, vec2 position, vec2 velocity);
+    Entity createSlasher(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health);
 }

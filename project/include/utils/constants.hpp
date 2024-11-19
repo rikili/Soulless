@@ -9,9 +9,11 @@ const unsigned int MAX_ENEMIES = 50;
 const float KNIGHT_SPAWN_INTERVAL_MS = 8000.f;
 const float ARCHER_SPAWN_INTERVAL_MS = 16000.f;
 const float PALADIN_SPAWN_INTERVAL_MS = 20000.f;
+const float SLASHER_SPAWN_INTERVAL_MS = 20000.f;
+
 const unsigned int QUEUE_SIZE = 7;
 
-constexpr float LOW_HEALTH_THRESHOLD = 30.0f;
+constexpr float LOW_HEALTH_THRESHOLD = 0.3f;
 constexpr float HEALTH_RECOVERY_RATE = 0.2f;
 
 const float ENEMY_INVINCIBILITY_TIMER = 800.f;
@@ -119,7 +121,8 @@ enum class EnemyType
 {
     KNIGHT,
     ARCHER,
-    PALADIN
+    PALADIN,
+    SLASHER
 };
 
 // --- Enemy Constants ---
@@ -151,6 +154,13 @@ const float PALADIN_RANGE = 35.f; // Melee range
 const float PALADIN_DAMAGE = 15.f;
 const float SWORD_VELOCITY = 0.35f;
 const float SWORD_DAMAGE = 35.f;
+
+// Slasher
+const float SLASHER_HEALTH = 25.f;
+const float SLASHER_COOLDOWN = 750.f;
+const float SLASHER_VELOCITY = 0.15f;
+const float SLASHER_RANGE = 100.f;
+const float SLASHER_DAMAGE = 20.f;
 
 // --- World Interactables ---
 enum class InteractableType

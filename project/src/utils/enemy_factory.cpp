@@ -3,16 +3,16 @@
 namespace EnemyFactory {
 
 Entity createEnemy(
-    ECSRegistry& registry, 
-    EnemyType type, 
-    vec2 position, 
-    vec2 velocity, 
-    float range, 
-    float cooldown, 
-    float health, 
+    ECSRegistry& registry,
+    EnemyType type,
+    vec2 position,
+    vec2 velocity,
+    float range,
+    float cooldown,
+    float health,
     float maxHealth,
-    float damage, 
-    const std::string& texture, 
+    float damage,
+    const std::string& texture,
     bool deadlyToPlayer
 ) {
     Entity enemy;
@@ -63,15 +63,15 @@ Entity createEnemy(
 
 Entity createPaladin(ECSRegistry& registry, vec2 position, vec2 velocity) {
     return createEnemy(
-        registry, 
-        EnemyType::PALADIN, 
-        position, 
-        velocity, 
-        PALADIN_RANGE, 
-        PALADIN_COOLDOWN, 
-        PALADIN_HEALTH, 
-        PALADIN_HEALTH, 
-        PALADIN_DAMAGE, 
+        registry,
+        EnemyType::PALADIN,
+        position,
+        velocity,
+        PALADIN_RANGE,
+        PALADIN_COOLDOWN,
+        PALADIN_HEALTH,
+        PALADIN_HEALTH,
+        PALADIN_DAMAGE,
         "paladin-idle",
         false
     );
@@ -79,48 +79,64 @@ Entity createPaladin(ECSRegistry& registry, vec2 position, vec2 velocity) {
 
 Entity createKnight(ECSRegistry& registry, vec2 position, vec2 velocity) {
     return createEnemy(
-        registry, 
-        EnemyType::KNIGHT, 
-        position, 
-        velocity, 
-        KNIGHT_RANGE, 
-        KNIGHT_COOLDOWN, 
-        KNIGHT_HEALTH, 
-        KNIGHT_HEALTH, 
-        KNIGHT_DAMAGE, 
-        "knight-idle", 
+        registry,
+        EnemyType::KNIGHT,
+        position,
+        velocity,
+        KNIGHT_RANGE,
+        KNIGHT_COOLDOWN,
+        KNIGHT_HEALTH,
+        KNIGHT_HEALTH,
+        KNIGHT_DAMAGE,
+        "knight-idle",
         true
     );
 }
 
 Entity createArcher(ECSRegistry& registry, vec2 position, vec2 velocity) {
     return createEnemy(
-        registry, 
-        EnemyType::ARCHER, 
-        position, 
-        velocity, 
-        ARCHER_RANGE, 
-        ARCHER_COOLDOWN, 
-        ARCHER_HEALTH, 
-        ARCHER_HEALTH, 
-        ARCHER_DAMAGE, 
+        registry,
+        EnemyType::ARCHER,
+        position,
+        velocity,
+        ARCHER_RANGE,
+        ARCHER_COOLDOWN,
+        ARCHER_HEALTH,
+        ARCHER_HEALTH,
+        ARCHER_DAMAGE,
         "archer-idle",
         false
+    );
+}
+
+Entity createSlasher(ECSRegistry& registry, vec2 position, vec2 velocity) {
+    return createEnemy(
+        registry,
+        EnemyType::SLASHER,
+        position,
+        velocity,
+        SLASHER_RANGE,
+        SLASHER_COOLDOWN,
+        SLASHER_HEALTH,
+        SLASHER_HEALTH,
+        SLASHER_DAMAGE,
+        "slasher-idle",
+        true
     );
 }
 
 // used for reloadability
 Entity createPaladin(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health) {
     return createEnemy(
-        registry, 
-        EnemyType::PALADIN, 
-        position, 
-        velocity, 
-        PALADIN_RANGE, 
+        registry,
+        EnemyType::PALADIN,
+        position,
+        velocity,
+        PALADIN_RANGE,
         cooldown,
         health,
         PALADIN_HEALTH,
-        PALADIN_DAMAGE, 
+        PALADIN_DAMAGE,
         "paladin-idle",
         false
     );
@@ -128,32 +144,48 @@ Entity createPaladin(ECSRegistry& registry, vec2 position, vec2 velocity, float 
 
 Entity createKnight(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health) {
     return createEnemy(
-        registry, 
-        EnemyType::KNIGHT, 
-        position, 
-        velocity, 
-        KNIGHT_RANGE, 
+        registry,
+        EnemyType::KNIGHT,
+        position,
+        velocity,
+        KNIGHT_RANGE,
         cooldown,
         health,
         KNIGHT_HEALTH,
-        KNIGHT_DAMAGE, 
-        "knight-idle", 
+        KNIGHT_DAMAGE,
+        "knight-idle",
         true
     );
 }
 
 Entity createArcher(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health) {
     return createEnemy(
-        registry, 
-        EnemyType::ARCHER, 
-        position, 
-        velocity, 
-        ARCHER_RANGE, 
+        registry,
+        EnemyType::ARCHER,
+        position,
+        velocity,
+        ARCHER_RANGE,
         cooldown,
         health,
         ARCHER_HEALTH,
-        ARCHER_DAMAGE, 
+        ARCHER_DAMAGE,
         "archer-idle",
+        false
+    );
+}
+
+Entity createSlasher(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health) {
+    return createEnemy(
+        registry,
+        EnemyType::SLASHER,
+        position,
+        velocity,
+        SLASHER_RANGE,
+        cooldown,
+        health,
+        SLASHER_HEALTH,
+        SLASHER_DAMAGE,
+        "slasher-idle",
         false
     );
 }

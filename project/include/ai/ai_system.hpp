@@ -112,10 +112,10 @@ NodeState tickSelector(float elapsed_ms) {
     return NodeState::FAILURE;
 }
     
-    NodeState tickParallel(float elapsed_ms) {
-        // not sure how it would work tbh but i think it's a common thing
-        printd("Parallel tick - not implemented\n");
-        return NodeState::SUCCESS;
+NodeState tickParallel(float elapsed_ms) {
+    // not sure how it would work tbh but i think it's a common thing
+    printd("Parallel tick - not implemented\n");
+    return NodeState::SUCCESS;
     }
 };
 
@@ -200,6 +200,7 @@ namespace AI_SYSTEM {
     void tickForEntity(Entity* entity, float elapsed_ms);
     void create_enemy_projectile(const Entity& enemy_ent);
     void invoke_enemy_cooldown(const Entity& enemy_ent);
+    void slash(const Entity& enemy_ent);
     void cleanNodeTree(Node* node);
 }
 

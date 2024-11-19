@@ -222,17 +222,19 @@ struct GlobalOptions {
 extern GlobalOptions globalOptions;
 
 struct EnemySpawnTimers {
-    float knight = 0.0f;
-    float archer = 60000.0f;
-    float paladin = 120000.0f;
+   float knight = 0.0f;
+   float archer = 60000.0f;
+   float paladin = 120000.0f;
+   float slasher = 180000.0f;
 
-    std::unordered_map<std::string, float&> asMap() {
-        return {
-            {"knight", knight},
-            {"archer", archer},
-            {"knight", paladin} // TODO: Will be fixed in Luca's branch
-        };
-    }
+   std::unordered_map<std::string, float&> asMap() {
+       return {
+           {"knight", knight},
+           {"archer", archer},
+           {"paladin", paladin},
+           {"slasher", slasher}
+       };
+   }
 };
 extern EnemySpawnTimers enemySpawnTimers;
 

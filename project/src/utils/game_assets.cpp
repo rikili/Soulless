@@ -27,7 +27,7 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId spellFont = assetManager.loadFont("spellFont", font_path("deutsch") + ".ttf", 32.0f);
     assets.fonts["spellFont"] = spellFont;
 
-    const std::vector<float> particleVertices = {     
+    const std::vector<float> particleVertices = {
         // positions        // texture coords
         -0.05f, -0.5f, 0.0f,  /*0.0f, 0.0f,*/
         0.05f,  -0.5f, 0.0f,  /*1.0f, 0.0f,*/
@@ -134,6 +134,15 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId paladinAttackTextureId = assetManager.loadTexture("paladin-attack", textures_path("paladin-attack") + ".png");
     assets.textures["paladin-attack"] = paladinAttackTextureId;
 
+    AssetId slasherIdleTextureId = assetManager.loadTexture("slasher-idle", textures_path("slasher-idle") + ".png");
+    assets.textures["slasher-idle"] = slasherIdleTextureId;
+
+    AssetId slasherWalkTextureId = assetManager.loadTexture("slasher-walk", textures_path("slasher-walk") + ".png");
+    assets.textures["slasher-walk"] = slasherWalkTextureId;
+
+    AssetId slasherAttackTextureId = assetManager.loadTexture("slasher-attack", textures_path("slasher-attack") + ".png");
+    assets.textures["slasher-attack"] = slasherAttackTextureId;
+
     // Projectiles / Spells
     AssetId fireballTextureId = assetManager.loadTexture("fireball", textures_path("fireball") + ".png");
     assets.textures["fireball"] = fireballTextureId;
@@ -225,6 +234,3 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
 
     return assets;
 }
-
-
-

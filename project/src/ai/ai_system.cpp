@@ -4,19 +4,19 @@
 
 AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
     AIComponent aiComponent;
-    
+
     auto root = new ControlNode(ControlNode::ControlType::SELECTOR);
-    
+
     auto healthCheck = new ConditionNode(
-        [entity = *entity](float elapsed_ms) {  
+        [entity = *entity](float elapsed_ms) {
             if (!registry.healths.has(entity)) {
                 return false;
             }
             auto& health = registry.healths.get(entity);
-            return health.health <= LOW_HEALTH_THRESHOLD;
+            return health.health / health.maxHealth <= LOW_HEALTH_THRESHOLD;
         }
     );
-    
+
     auto fleeFromPlayer = new ActionNode(
         [entity = *entity](float elapsed_ms) {
             if (!registry.motions.has(entity)) {
@@ -60,11 +60,11 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
             return NodeState::RUNNING;
         }
     );
-    
+
     auto lowHealthSequence = new ControlNode(ControlNode::ControlType::SEQUENCE);
     lowHealthSequence->children.push_back(healthCheck);
     lowHealthSequence->children.push_back(fleeFromPlayer);
-    
+
  auto inRangeCheck = new ConditionNode(
     [entity = *entity](float elapsed_ms) {
         if (!registry.motions.has(entity)) {
@@ -82,7 +82,7 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
             return distance < range;
         }
     );
-    
+
     auto attackAction = new ActionNode(
         [entity = *entity](float elapsed_ms) {
             if (!registry.enemies.has(entity)) {
@@ -94,7 +94,12 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
             Enemy& enemy = registry.enemies.get(entity);
 
             if (enemy.cooldown <= 0) {
-                create_enemy_projectile(entity);
+                if (enemy.type == EnemyType::SLASHER) {
+                    slash(entity);
+                }
+                else {
+                    create_enemy_projectile(entity);
+                }
                 invoke_enemy_cooldown(entity);
             }
             return NodeState::SUCCESS;
@@ -102,11 +107,11 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
         0.0f,
         false
     );
-    
+
     auto attackSequence = new ControlNode(ControlNode::ControlType::SEQUENCE);
     attackSequence->children.push_back(inRangeCheck);
     attackSequence->children.push_back(attackAction);
-    
+
 auto moveToPlayer = new ActionNode(
     [entity = *entity](float elapsed_ms) {
         if (!registry.motions.has(entity)) {
@@ -143,24 +148,41 @@ auto moveToPlayer = new ActionNode(
                 case EnemyType::PALADIN:
                     speed = PALADIN_VELOCITY;
                     break;
+                case EnemyType::SLASHER:
+                    speed = SLASHER_VELOCITY;
+                    break;
             }
             vec2 direction_normalized = glm::normalize(player_motion.position - motion.position);
             motion.velocity = direction_normalized * speed;
-            return NodeState::RUNNING;  
+            return NodeState::RUNNING;
         },
         0.0f,
         false
     );
 
-    
+
     root->children.push_back(lowHealthSequence);
     root->children.push_back(attackSequence);
     root->children.push_back(moveToPlayer);
-    
+
     aiComponent.root = root;
-    
+
     registry.ai_systems.emplace(*entity, aiComponent);
     return registry.ai_systems.get(*entity);
+}
+
+// TODO: linear interpolation
+void AI_SYSTEM::slash(const Entity& enemy_ent) {
+    Motion& enemy_motion = registry.motions.get(enemy_ent);
+    Enemy& enemy = registry.enemies.get(enemy_ent);
+
+    Animation& enemy_animation = registry.animations.get(enemy_ent);
+    enemy_animation.state = EntityState::ATTACKING;
+    enemy_animation.frameTime = 30.f;
+    enemy_motion.currentDirection = angleToDirection(find_closest_angle(enemy_motion.angle));
+    enemy_animation.initializeAtRow((int)enemy_motion.currentDirection);
+
+    enemy_motion.velocity *= 2.f;
 }
 
 void AI_SYSTEM::tickForEntity(Entity* entity, float elapsed_ms) {
@@ -218,7 +240,7 @@ void AI_SYSTEM::create_enemy_projectile(const Entity& enemy_ent)
 		attack_damage = SWORD_DAMAGE;
 		attack_texture = "filler";
 		break;
-	default:  
+	default:
 		attack_velocity = PITCHFORK_VELOCITY;
 		attack_damage = PITCHFORK_DAMAGE;
 		attack_texture = "pitchfork";
@@ -251,6 +273,8 @@ void AI_SYSTEM::invoke_enemy_cooldown(const Entity& enemy_ent)
 	case EnemyType::PALADIN:
 		enemy.cooldown = PALADIN_COOLDOWN;
 		break;
+    case EnemyType::SLASHER:
+        enemy.cooldown = SLASHER_COOLDOWN;
 	}
 }
 
