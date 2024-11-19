@@ -80,6 +80,14 @@ struct Interactable {
     InteractableType type;
 };
 
+struct SpellUnlock {
+    SpellType type;
+};
+
+struct Decay {
+    float timer = 0;
+};
+
 // Timed Component
 // struct Timed {
 //     float timer = 0;

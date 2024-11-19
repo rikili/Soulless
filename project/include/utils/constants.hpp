@@ -155,8 +155,15 @@ const float SWORD_DAMAGE = 35.f;
 // --- World Interactables ---
 enum class InteractableType
 {
-    HEALER
+    HEALER,
+    POWER
 };
+
+// --- Interactable Timers ---
+const float POWERUP_DECAY = 30000.f;
+const float POWERUP_SPAWN_TIMER = 2 * 60000.f;
+const float POWERUP_SPAWN_BUFFER = 180.f; // distance from edge to spawn
+const float MIN_POWERUP_DIST = 80;
 
 // --- Offsets ---
 const float HEALTH_BAR_Y_OFFSET = -30.f;

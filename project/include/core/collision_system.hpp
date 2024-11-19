@@ -16,6 +16,7 @@ public:
     void resolve_collisions();
     void applyDamage(Entity attacker, Entity victim);
     void applyHealing(Entity target);
+    void unlockSpell(Entity target, SpellType type);
 
 private:
     IRenderSystem* renderer;

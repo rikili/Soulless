@@ -45,6 +45,8 @@ bool SoundManager::initialize() {
     registerSound(SoundEffect::LIGHTNING, "lightning.wav");
     registerSound(SoundEffect::WATER, "water.wav");
     registerSound(SoundEffect::DISCARD_SPELL, "discard_spell.wav");
+    registerSound(SoundEffect::POWERUP_PICKUP, "powerup-pickup.wav");
+    registerSound(SoundEffect::POWERUP_SPAWN, "powerup-spawn.wav");
 
     return true;
 }

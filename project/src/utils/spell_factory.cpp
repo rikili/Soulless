@@ -8,7 +8,7 @@ namespace SpellFactory {
 
     player_animation.state = EntityState::ATTACKING;
     player_animation.frameTime = 30.f;
-    player_motion.currentDirection = angleToDirection(player_motion.angle);
+    player_motion.currentDirection = angleToDirection(find_closest_angle(player_motion.angle));
     player_animation.initializeAtRow((int)player_motion.currentDirection);
 
     switch (spell) {

@@ -159,6 +159,16 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId arrowTextureId = assetManager.loadTexture("arrow", textures_path("arrow") + ".png");
     assets.textures["arrow"] = arrowTextureId;
 
+    // Collectibles
+    AssetId lightningCollectibleId = assetManager.loadTexture("lightning-collect", textures_path("lightning-collect") + ".png");
+    assets.textures["lightning"] = lightningCollectibleId;
+
+    AssetId waterCollectibleId = assetManager.loadTexture("water-collect", textures_path("water-collect") + ".png");
+    assets.textures["water"] = waterCollectibleId;
+
+    AssetId iceCollectibleId = assetManager.loadTexture("ice-collect", textures_path("ice-collect") + ".png");
+    assets.textures["ice"] = iceCollectibleId;
+
     // Used for paladin's MELEE sword slash
     AssetId fillerTextureId = assetManager.loadTexture("filler", textures_path("filler") + ".png");
     assets.textures["filler"] = fillerTextureId;

@@ -42,6 +42,8 @@ private:
    void handle_enemy_logic(float elapsed_ms_since_last_update);
    std::string peToString(Entity e);
    void handleRain();
+   void handleCollectible(const float elapsed_ms_since_last_update);
+   void createCollectible(const vec2 position, const SpellType);
 
    // Mix_Music* background_music;
    GLFWwindow* window{};
@@ -50,4 +52,5 @@ private:
    // IInputHandler* input_handler;
    Entity player_mage;
    ParticleSystem particleSystem;
+   float powerup_timer;
 };

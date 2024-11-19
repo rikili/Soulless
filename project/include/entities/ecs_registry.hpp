@@ -36,8 +36,10 @@ public:
 	ComponentContainer<Particle> particles;
 	ComponentContainer<DebugRequest> debug_requests;
 	ComponentContainer<MeshCollider> mesh_colliders;
-	CollisionRegistry collision_registry;
 	ComponentContainer<AIComponent> ai_systems;
+	ComponentContainer<SpellUnlock> spellUnlocks;
+	ComponentContainer<Decay> decays;
+	CollisionRegistry collision_registry;
 	mat4 viewMatrix;
 	mat4 projectionMatrix;
 
@@ -70,6 +72,8 @@ public:
 		registry_list.push_back(&tiles);
 		registry_list.push_back(&particles);
 		registry_list.push_back(&ai_systems);
+		registry_list.push_back(&spellUnlocks);
+		registry_list.push_back(&decays);
 
 	}
 

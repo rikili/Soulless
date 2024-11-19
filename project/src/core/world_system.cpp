@@ -289,6 +289,7 @@ void WorldSystem::computeNewDirection(Entity e) {
  */
 void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 {
+	handleCollectible(elapsed_ms_since_last_update);
 
 	for (Entity& hit_ent : registry.onHits.entities)
 	{
@@ -325,6 +326,17 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 				registry.game_over = true;
 			}
 			registry.remove_all_components_of(dead_ent);
+		}
+	}
+
+	for (Entity& decay_ent : registry.decays.entities)
+	{
+		Decay& decay = registry.decays.get(decay_ent);
+		decay.timer -= elapsed_ms_since_last_update;
+		if (decay.timer < 0)
+		{
+			Death& death = registry.deaths.emplace(decay_ent);
+			death.timer = 0;
 		}
 	}
 
@@ -438,6 +450,9 @@ void WorldSystem::restartGame() {
 	this->createTileGrid();
 	loadBackgroundObjects();
 	this->renderer->initializeCamera();
+	powerup_timer = POWERUP_SPAWN_TIMER;
+	
+	//createCollectible({ 1000, 200 }, SpellType::LIGHTNING);
 
 	// Reset enemy spawn timers (rework this if needed)
 	enemySpawnTimers.knight = 0.0f;
@@ -632,8 +647,76 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 			this->createEnemy(EnemyType::PALADIN, position, { 0, 0 });
 		}
 	}
+}
 
+void WorldSystem::handleCollectible(const float elapsed_ms_since_last_update)
+{
+	powerup_timer -= elapsed_ms_since_last_update;
+	if (powerup_timer <= 0)
+	{
+		std::random_device rd;	// Random device
+		std::mt19937 gen(rd()); // Mersenne Twister generator
+		std::uniform_real_distribution<float> hor_distr(0 + POWERUP_SPAWN_BUFFER, window_width_px - POWERUP_SPAWN_BUFFER);
+		std::uniform_real_distribution<float> ver_distr(0 + POWERUP_SPAWN_BUFFER, window_height_px - POWERUP_SPAWN_BUFFER);
 
+		Motion& motion = registry.motions.get(player_mage);
+		Player& player = registry.players.get(player_mage);
+		SoundManager* sound_manager = sound_manager->getSoundManager();
+
+		const std::vector<SpellType> missing_spells = player.spell_queue.getMissingSpells();
+		if (missing_spells.size())
+		{
+			std::uniform_int_distribution<int> spell_choice(1, missing_spells.size());
+			while (true)
+			{
+				float x = hor_distr(gen);
+				float y = ver_distr(gen);
+				if (glm::distance(motion.position, { x , y }) > MIN_POWERUP_DIST)
+				{
+					sound_manager->playSound(SoundEffect::POWERUP_SPAWN);
+					createCollectible({ x, y }, static_cast<SpellType>(spell_choice(gen)));
+					break;
+				}
+			}
+		}
+
+		powerup_timer = POWERUP_SPAWN_TIMER;
+	}
+}
+
+void WorldSystem::createCollectible(const vec2 position, const SpellType type)
+{
+	Entity entity;
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.scale = { 0.5, 0.5 };
+
+	RenderRequest& request = registry.render_requests.emplace(entity);
+	request.mesh = "sprite";
+	request.shader = "sprite";
+	request.type = ENEMY;
+
+	Interactable& interact = registry.interactables.emplace(entity);
+	interact.type = InteractableType::POWER;
+	SpellUnlock& unlock = registry.spellUnlocks.emplace(entity);
+	unlock.type = type;
+	Decay& decay = registry.decays.emplace(entity);
+	decay.timer = POWERUP_DECAY;
+
+	switch (type) {
+	case SpellType::LIGHTNING:
+		request.texture = "lightning-collect";
+		break;
+	case SpellType::WATER:
+		request.texture = "water-collect";
+		break;
+	case SpellType::ICE:
+		request.texture = "ice-collect";
+		break;
+	default:
+		registry.remove_all_components_of(entity);
+	}
 }
 
 std::string WorldSystem::peToString(Entity e) {

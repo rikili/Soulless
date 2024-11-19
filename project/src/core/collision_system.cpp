@@ -154,7 +154,6 @@ void CollisionSystem::detect_collisions()
             draw_vertices(entity, *renderer->getMesh("mage_collider")); // can fetch mesh from component as well
         }
 
-        // bool collided = false;
         for (const Entity& other_entity : registry.motions.entities)
         {
             if (entity == other_entity) continue;
@@ -298,13 +297,22 @@ void CollisionSystem::resolve_collisions()
     for (const Entity& interactable_entity : registry.interactables.entities)
     {
         std::unordered_set<Entity> other_entities = registry.collision_registry.get_collision_by_ent(interactable_entity);
-        // const Interactable& interactable = registry.interactables.get(interactable_entity);
+         const Interactable& interactable = registry.interactables.get(interactable_entity);
         for (const Entity& other_entity : other_entities)
         {
             if (!registry.collision_registry.check_collision(interactable_entity, other_entity)) continue;
             if (registry.players.has(other_entity))
             {
-                if (is_mesh_colliding(other_entity, interactable_entity)) applyHealing(other_entity);
+                if (interactable.type == InteractableType::HEALER && is_mesh_colliding(other_entity, interactable_entity)) applyHealing(other_entity);
+                if (interactable.type == InteractableType::POWER && is_mesh_colliding(other_entity, interactable_entity))
+                {
+                    SoundManager* sound = SoundManager::getSoundManager();
+                    sound->playSound(SoundEffect::POWERUP_PICKUP);
+                    SpellUnlock& unlock = registry.spellUnlocks.get(interactable_entity);
+                    unlockSpell(other_entity, unlock.type);
+                    Decay& decay = registry.decays.get(interactable_entity);
+                    decay.timer = 0;
+                }
             }
 
             registry.collision_registry.remove_collision(interactable_entity, other_entity);
@@ -412,4 +420,10 @@ void CollisionSystem::applyHealing(Entity target)
 
     OnHeal& heal = registry.onHeals.emplace(target);
     heal.heal_time = PLAYER_HEAL_COOLDOWN;
+}
+
+void CollisionSystem::unlockSpell(Entity target, SpellType type)
+{
+    Player& player = registry.players.get(target);
+    player.spell_queue.unlockSpell(type);
 }

@@ -28,4 +28,6 @@ public:
 
     virtual Entity getPlayer() const = 0;
     virtual void setRenderer(IRenderSystem* renderer) = 0;
+    virtual void handleCollectible(const float elapsed_ms_since_last_update) = 0;
+    virtual void createCollectible(const vec2 position, const SpellType) = 0;
 };

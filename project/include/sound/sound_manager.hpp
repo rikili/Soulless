@@ -13,7 +13,9 @@ enum class SoundEffect {
     LIGHTNING,
     WATER,
     PLAYER_DEFEATED,
-    DISCARD_SPELL
+    DISCARD_SPELL,
+    POWERUP_PICKUP,
+    POWERUP_SPAWN
 };
 
 enum class Song {

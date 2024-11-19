@@ -24,6 +24,8 @@ public:
 	void discardSpell(bool is_first);
 	void replaceSpell(int position, SpellType spell);
 	const std::deque<SpellType>& getQueue() const;
+	void unlockSpell(SpellType type);
+	const std::vector<SpellType> getMissingSpells();
 
 	SpellType getLeftSpell() const { return firstSpell; }
 	SpellType getRightSpell() const { return secondSpell; }
