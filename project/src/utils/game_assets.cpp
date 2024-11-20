@@ -32,11 +32,11 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
         -0.05f, -0.5f, 0.0f,  /*0.0f, 0.0f,*/
         0.05f,  -0.5f, 0.0f,  /*1.0f, 0.0f,*/
         0.05f,  0.5f,  0.0f,  /*1.0f, 1.0f,*/
-        -0.05f, 0.5f,  0.0f,  /*0.0f, 1.0f */};
+        -0.05f, 0.5f,  0.0f,  /*0.0f, 1.0f */ };
 
     const std::vector<uint32_t> quadIndices = {
         0, 1, 2,
-        2, 3, 0};
+        2, 3, 0 };
 
     AssetId particleMeshId = assetManager.loadParticleMesh("particle", particleVertices, quadIndices);
 
@@ -143,6 +143,15 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId slasherAttackTextureId = assetManager.loadTexture("slasher-attack", textures_path("slasher-attack") + ".png");
     assets.textures["slasher-attack"] = slasherAttackTextureId;
 
+    AssetId darkLordIdleTextureId = assetManager.loadTexture("darklord-idle", textures_path("darklord-idle") + ".png");
+    assets.textures["darklord-idle"] = darkLordIdleTextureId;
+
+    AssetId darkLordWalkTextureId = assetManager.loadTexture("darklord-walk", textures_path("darklord-walk") + ".png");
+    assets.textures["darklord-walk"] = darkLordWalkTextureId;
+
+    AssetId darkLordAttackTextureId = assetManager.loadTexture("darklord-attack", textures_path("darklord-attack") + ".png");
+    assets.textures["darklord-attack"] = darkLordAttackTextureId;
+
     // Projectiles / Spells
     AssetId fireballTextureId = assetManager.loadTexture("fireball", textures_path("fireball") + ".png");
     assets.textures["fireball"] = fireballTextureId;
@@ -162,11 +171,19 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId iceTextureId = assetManager.loadTexture("ice", textures_path("ice") + ".png");
     assets.textures["ice"] = iceTextureId;
 
+    AssetId windTextureId = assetManager.loadTexture("wind", textures_path("wind-sheet") + ".png");
+    assets.textures["wind"] = windTextureId;
+
+    AssetId plasmaTextureId = assetManager.loadTexture("plasma", textures_path("plasma") + ".png");
+    assets.textures["plasma"] = plasmaTextureId;
+
     AssetId pitchforkTextureId = assetManager.loadTexture("pitchfork", textures_path("pitchfork") + ".png");
     assets.textures["pitchfork"] = pitchforkTextureId;
 
     AssetId arrowTextureId = assetManager.loadTexture("arrow", textures_path("arrow") + ".png");
     assets.textures["arrow"] = arrowTextureId;
+
+    // Dark Lord's attack texture is the same as plasma's
 
     // Collectibles
     AssetId lightningCollectibleId = assetManager.loadTexture("lightning-collect", textures_path("lightning-collect") + ".png");
@@ -177,6 +194,12 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
 
     AssetId iceCollectibleId = assetManager.loadTexture("ice-collect", textures_path("ice-collect") + ".png");
     assets.textures["ice"] = iceCollectibleId;
+
+    AssetId windCollectibleId = assetManager.loadTexture("wind-collect", textures_path("wind-collect") + ".png");
+    assets.textures["wind"] = windCollectibleId;
+
+    AssetId plasmaCollectibleId = assetManager.loadTexture("plasma-collect", textures_path("plasma-collect") + ".png");
+    assets.textures["plasma"] = plasmaCollectibleId;
 
     // Used for paladin's MELEE sword slash
     AssetId fillerTextureId = assetManager.loadTexture("filler", textures_path("filler") + ".png");

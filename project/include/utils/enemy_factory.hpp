@@ -2,17 +2,18 @@
 
 namespace EnemyFactory {
     Entity createEnemy(
-        ECSRegistry& registry, 
-        EnemyType type, 
-        vec2 position, 
-        vec2 velocity, 
-        float range, 
-        float cooldown, 
-        float health, 
-        float maxHealth, 
-        float damage, 
-        const std::string& texture, 
-        bool deadlyToPlayer = false
+        ECSRegistry& registry,
+        EnemyType type,
+        vec2 position,
+        vec2 velocity,
+        float range,
+        float cooldown,
+        float health,
+        float maxHealth,
+        float damage,
+        const std::string& texture,
+        bool deadlyToPlayer = false,
+        vec2 scale = { 1.f, 1.f }
     );
 
     Entity createPaladin(ECSRegistry& registry, vec2 position, vec2 velocity);
@@ -26,4 +27,7 @@ namespace EnemyFactory {
 
     Entity createSlasher(ECSRegistry& registry, vec2 position, vec2 velocity);
     Entity createSlasher(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health);
+
+    Entity createDarkLord(ECSRegistry& registry, vec2 position, vec2 velocity);
+    Entity createDarkLord(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health);
 }

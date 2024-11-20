@@ -11,5 +11,7 @@ namespace SpellFactory {
   void configureFireSpell(ECSRegistry& registry, Entity& spell_ent);
   void configureWaterSpell(ECSRegistry& registry, Entity& spell_ent);
   void configureLightningSpell(ECSRegistry& registry, Entity& spell_ent);
+  void configureWindSpell(ECSRegistry& registry, Entity& spell_ent);
   void configureIceSpell(ECSRegistry& registry, Entity& spell_ent);
+  void configurePlasmaSpell(ECSRegistry& registry, Entity& spell_ent);
 }

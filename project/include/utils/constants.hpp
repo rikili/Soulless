@@ -10,6 +10,7 @@ const float KNIGHT_SPAWN_INTERVAL_MS = 8000.f;
 const float ARCHER_SPAWN_INTERVAL_MS = 16000.f;
 const float PALADIN_SPAWN_INTERVAL_MS = 20000.f;
 const float SLASHER_SPAWN_INTERVAL_MS = 20000.f;
+const float DARKLORD_SPAWN_INTERVAL_MS = 270000.f;
 
 const unsigned int QUEUE_SIZE = 7;
 
@@ -73,9 +74,12 @@ enum class SpellType
     WATER = 1,
     LIGHTNING = 2,
     ICE = 3,
+    WIND = 4,
+    PLASMA = 5,
     // Add any new spells here
     COUNT // Used to track how many spell types we have
 };
+const int NOT_DROPPED_SPELL_COUNT = 2;
 
 const float FIRE_DAMAGE = 25.f;
 const float FIRE_VELOCITY = 0.8f;
@@ -111,10 +115,19 @@ const vec2 ICE_COLLIDER = { 13.f, 13.f };
 const int ICE_SHARD_COUNT = 5;
 const float ICE_DEGREE_DIFFERENCE = 10.f;
 
-// LIGHTNING
-// PLASMA
-// WATER
-// WIND
+const float WIND_DAMAGE = 4.f;
+const float WIND_RANGE = FLT_MAX;
+const vec2 WIND_SCALE = { 0.75f, 0.75f };
+const float WIND_SCALE_FACTOR = 1.f;
+const vec2 WIND_COLLIDER = { 40.f, 80.f };
+const float WIND_PLACEMENT_LIFETIME = 10000.f;
+
+const float PLASMA_DAMAGE = 25.f;
+const float PLASMA_SPEED = 0.01f;
+const float PLASMA_MAX_SPEED = 1.0f;
+const float PLASMA_RANGE = 300.f;
+const vec2 PLASMA_SCALE = { 0.4f, 0.4f };
+const vec2 PLASMA_COLLIDER = { 35.f, 35.f };
 
 // --- Enemy Types ---
 enum class EnemyType
@@ -122,7 +135,8 @@ enum class EnemyType
     KNIGHT,
     ARCHER,
     PALADIN,
-    SLASHER
+    SLASHER,
+    DARKLORD // Boss
 };
 
 // --- Enemy Constants ---
@@ -161,6 +175,22 @@ const float SLASHER_COOLDOWN = 750.f;
 const float SLASHER_VELOCITY = 0.15f;
 const float SLASHER_RANGE = 100.f;
 const float SLASHER_DAMAGE = 20.f;
+
+// Dark Lord + Razor Wind + Claw Pull
+const float DARKLORD_HEALTH = 750.f;
+const float DARKLORD_VELOCITY = 0.02f;
+const float DARKLORD_DAMAGE = 20.f;
+const float DARKLORD_RANGE = 500.f;
+const float DARKLORD_COOLDOWN = 5000.f;
+// const float DARKLORD_RAZOR_COOLDOWN = 5000.f;
+// const float DARKLORD_CLAW_COOLDOWN = 10000.f;
+// const float DARKLORD_RAZOR_RANGE = 350.f;
+// const float DARKLORD_CLAW_RANGE = 400.f;
+const float DARKLORD_RAZOR_DAMAGE = 25.f;
+// const float DARKLORD_CLAW_DAMAGE = 10.f;
+const float DARKLORD_RAZOR_SPEED = 0.1f;
+const float DARKLORD_RAZOR_MAX_SPEED = 1.5f;
+// const float DARKLORD_CLAW_VELOCITY = 0.3f;
 
 // --- World Interactables ---
 enum class InteractableType

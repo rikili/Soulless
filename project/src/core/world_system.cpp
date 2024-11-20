@@ -163,6 +163,37 @@ void WorldSystem::handleProjectiles(float elapsed_ms_since_last_update)
 			motion.scale.y = scale_factor.y;
 			// particleSystem.emitParticle(motion.position, {-motion.velocity.x / 4, -motion.velocity.y / 4}, 100, 5);
 		}
+		else if (projectile.type == DamageType::plasma) {
+			float MAX_SPEED;         											// max speed
+			float MAX_RANGE;       												// max range of projectile
+			if (deadly.to_enemy) {
+				MAX_SPEED = PLASMA_MAX_SPEED;
+				MAX_RANGE = PLASMA_RANGE;
+			}
+			else {
+				MAX_SPEED = DARKLORD_RAZOR_MAX_SPEED;
+				MAX_RANGE = DARKLORD_RANGE;
+			}
+
+			const float SCALE_FACTOR = 25.0f;     				// steepness of curve / ramp-up
+			const float SHIFT = 0.2f;             				// adjusts when the ramp-up starts
+			const float TIME_FACTOR = 0.01f;      				// time scaling
+
+			// Calculate the base speed dynamically
+			float speed = sqrt(motion.velocity.x * motion.velocity.x + motion.velocity.y * motion.velocity.y);
+
+			float range_progress = 1.0f - (projectile.range / MAX_RANGE);
+			range_progress = clamp(range_progress, 0.0f, 1.0f);
+
+			float log_factor = 1.0f / (1.0f + exp(-SCALE_FACTOR * (range_progress - SHIFT)));
+			log_factor = pow(log_factor, 2.0f); // square to make steeper
+
+			float new_speed = speed + (MAX_SPEED - speed) * log_factor;
+
+			// printf("Range Progress: %f, Logistic Factor: %f, Plasma Speed: %f\n", range_progress, log_factor, new_speed);
+
+			motion.velocity = normalize(motion.velocity) * new_speed;
+		}
 
 		if (projectile.range <= 0)
 		{
@@ -328,6 +359,12 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 			{
 				registry.game_over = true;
 			}
+			if (registry.enemies.has(dead_ent)
+				&& registry.enemies.get(dead_ent).type == EnemyType::DARKLORD)
+			{
+				Motion& motion = registry.motions.get(dead_ent);
+				createCollectible(motion.position, SpellType::PLASMA);
+			}
 			registry.remove_all_components_of(dead_ent);
 		}
 	}
@@ -454,7 +491,7 @@ void WorldSystem::restartGame() {
 	loadBackgroundObjects();
 	this->renderer->initializeCamera();
 	powerup_timer = POWERUP_SPAWN_TIMER;
-	
+
 	//createCollectible({ 1000, 200 }, SpellType::LIGHTNING);
 
 	// Reset enemy spawn timers (rework this if needed)
@@ -476,7 +513,7 @@ void WorldSystem::createTileGrid() {
 	int numCols = static_cast<int>(gridDim.x);
 	int numRows = static_cast<int>(gridDim.y);
 	auto* batchRenderer = new BatchRenderer();
-  
+
 	TileGenerator tileGenerator(numCols, numRows, w, h, true);
 	tileGenerator.generateTiles(batchRenderer);
 	batchRenderer->finalizeBatches();
@@ -544,6 +581,9 @@ void WorldSystem::createEnemy(EnemyType type, vec2 position, vec2 velocity)
 	case EnemyType::SLASHER:
 		EnemyFactory::createSlasher(registry, position, velocity);
 		break;
+	case EnemyType::DARKLORD:
+		EnemyFactory::createDarkLord(registry, position, velocity);
+		break;
 	}
 }
 
@@ -596,13 +636,15 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 	enemySpawnTimers.archer -= elapsed_ms_since_last_update;
 	enemySpawnTimers.paladin -= elapsed_ms_since_last_update;
 	enemySpawnTimers.slasher -= elapsed_ms_since_last_update;
+	enemySpawnTimers.darklord -= elapsed_ms_since_last_update;
 
 	const bool should_spawn_knight = enemySpawnTimers.knight <= 0;
 	const bool should_spawn_archer = enemySpawnTimers.archer <= 0;
 	const bool should_spawn_paladin = enemySpawnTimers.paladin <= 0;
 	const bool should_spawn_slasher = enemySpawnTimers.slasher <= 0;
+	const bool should_spawn_darklord = enemySpawnTimers.darklord <= 0;
 
-	if (should_spawn_knight || should_spawn_archer || should_spawn_paladin || should_spawn_slasher)
+	if (should_spawn_knight || should_spawn_archer || should_spawn_paladin || should_spawn_slasher || should_spawn_darklord)
 	{
 		std::random_device rd;	// Random device
 		std::mt19937 gen(rd()); // Mersenne Twister generator
@@ -661,6 +703,11 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 			enemySpawnTimers.slasher = SLASHER_SPAWN_INTERVAL_MS;
 			this->createEnemy(EnemyType::SLASHER, position, { 0, 0 });
 		}
+
+		if (should_spawn_darklord) {
+			enemySpawnTimers.darklord = DARKLORD_SPAWN_INTERVAL_MS;
+			this->createEnemy(EnemyType::DARKLORD, position, { 0, 0 });
+		}
 	}
 }
 
@@ -677,11 +724,10 @@ void WorldSystem::handleCollectible(const float elapsed_ms_since_last_update)
 		Motion& motion = registry.motions.get(player_mage);
 		Player& player = registry.players.get(player_mage);
 		SoundManager* sound_manager = sound_manager->getSoundManager();
-
 		const std::vector<SpellType> missing_spells = player.spell_queue.getMissingSpells();
 		if (missing_spells.size())
 		{
-			std::uniform_int_distribution<int> spell_choice(1, missing_spells.size());
+			std::uniform_int_distribution<int> spell_choice(1, missing_spells.size() - NOT_DROPPED_SPELL_COUNT);
 			while (true)
 			{
 				float x = hor_distr(gen);
@@ -729,6 +775,12 @@ void WorldSystem::createCollectible(const vec2 position, const SpellType type)
 	case SpellType::ICE:
 		request.texture = "ice-collect";
 		break;
+	case SpellType::WIND:
+		request.texture = "wind-collect";
+		break;
+	case SpellType::PLASMA:
+		request.texture = "plasma-collect";
+		break;
 	default:
 		registry.remove_all_components_of(entity);
 	}
@@ -745,6 +797,7 @@ std::string WorldSystem::peToString(Entity e) {
 		case EnemyType::ARCHER: return "archer";
 		case EnemyType::PALADIN: return "paladin";
 		case EnemyType::SLASHER: return "slasher";
+		case EnemyType::DARKLORD: return "darklord";
 		default: return "unknown";
 		}
 	}

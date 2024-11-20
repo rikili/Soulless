@@ -226,7 +226,11 @@ SoundEffect convertSpellToSoundEffect(SpellType spellType, bool drop) {
     case SpellType::LIGHTNING:
         return SoundEffect::LIGHTNING;
     case SpellType::ICE:
-        return SoundEffect::LIGHTNING; // TODO: Change to ice sound effect
+        return SoundEffect::ICE;
+    case SpellType::WIND:
+        return SoundEffect::WIND;
+    case SpellType::PLASMA:
+        return SoundEffect::PLASMA;
     default:
         throw std::invalid_argument("Unknown SpellType");
     }

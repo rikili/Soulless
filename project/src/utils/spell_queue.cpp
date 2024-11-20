@@ -17,11 +17,13 @@ SpellQueue::SpellQueue() {
   }
 
   collectedSpells[SpellType::FIRE] = 1;
+  collectedSpells[SpellType::WIND] = 1;
 
   // Uncomment to add all spells to start
   //collectedSpells[SpellType::WATER] = 1;
   //collectedSpells[SpellType::LIGHTNING] = 1;
   //collectedSpells[SpellType::ICE] = 1;
+  //collectedSpells[SpellType::PLASMA] = 1;
 
   for (int i = 0; i < QUEUE_SIZE; i++) {
     addSpell();
@@ -97,16 +99,16 @@ const std::deque<SpellType>& SpellQueue::getQueue() const {
 };
 
 void SpellQueue::unlockSpell(SpellType type) {
-    this->collectedSpells[type] = 1;
+  this->collectedSpells[type] = 1;
 }
 
 const std::vector<SpellType> SpellQueue::getMissingSpells() {
-    std::vector<SpellType> ret;
-    for (auto& pair : collectedSpells)
-    {
-        if (!pair.second) ret.push_back(pair.first);
-    }
-    return ret;
+  std::vector<SpellType> ret;
+  for (auto& pair : collectedSpells)
+  {
+    if (!pair.second) ret.push_back(pair.first);
+  }
+  return ret;
 }
 
 /**

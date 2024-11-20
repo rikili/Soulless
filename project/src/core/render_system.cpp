@@ -17,6 +17,8 @@ std::string spellTypeToString(SpellType spell) {
 	case SpellType::WATER: return "Water";
 	case SpellType::LIGHTNING: return "Lightning";
 	case SpellType::ICE: return "Ice";
+	case SpellType::WIND: return "Wind";
+	case SpellType::PLASMA: return "Plasma";
 	default: return "Unknown";
 	}
 }
@@ -27,6 +29,8 @@ glm::vec3 spellTypeToColor(SpellType spell) {
 	case SpellType::WATER: return { 0.09411764705882353f, 0.7568627450980392f, 0.8980392156862745f };
 	case SpellType::LIGHTNING: return { 0.984313725490196f, 0.9490196078431372f, 0.21176470588235294f };
 	case SpellType::ICE: return { 0, 1, 1 }; // TODO: Change this to a different color
+	case SpellType::WIND: return { 0.7176470588235294f, 0.8705882352941177f, 0.7176470588235294f };
+	case SpellType::PLASMA: return { 0.949f, 0.082f, 0.957f };
 	default: return { 0.f, 0.f, 0.f };
 	}
 }

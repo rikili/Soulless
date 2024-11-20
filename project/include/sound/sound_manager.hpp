@@ -15,7 +15,10 @@ enum class SoundEffect {
     PLAYER_DEFEATED,
     DISCARD_SPELL,
     POWERUP_PICKUP,
-    POWERUP_SPAWN
+    POWERUP_SPAWN,
+    ICE,
+    WIND,
+    PLASMA
 };
 
 enum class Song {

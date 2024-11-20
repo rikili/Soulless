@@ -47,6 +47,9 @@ bool SoundManager::initialize() {
     registerSound(SoundEffect::DISCARD_SPELL, "discard_spell.wav");
     registerSound(SoundEffect::POWERUP_PICKUP, "powerup-pickup.wav");
     registerSound(SoundEffect::POWERUP_SPAWN, "powerup-spawn.wav");
+    registerSound(SoundEffect::ICE, "ice.wav");
+    registerSound(SoundEffect::WIND, "wind.wav");
+    registerSound(SoundEffect::PLASMA, "plasma.wav");
 
     return true;
 }

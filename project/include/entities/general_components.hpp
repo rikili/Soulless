@@ -189,7 +189,7 @@ struct Animation
 
     int spriteCols = 4;
     int spriteRows = 1;
-    int spriteCount = 12;
+    int spriteCount = 4;
 
     int frameCount = 4;
 
@@ -222,19 +222,21 @@ struct GlobalOptions {
 extern GlobalOptions globalOptions;
 
 struct EnemySpawnTimers {
-   float knight = 0.0f;
-   float archer = 60000.0f;
-   float paladin = 120000.0f;
-   float slasher = 180000.0f;
+    float knight = 0.0f;
+    float archer = 60000.0f;
+    float paladin = 120000.0f;
+    float slasher = 180000.0f;
+    float darklord = 270000.0f; // 4.5 min
 
-   std::unordered_map<std::string, float&> asMap() {
-       return {
-           {"knight", knight},
-           {"archer", archer},
-           {"paladin", paladin},
-           {"slasher", slasher}
-       };
-   }
+    std::unordered_map<std::string, float&> asMap() {
+        return {
+            {"knight", knight},
+            {"archer", archer},
+            {"paladin", paladin},
+            {"slasher", slasher},
+            {"darklord", darklord}
+        };
+    }
 };
 extern EnemySpawnTimers enemySpawnTimers;
 

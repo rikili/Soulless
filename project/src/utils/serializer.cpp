@@ -139,6 +139,9 @@ void Serializer::deserialize() {
             case EnemyType::PALADIN:
                 enemyEntity = EnemyFactory::createPaladin(registry, position, velocity, cooldown, health);
                 break;
+            case EnemyType::DARKLORD:
+                enemyEntity = EnemyFactory::createDarkLord(registry, position, velocity, cooldown, health);
+                break;
             default:
                 std::cerr << "Unknown enemy type: " << static_cast<int>(type) << std::endl;
                 continue;

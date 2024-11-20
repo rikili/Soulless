@@ -322,13 +322,23 @@ void CollisionSystem::resolve_collisions()
 
 void CollisionSystem::applyDamage(Entity attacker, Entity victim)
 {
-    // if player is victim in invincibility state OR attacker is dead OR victim is dead
-    if ((registry.onHits.has(victim) && registry.players.has(victim)) || registry.deaths.has(attacker) || registry.deaths.has(victim))
+    if (registry.deaths.has(attacker) || registry.deaths.has(victim))
     {
-        if (registry.projectiles.has(attacker) && !registry.deaths.has(attacker)) {
-            registry.deaths.emplace(attacker);
-        }
         return;
+    }
+
+    if (registry.onHits.has(victim)) {
+        if (registry.players.has(victim) && registry.projectiles.has(attacker) && !registry.deaths.has(attacker)) {
+            registry.deaths.emplace(attacker);
+            return;
+        }
+        // spells (besides ice) shouldn't register more than once
+        if (registry.projectiles.has(attacker)) {
+            Projectile& projectile = registry.projectiles.get(attacker);
+            if (projectile.type != DamageType::ice) {
+                return;
+            }
+        }
     }
 
     SoundManager* soundManager = SoundManager::getSoundManager();
@@ -395,7 +405,7 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
         Projectile& attacker_projectile = registry.projectiles.get(attacker);
 
         // lightning spell shouldn't die after hitting one target
-        if (attacker_projectile.type == DamageType::lightning)
+        if (attacker_projectile.type == DamageType::lightning || attacker_projectile.type == DamageType::wind)
         {
             // do nothing
         }

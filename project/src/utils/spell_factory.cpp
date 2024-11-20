@@ -30,6 +30,12 @@ namespace SpellFactory {
       configureLightningSpell(registry, spell_ent);
       break;
     }
+    case SpellType::WIND:
+    {
+      Entity spell_ent = initSpellEntity(registry, { x, y }, 0.f, vec2(0.f));
+      configureWindSpell(registry, spell_ent);
+      break;
+    }
     case SpellType::ICE:
     {
       vec2 initial_player_pos = player_motion.position;
@@ -39,6 +45,12 @@ namespace SpellFactory {
         Entity spell_ent = initSpellEntity(registry, initial_player_pos, modified_angle, vec2({ cos(modified_angle), sin(modified_angle) }) * ICE_SPEED);
         configureIceSpell(registry, spell_ent);
       }
+      break;
+    }
+    case SpellType::PLASMA:
+    {
+      Entity spell_ent = initSpellEntity(registry, player_motion.position, player_motion.angle, vec2({ cos(player_motion.angle), sin(player_motion.angle) }) * PLASMA_SPEED);
+      configurePlasmaSpell(registry, spell_ent);
       break;
     }
     default:
@@ -133,6 +145,33 @@ namespace SpellFactory {
     request.type = PROJECTILE;
   }
 
+  void configureWindSpell(ECSRegistry& registry, Entity& spell_ent) {
+    Motion& spell_motion = registry.motions.get(spell_ent);
+    Projectile& projectile = registry.projectiles.get(spell_ent);
+    Damage& damage = registry.damages.get(spell_ent);
+    RenderRequest& request = registry.render_requests.get(spell_ent);
+    Deadly& deadly = registry.deadlies.get(spell_ent);
+    Decay& decay = registry.decays.emplace(spell_ent);
+
+    decay.timer = WIND_PLACEMENT_LIFETIME;
+    spell_motion.scale = WIND_SCALE;
+    spell_motion.collider = WIND_COLLIDER;
+
+    projectile.type = DamageType::wind;
+    projectile.range = WIND_RANGE;
+
+      Animation& animation = registry.animations.emplace(spell_ent);
+      animation.frameTime = 80.f;
+
+      deadly.to_enemy = true;
+
+    damage.value = WIND_DAMAGE;
+
+      request.texture = "wind";
+      request.shader = "animatedsprite";
+      request.type = PROJECTILE;
+  }
+
   void configureIceSpell(ECSRegistry& registry, Entity& spell_ent) {
     Motion& spell_motion = registry.motions.get(spell_ent);
     Projectile& projectile = registry.projectiles.get(spell_ent);
@@ -151,6 +190,27 @@ namespace SpellFactory {
     damage.value = ICE_DAMAGE;
 
     request.texture = "ice";
+    request.type = PROJECTILE;
+  }
+
+  void configurePlasmaSpell(ECSRegistry& registry, Entity& spell_ent) {
+    Motion& spell_motion = registry.motions.get(spell_ent);
+    Projectile& projectile = registry.projectiles.get(spell_ent);
+    Deadly& deadly = registry.deadlies.get(spell_ent);
+    Damage& damage = registry.damages.get(spell_ent);
+    RenderRequest& request = registry.render_requests.get(spell_ent);
+
+    spell_motion.scale = PLASMA_SCALE;
+    spell_motion.collider = PLASMA_COLLIDER;
+
+    projectile.type = DamageType::plasma;
+    projectile.range = PLASMA_RANGE;
+
+    deadly.to_enemy = true;
+
+    damage.value = PLASMA_DAMAGE;
+
+    request.texture = "plasma";
     request.type = PROJECTILE;
   }
 
