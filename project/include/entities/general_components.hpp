@@ -213,6 +213,7 @@ struct Camera
 
 struct GlobalOptions {
     bool tutorial = true;
+    int showingTab = 0;
     bool pause = false;
     int fps = 0;
     bool showFps = false;

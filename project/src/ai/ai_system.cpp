@@ -46,7 +46,7 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
             }
 
             EnemyType type = enemy.type;
-            if (type != EnemyType::KNIGHT) {
+            if (type != EnemyType::ARCHER) {
                 motion.velocity = { 0, 0 };
                 return NodeState::SUCCESS;
             }
@@ -57,7 +57,7 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
             auto& health = registry.healths.get(entity);
             health.health += HEALTH_RECOVERY_RATE * elapsed_ms / 1000.0f;
 
-            return NodeState::RUNNING;
+            return NodeState::SUCCESS;
         }
     );
 
@@ -92,6 +92,9 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
                 return NodeState::FAILURE;
             }
             Enemy& enemy = registry.enemies.get(entity);
+
+            Motion& motion = registry.motions.get(entity);
+            motion.velocity = { 0, 0 };
 
             if (enemy.cooldown <= 0) {
                 if (enemy.type == EnemyType::SLASHER) {
@@ -157,10 +160,10 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
             }
             vec2 direction_normalized = glm::normalize(player_motion.position - motion.position);
             motion.velocity = direction_normalized * speed;
-            return NodeState::RUNNING;
+            return NodeState::SUCCESS;
         },
         0.0f,
-        false
+        true
     );
 
 

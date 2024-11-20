@@ -66,6 +66,11 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
             globalOptions.tutorial = false;
             globalOptions.pause = false;
         }
+
+        if (key == GLFW_KEY_1 || key == GLFW_KEY_2 || key == GLFW_KEY_3 || key == GLFW_KEY_4)
+        {
+            globalOptions.showingTab = key - GLFW_KEY_0;
+        }
         return;
     }
 

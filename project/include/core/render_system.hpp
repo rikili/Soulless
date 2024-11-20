@@ -24,7 +24,8 @@ public:
                  const std::string& fontName, 
                  float x, float y, 
                  float scale, 
-                 const glm::vec3& color) override;
+                 const glm::vec3& color,
+                 bool centered = true) override;
 
     float getTextWidth(const std::string& text, 
                       const std::string& fontName, 

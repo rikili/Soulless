@@ -19,3 +19,5 @@ soulless
 build.ninja
 Testing/
 .cmake/
+
+data.json

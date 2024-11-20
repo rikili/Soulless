@@ -341,6 +341,8 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
         }
     }
 
+    if (registry.enemies.has(attacker)) return;
+
     SoundManager* soundManager = SoundManager::getSoundManager();
 
     if (registry.healths.has(victim)) {

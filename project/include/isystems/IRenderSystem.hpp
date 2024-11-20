@@ -20,7 +20,8 @@ public:
                           const std::string &fontName,
                           float x, float y,
                           float scale,
-                          const glm::vec3 &color) = 0;
+                          const glm::vec3 &color,
+                           bool centered) = 0;
     virtual float getTextWidth(const std::string &text,
                                const std::string &fontName,
                                float scale) = 0;

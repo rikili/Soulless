@@ -162,34 +162,66 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		float titleFontSize = this->asset_manager->getFont("king")->size;
 		float tutFontSize = this->asset_manager->getFont("deutsch")->size;
 		float currentY = window_height_px - titleFontSize;
+
 		drawText("Soulless", "king", window_width_px / 2.0f, currentY, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 		currentY -= titleFontSize * 1.2;
 
 		vec3 color = glm::vec3(0.83f, 0.83f, 0.83f);
 
-		drawText("Move using: W, A, S, D", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
-		currentY -= tutFontSize * 1.5;
+		vec3 selectedColor = glm::vec3(1.0f, 1.0f, 0.0f);
 
-		drawText("Aim with your mouse.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
-		currentY -= tutFontSize * 1.5;
+		drawText("Gameplay: 1", "deutsch", window_width_px / 2.0f - 200, currentY, 1.0f, globalOptions.showingTab == 1 ? selectedColor : color, true);
+		drawText("Controls: 2", "deutsch", window_width_px / 2.0f , currentY, 1.0f, globalOptions.showingTab == 2 ? selectedColor : color, true);
+		drawText("Advanced: 3", "deutsch", window_width_px / 2.0f + 200, currentY, 1.0f, globalOptions.showingTab == 3 ? selectedColor : color, true);
+		currentY -= tutFontSize * 1.5 + 20;
 
-		drawText("Left click to shoot first spell. Right click for second.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
-		currentY -= tutFontSize * 1.5;
 
-		drawText("Press q to drop first spell. Press e to drop second.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
-		currentY -= tutFontSize * 1.5;
+		switch (globalOptions.showingTab)
+		{
+		case 0:
+			break;
+		case 1:
+			drawText("As a dark mage you must survive against an army of knights and archers.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("As time goes on new enemies will spawn with new strength and weaknesses.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("Consuming campfires will heal you, but be careful, they don't spawn fast.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("You combat the enemies by casting spells. At the start you have one spell- Fire.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("You will find new spell collectibles on the map or dropped by enemies.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("You can cast two spells at a time, so choose wisely to drop or cast it.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			break;
 
-		drawText("Press T to pause/show Tutorial.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
-		currentY -= tutFontSize * 1.5;
+		case 2:
+			drawText("Move using: W, A, S, D.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
 
-		drawText("While paused, press s to save or l to load game.", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
-		currentY -= tutFontSize * 1.5;
+			drawText("Aim with your mouse.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
 
-		drawText("Survive as long as you can!", "deutsch", window_width_px / 2.0f, currentY, 1.0f, color);
+			drawText("Left click to shoot first spell. Right click for second.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+
+			drawText("Press q to drop first spell. Press e to drop second.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("Press shift + T to pause/show tutorial.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("While paused, press s to save or l to load game.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			break;
+		case 3:
+			drawText("Press shift + f to show FPS.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("Press k to display collision boxes.", "deutsch", 20, currentY, 1.0f, color, false);
+			break;
+		}
 
 		std::string message = "Press SPACE or click to ";
 		std::string start = globalOptions.pause ? "resume." : "start.";
-		drawText(message + start, "deutsch", window_width_px / 2.0f, tutFontSize * 1.5, 1.0f, color);
+		drawText(message + start, "deutsch", window_width_px / 2.0f, tutFontSize * 1.5, 1.0f, selectedColor);
 		return;
 	}
 
@@ -399,18 +431,6 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		drawText(std::to_string(globalOptions.fps), "deutsch", window_width_px - 100.0f, window_height_px - 50.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 	}
 
-	// makes it kinda slow
-	//for (Entity entity : registry.enemies.entities) {
-	//	if (registry.healths.has(entity) && registry.motions.has(entity)) {
-	//		Motion& motion = registry.motions.get(entity);
-	//		Health& health = registry.healths.get(entity);
-
-	//		int percentage = static_cast<int>((health.health / health.maxHealth) * 100);
-
-	//		drawText(std::to_string(percentage) + "%", "healthFont", motion.position.x, motion.position.y - 55.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	//	}
-	//}
-
 	Player& playerObj = registry.players.get(player);
 	SpellQueue& spell_queue = playerObj.spell_queue;
 
@@ -429,11 +449,14 @@ void RenderSystem::drawFrame(float elapsed_ms)
 
 // source: inclass SimpleGL-3
 // the x,y values should be the position we want the center of our text to be
-void RenderSystem::drawText(const std::string& text, const std::string& fontName, float x, float y, float scale, const glm::vec3& color) {
+void RenderSystem::drawText(const std::string& text, const std::string& fontName, float x, float y, float scale, const glm::vec3& color, bool centered) {
 	Font* font = this->asset_manager->getFont(fontName);
 	float textWidth = getTextWidth(text, fontName, scale);
 
-	x = x - textWidth / 2;
+	if (centered)
+	{
+		x = x - textWidth / 2;
+	}
 	y = y - font->size / 2;
 
 	glm::mat4 trans = glm::mat4(1.0f);
