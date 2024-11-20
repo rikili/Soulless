@@ -322,7 +322,7 @@ void CollisionSystem::resolve_collisions()
 
 void CollisionSystem::applyDamage(Entity attacker, Entity victim)
 {
-    if (registry.deaths.has(attacker) || registry.deaths.has(victim))
+    if ((registry.onHits.has(victim) && registry.players.has(victim)) || registry.deaths.has(attacker) || registry.deaths.has(victim))
     {
         return;
     }
@@ -340,8 +340,6 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
             }
         }
     }
-
-    if (registry.enemies.has(attacker)) return;
 
     SoundManager* soundManager = SoundManager::getSoundManager();
 

@@ -93,8 +93,8 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
             }
             Enemy& enemy = registry.enemies.get(entity);
 
-            Motion& motion = registry.motions.get(entity);
-            motion.velocity = { 0, 0 };
+            /*Motion& motion = registry.motions.get(entity);
+            motion.velocity = { 0, 0 };*/
 
             if (enemy.cooldown <= 0) {
                 if (enemy.type == EnemyType::SLASHER) {
