@@ -139,6 +139,9 @@ void Serializer::deserialize() {
             case EnemyType::PALADIN:
                 enemyEntity = EnemyFactory::createPaladin(registry, position, velocity, cooldown, health);
                 break;
+            case EnemyType::SLASHER:
+                enemyEntity = EnemyFactory::createSlasher(registry, position, velocity, cooldown, health);
+                break;
             case EnemyType::DARKLORD:
                 enemyEntity = EnemyFactory::createDarkLord(registry, position, velocity, cooldown, health);
                 break;
