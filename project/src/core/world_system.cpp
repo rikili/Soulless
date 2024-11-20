@@ -499,6 +499,7 @@ void WorldSystem::restartGame() {
 	enemySpawnTimers.archer = 60000.f;
 	enemySpawnTimers.paladin = 120000.f;
 	enemySpawnTimers.slasher = 180000.f;
+	enemySpawnTimers.darklord = 270000.f;
 }
 
 void WorldSystem::reloadGame() {
@@ -749,7 +750,7 @@ void WorldSystem::handleCollectible(const float elapsed_ms_since_last_update)
 		}
 		else
 		{
-			registry.debug && printf("DEBUG: No spells left to spawn.\n");
+			registry.debug&& printf("DEBUG: No spells left to spawn.\n");
 		}
 
 		powerup_timer = POWERUP_SPAWN_TIMER;
