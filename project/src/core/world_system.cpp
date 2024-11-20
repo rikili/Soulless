@@ -714,6 +714,11 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 void WorldSystem::handleCollectible(const float elapsed_ms_since_last_update)
 {
 	powerup_timer -= elapsed_ms_since_last_update;
+	if (registry.debug && globalOptions.debugSpellSpawn)
+	{
+		powerup_timer = 0;
+		globalOptions.debugSpellSpawn = false;
+	}
 	if (powerup_timer <= 0)
 	{
 		std::random_device rd;	// Random device
@@ -725,20 +730,26 @@ void WorldSystem::handleCollectible(const float elapsed_ms_since_last_update)
 		Player& player = registry.players.get(player_mage);
 		SoundManager* sound_manager = sound_manager->getSoundManager();
 		const std::vector<SpellType> missing_spells = player.spell_queue.getMissingSpells();
-		if (missing_spells.size())
+		int remaining_spells = missing_spells.size() - NOT_DROPPED_SPELL_COUNT;
+		if (remaining_spells > 0)
 		{
-			std::uniform_int_distribution<int> spell_choice(1, missing_spells.size() - NOT_DROPPED_SPELL_COUNT);
+			std::uniform_int_distribution<int> spell_choice(0, remaining_spells);
 			while (true)
 			{
 				float x = hor_distr(gen);
 				float y = ver_distr(gen);
 				if (glm::distance(motion.position, { x , y }) > MIN_POWERUP_DIST)
 				{
+					if (registry.debug) printf("DEBUG: spawning powerup at %f %f\n", x, y);
 					sound_manager->playSound(SoundEffect::POWERUP_SPAWN);
-					createCollectible({ x, y }, static_cast<SpellType>(spell_choice(gen)));
+					createCollectible({ x, y }, static_cast<SpellType>(missing_spells[spell_choice(gen)]));
 					break;
 				}
 			}
+		}
+		else
+		{
+			registry.debug && printf("DEBUG: No spells left to spawn.\n");
 		}
 
 		powerup_timer = POWERUP_SPAWN_TIMER;

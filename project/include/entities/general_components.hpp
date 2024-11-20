@@ -217,6 +217,9 @@ struct GlobalOptions {
     int fps = 0;
     bool showFps = false;
     bool loadingOldGame = false;
+
+    // -- DEBUG options, will refactor --
+    bool debugSpellSpawn = false;
 };
 
 extern GlobalOptions globalOptions;

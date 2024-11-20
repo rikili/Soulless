@@ -17,8 +17,7 @@ SpellQueue::SpellQueue() {
   }
 
   collectedSpells[SpellType::FIRE] = 1;
-  collectedSpells[SpellType::WIND] = 1;
-
+  //collectedSpells[SpellType::WIND] = 1;
   // Uncomment to add all spells to start
   //collectedSpells[SpellType::WATER] = 1;
   //collectedSpells[SpellType::LIGHTNING] = 1;

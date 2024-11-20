@@ -108,6 +108,9 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
                 globalOptions.pause = true;
             }
             break;
+        case GLFW_KEY_P:
+            globalOptions.debugSpellSpawn = true;
+            break;
         default:
             break;
         }
