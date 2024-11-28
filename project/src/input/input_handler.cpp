@@ -289,10 +289,12 @@ void InputHandler::invoke_player_cooldown(Player& player, bool is_left)
     if (is_left)
     {
         player.leftCooldown = cooldown;
+        player.leftCooldownTotal = cooldown;
     }
     else
     {
         player.rightCooldown = cooldown;
+        player.rightCooldownTotal = cooldown;
     }
 }
 

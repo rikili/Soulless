@@ -11,14 +11,14 @@
 #include "utils/spell_queue.hpp"
 #include "utils/isometric_helper.hpp"
 
-std::string spellTypeToString(SpellType spell) {
+std::string spellTypeToCollect(SpellType spell) {
 	switch (spell) {
-	case SpellType::FIRE: return "Fire";
-	case SpellType::WATER: return "Water";
-	case SpellType::LIGHTNING: return "Lightning";
-	case SpellType::ICE: return "Ice";
-	case SpellType::WIND: return "Wind";
-	case SpellType::PLASMA: return "Plasma";
+	case SpellType::FIRE: return "fire-collect";
+	case SpellType::WATER: return "water-collect";
+	case SpellType::LIGHTNING: return "lightning-collect";
+	case SpellType::ICE: return "ice-collect";
+	case SpellType::WIND: return "wind-collect";
+	case SpellType::PLASMA: return "plasma-collect";
 	default: return "Unknown";
 	}
 }
@@ -389,6 +389,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 
 	drawParticles();
 	drawHealthBars();
+	drawHUD();
 
 	for (const Entity& debug_entity : registry.debug_requests.entities)
 	{
@@ -433,18 +434,6 @@ void RenderSystem::drawFrame(float elapsed_ms)
 
 	Player& playerObj = registry.players.get(player);
 	SpellQueue& spell_queue = playerObj.spell_queue;
-
-	// render text for left spell
-	SpellType leftSpell = spell_queue.getLeftSpell();
-	std::string spellText = spellTypeToString(leftSpell);
-	glm::vec3 color = spellTypeToColor(leftSpell);
-	drawText(spellText, "spellFont", (window_width_px / 2.0f) - 100, 30.0f, 1.0f, color);
-
-	// render text for right spell
-	SpellType rightSpell = spell_queue.getRightSpell();
-	spellText = spellTypeToString(rightSpell);
-	color = spellTypeToColor(rightSpell);
-	drawText(spellText, "spellFont", (window_width_px / 2.0f) + 100, 30.0f, 1.0f, color);
 }
 
 // source: inclass SimpleGL-3
@@ -679,4 +668,131 @@ void RenderSystem::updateRenderOrder(ComponentContainer<RenderRequest>& render_r
 			}
 			return a.render_y < b.render_y;
 		});
+}
+
+
+/**
+ * @brief Draw textured elements onto screen.
+ * Translation in screen coordinates (pixels).
+ * Scale in decimal (0.f - 1.f)
+ */
+void RenderSystem::drawHUDElement(std::string textureId, vec2 translation, vec2 scale)
+{
+	const Shader* shader = this->asset_manager->getShader("screen");
+	if (!shader)
+	{
+		std::cerr << "Could not find shader with id sprite" << std::endl;
+		return;
+	}
+	const Texture* texture = this->asset_manager->getTexture(textureId);
+	const GLuint shaderProgram = shader->program;
+	glUseProgram(shaderProgram);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture->handle);
+	glUniform1i(glGetUniformLocation(shaderProgram, "image"), 0);
+
+	mat4 transform = mat4(1.0f);
+	vec3 ndcTranslate = glm::vec3(2.f * translation.x / window_width_px, 2.f * translation.y / window_height_px, 0.f);
+
+	transform = glm::translate(transform, ndcTranslate);
+	transform = glm::scale(transform, vec3(scale.x, scale.y, 1.f));
+
+	GLint flipLoc = glGetUniformLocation(shaderProgram, "flip");
+	glUniform1f(flipLoc, true);
+	const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+	const Mesh* mesh = this->asset_manager->getMesh("sprite");
+
+	if (!mesh)
+	{
+		std::cerr << "Could not find mesh with id sprite" << std::endl;
+		return;
+	}
+
+	glBindVertexArray(mesh->vao);
+	glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
+	gl_has_errors();
+}
+
+void RenderSystem::drawCooldownElement(vec2 translation, vec2 scale)
+{
+	const Shader* shader = this->asset_manager->getShader("basic");
+	if (!shader)
+	{
+		std::cerr << "Could not find shader with id sprite" << std::endl;
+		return;
+	}
+	const GLuint shaderProgram = shader->program;
+	glUseProgram(shaderProgram);
+
+	mat4 transform = mat4(1.f);
+	vec3 ndcTranslate = glm::vec3(2.f * translation.x / window_width_px, 2.f * translation.y / window_height_px, 0.f);
+	transform = glm::translate(transform, ndcTranslate);
+	transform = glm::scale(transform, vec3(scale.x, scale.y, 1.f));
+
+	const GLint opacity_loc = glGetUniformLocation(shaderProgram, "opacity");
+	glUniform1f(opacity_loc, 0.8f);
+	const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+	const GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(mat4(1.f)));
+	const Mesh* mesh = this->asset_manager->getMesh("square");
+
+	if (!mesh)
+	{
+		std::cerr << "Could not find mesh with id square" << std::endl;
+		return;
+	}
+
+	glBindVertexArray(mesh->vao);
+	glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
+	gl_has_errors();
+}
+
+void RenderSystem::drawCooldown(const Player& player)
+{
+	if (player.leftCooldown > 0)
+	{
+		float percent = player.leftCooldown / player.leftCooldownTotal;
+		drawCooldownElement(LEFT_COOLDOWN_TRANSLATE, COOLDOWN_SCALE * percent);
+	}
+	if (player.rightCooldown > 0)
+	{
+		float percent = player.rightCooldown / player.rightCooldownTotal;
+		drawCooldownElement(RIGHT_COOLDOWN_TRANSLATE, COOLDOWN_SCALE * percent);
+	}
+}
+
+/**
+ * @brief Draw HUD elements
+ */
+void RenderSystem::drawHUD()
+{
+	vec2 translate_spells = TRANSLATE_QUEUE_SPELLS;
+
+	// Spell Queue Bar Rendering
+	drawHUDElement("queue", QUEUE_TRANSLATE, QUEUE_SCALE);
+
+
+	// Spells in Queue Rendering
+	const Player& player = registry.players.get(registry.players.entities[0]); // hard-coded player get
+	const SpellQueue spell_queue = player.spell_queue;
+	const std::deque<SpellType>& queue = spell_queue.getQueue();
+	int count = 0;
+
+	for (SpellType spell : queue)
+	{
+		drawHUDElement(spellTypeToCollect(spell), translate_spells, SCALE_QUEUE_SPELLS);
+		translate_spells.x += QUEUE_SPACING;
+		count++;
+	}
+
+	// Spells in L Hand Rendering
+	drawHUDElement(spellTypeToCollect(spell_queue.getLeftSpell()), LEFT_SLOT_TRANSLATE, SCALE_QUEUE_SPELLS);
+
+	// Spells in R Hand Rendering
+	drawHUDElement(spellTypeToCollect(spell_queue.getRightSpell()), RIGHT_SLOT_TRANSLATE, SCALE_QUEUE_SPELLS);
+	drawCooldown(player);
+
 }

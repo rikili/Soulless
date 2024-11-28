@@ -84,16 +84,32 @@ private:
     void updateCameraPosition(float x, float y);
     void drawBackgroundObjects();
     void drawHealthBars();
+    void drawHUDElement(std::string textureId, vec2 translation, vec2 scale);
+    void drawHUD();
+    void drawCooldown(const Player& player);
+    void drawCooldownElement(vec2 translation, vec2 scale);
 
     std::vector<RenderIndex> sorted_indices;
     Entity screen_state_entity;
     GLFWwindow* window = nullptr;
     IAssetManager* asset_manager = nullptr; 
-    IInputHandler* input_handler = nullptr;  
+    IInputHandler* input_handler = nullptr;
 
     std::map<std::string, ISubRenderer*> sub_renderers;
     std::vector<RenderRequest> render_requests;
     glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
     Entity camera;
+
+    // Spell queue rendering constants
+    const vec2 QUEUE_TRANSLATE = vec2(0, -window_height_px / 2.f + 50.f);
+    const vec2 QUEUE_SCALE = vec2(.45f, .7f);
+    const vec2 TRANSLATE_QUEUE_SPELLS = vec2(-168.f, -window_height_px / 2.f + 50.f);
+    const vec2 SCALE_QUEUE_SPELLS = vec2(.05f, .075f);
+    const float QUEUE_SPACING = 68.f;
+    const vec2 LEFT_SLOT_TRANSLATE = vec2(-200.f, -window_height_px / 3.f + 22.f);
+    const vec2 RIGHT_SLOT_TRANSLATE = vec2(205.f, -window_height_px / 3.f + 22.f);
+    const vec2 LEFT_COOLDOWN_TRANSLATE = vec2(-202.f, -window_height_px / 3.f + 24.f);
+    const vec2 RIGHT_COOLDOWN_TRANSLATE = vec2(202.f, -window_height_px / 3.f + 24.f);
+    const vec2 COOLDOWN_SCALE = vec2(.055f, .085f);
 };

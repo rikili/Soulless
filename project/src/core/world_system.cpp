@@ -389,10 +389,12 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 		if (player.leftCooldown < 0)
 		{
 			player.leftCooldown = 0;
+			player.leftCooldownTotal = 0;
 		}
 		if (player.rightCooldown < 0)
 		{
 			player.rightCooldown = 0;
+			player.rightCooldownTotal = 0;
 		}
 	}
 

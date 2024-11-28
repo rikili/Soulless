@@ -67,7 +67,9 @@ struct Enemy {
 
 struct Player {
     float leftCooldown = -1.f;
+    float leftCooldownTotal = -1.f;
     float rightCooldown = -1.f;
+    float rightCooldownTotal = -1.f;
     SpellQueue spell_queue;
 };
 

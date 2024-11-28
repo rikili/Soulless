@@ -13,6 +13,7 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     assets.shaders["healthbar"] = assetManager.loadShader("healthbar", shader_path("healthbar") + ".vs.glsl", shader_path("healthbar") + ".fs.glsl");
     assets.shaders["font"] = assetManager.loadShader("font", shader_path("font") + ".vs.glsl", shader_path("font") + ".fs.glsl");
     assets.shaders["particle"] = assetManager.loadShader("particle", shader_path("particle") + ".vs.glsl", shader_path("particle") + ".fs.glsl");
+    assets.shaders["screen"] = assetManager.loadShader("screen", shader_path("screen") + ".vs.glsl", shader_path("screen") + ".fs.glsl");
 
     // fonts
     AssetId deutschFont = assetManager.loadFont("deutsch", font_path("deutsch") + ".ttf", 30.0f);
@@ -52,6 +53,20 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
         {2, GL_FLOAT, GL_FALSE, "texCoord"} };
 
     AssetId spriteMeshId = assetManager.loadMesh("sprite", spriteVertices, quadIndices, spriteAttributes);
+
+    const std::vector<float> squareVertices = {
+        // positions         // color coords
+        -1.0f, -1.0f, 0.0f,  1.0f, 1.0f, 1.f,
+        1.0f,  -1.0f, 0.0f,  1.0f, 1.0f, 1.f,
+        1.0f,  1.0f,  0.0f,  1.0f, 1.0f, 1.f,
+        -1.0f, 1.0f,  0.0f,  1.0f, 1.0f, 1.f};
+
+    const std::vector<VertexAttribute> squareAttributes = {
+        {3, GL_FLOAT, GL_FALSE, "position"},
+        {3, GL_FLOAT, GL_FALSE, "aColor"}
+    };
+
+    AssetId squareMeshId = assetManager.loadMesh("square", squareVertices, quadIndices, squareAttributes);
 
     const std::vector<float> mageCollisionVertices = {
         0.f, 1.f, 0.f,
@@ -186,6 +201,9 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     // Dark Lord's attack texture is the same as plasma's
 
     // Collectibles
+    AssetId fireCollectibleId = assetManager.loadTexture("fire-collect", textures_path("fire-collect") + ".png");
+    assets.textures["fire"] = fireCollectibleId;
+
     AssetId lightningCollectibleId = assetManager.loadTexture("lightning-collect", textures_path("lightning-collect") + ".png");
     assets.textures["lightning"] = lightningCollectibleId;
 
@@ -214,6 +232,9 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     // UI
     AssetId healthBarId = assetManager.loadTexture("healthbar", textures_path("health") + ".png");
     assets.textures["healthbar"] = healthBarId;
+
+    AssetId queueId = assetManager.loadTexture("queue", textures_path("queue") + ".png");
+    assets.textures["queue"] = queueId;
 
     // Add a new mesh for the background (full screen quad)
     const std::vector<float> bgVertices = {

@@ -12,7 +12,7 @@ const float PALADIN_SPAWN_INTERVAL_MS = 20000.f;
 const float SLASHER_SPAWN_INTERVAL_MS = 20000.f;
 const float DARKLORD_SPAWN_INTERVAL_MS = 270000.f;
 
-const unsigned int QUEUE_SIZE = 7;
+const unsigned int QUEUE_SIZE = 6;
 
 constexpr float LOW_HEALTH_THRESHOLD = 0.3f;
 constexpr float HEALTH_RECOVERY_RATE = 0.2f;
