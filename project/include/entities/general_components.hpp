@@ -15,8 +15,8 @@ using AssetId = std::string;
 struct Motion {
     vec2 position = { 0, 0 };
     vec2 velocity = { 0, 0 };
-    vec2 scale = { 1, 1 };
-    vec2 collider = { 50, 50 };
+    vec2 scale = { 0.75, 0.75 };
+    vec2 collider = { 25, 25 };
 
     float mass = 0;
     float speedModifier = 1.f;

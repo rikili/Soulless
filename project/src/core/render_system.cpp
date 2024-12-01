@@ -229,8 +229,8 @@ void RenderSystem::drawFrame(float elapsed_ms)
 	float playerX = registry.motions.get(player).position.x - window_width_px / 2.0 * zoomFactor;
 	float playerY = registry.motions.get(player).position.y - window_height_px / 2.0 * zoomFactor;
 
-	updateCameraPosition(clamp(playerX, 0.f, (float)(window_width_px / 2.0)),
-		clamp(playerY, 0.f, (float)(window_height_px / 2.0)));
+	updateCameraPosition(clamp(playerX, 0.f, (float)(window_width_px / 2.0 + window_width_px * zoomFactor)),
+		clamp(playerY, 0.f, (float)(window_height_px / 2.0 + window_height_px * zoomFactor)));
 
 	drawBackgroundObjects();
 
@@ -290,7 +290,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 				transform = rotate(transform, motion.angle, glm::vec3(0.0f, 0.0f, 1.0f)); // Apply rotation
 			}
 
-			transform = scale(transform, vec3(motion.scale * 100.f * zoomFactor, 1.0f));
+			transform = scale(transform, vec3(motion.scale * renderScaleModifier * zoomFactor, 1.0f));
 
 
 			if (render_request.shader == "sprite" || render_request.shader == "animatedsprite") {
@@ -615,7 +615,7 @@ void RenderSystem::drawHealthBars() {
 
 		mat4 transform = mat4(1.0f);
 		transform = translate(transform, glm::vec3(healthBar.position, 0.0f));
-		transform = scale(transform, glm::vec3(healthBar.scale * 100.f * zoomFactor, 1.0f));
+		transform = scale(transform, glm::vec3(healthBar.scale * renderScaleModifier * zoomFactor, 1.0f));
 		mat4 projection = projectionMatrix;
 		mat4 view = viewMatrix;
 

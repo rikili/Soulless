@@ -69,27 +69,23 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId squareMeshId = assetManager.loadMesh("square", squareVertices, quadIndices, squareAttributes);
 
     const std::vector<float> mageCollisionVertices = {
-        0.f, 1.f, 0.f,
-        -.5333333f, 0.2666667f, 0.f,
-        .9333333f, .0666667f, 0.f,
-        -.4f, -0.333333f, 0.f,
-        -0.5333333f, -1.f, 0.f,
-        0.4666667f, -1.f, 0.f,
-        0.7333333f, -1.f, 0.f,
-        0.4f, -0.2f, 0.f,
-        0.333333f, 0.8f, 0.f,
-        0.9333333f, 0.9333333f, 0.f
+        -0.25f, .6f, 0.f,
+        -.3999999f, 0.2f, 0.f,
+        .3999999f, .2f, 0.f,
+        -.4333333f, -0.2f, 0.f,
+        -0.35f, -.6666667f, 0.f,
+        0.35f, -.6666667f, 0.f,
+        0.4333333f, -0.2f, 0.f,
+        0.25f, 0.6f, 0.f,
     };
 
     const std::vector<uint32_t> mage_col_indices = {
-        0, 1, 8,
+        0, 1, 7,
         1, 2, 3,
         3, 4, 5,
-        3, 5, 7,
-        1, 3, 7,
-        1, 7, 8,
-        7, 8, 9,
-        6, 7, 9
+        3, 5, 6,
+        1, 3, 6,
+        1, 6, 7,
     };
 
     const std::vector<VertexAttribute> mageCollisionAttributes = {

@@ -14,7 +14,7 @@ namespace SpellFactory {
     switch (spell) {
     case SpellType::FIRE:
     {
-      Entity spell_ent = initSpellEntity(registry, player_motion.position, player_motion.angle, vec2({ cos(player_motion.angle), sin(player_motion.angle) }));
+      Entity spell_ent = initSpellEntity(registry, player_motion.position, player_motion.angle, vec2({ cos(player_motion.angle), sin(player_motion.angle) }) * FIRE_VELOCITY);
       configureFireSpell(registry, spell_ent);
       break;
     }
