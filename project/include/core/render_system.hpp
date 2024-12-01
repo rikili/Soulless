@@ -11,34 +11,34 @@
 
 class RenderSystem final : public IRenderSystem {
 public:
-    bool initialize(IInputHandler& input_handler, 
-                   int width = 480, 
-                   int height = 500, 
-                   const char* title = "OpenGL Example") override;
+    bool initialize(IInputHandler& input_handler,
+        int width = 480,
+        int height = 500,
+        const char* title = "OpenGL Example") override;
     void setUpView() const override;
     void initializeCamera() override;
     GLFWwindow* getGLWindow() const override;
     void drawFrame(float elapsed_ms) override;
-    
-    void drawText(const std::string& text, 
-                 const std::string& fontName, 
-                 float x, float y, 
-                 float scale, 
-                 const glm::vec3& color,
-                 bool centered = true) override;
 
-    float getTextWidth(const std::string& text, 
-                      const std::string& fontName, 
-                      float scale) override;
+    void drawText(const std::string& text,
+        const std::string& fontName,
+        float x, float y,
+        float scale,
+        const glm::vec3& color,
+        bool centered = true) override;
+
+    float getTextWidth(const std::string& text,
+        const std::string& fontName,
+        float scale) override;
 
     void drawParticles() override;
 
-    void setAssetManager(IAssetManager* asset_manager) override { 
-        this->asset_manager = asset_manager; 
+    void setAssetManager(IAssetManager* asset_manager) override {
+        this->asset_manager = asset_manager;
     }
 
-    Mesh* getMesh(const AssetId& name) override { 
-        return asset_manager->getMesh(name); 
+    Mesh* getMesh(const AssetId& name) override {
+        return asset_manager->getMesh(name);
     }
 
     IAssetManager& getAssetManager() override {
@@ -72,6 +72,11 @@ public:
             delete pair.second;
         }
         sub_renderers.clear();
+
+        if (cursor) {
+            glfwDestroyCursor(cursor);
+            cursor = nullptr;
+        }
     }
 
 private:
@@ -93,7 +98,7 @@ private:
     std::vector<RenderIndex> sorted_indices;
     Entity screen_state_entity;
     GLFWwindow* window = nullptr;
-    IAssetManager* asset_manager = nullptr; 
+    IAssetManager* asset_manager = nullptr;
     IInputHandler* input_handler = nullptr;
 
     std::map<std::string, ISubRenderer*> sub_renderers;
@@ -124,4 +129,7 @@ private:
     const float GAUGE_SPACING = 50.f;
     const vec3 GAUGE_TEXTURE_TRANSLATE = vec3(140, 700, 0);
     const vec3 GAUGE_TEXTURE_SCALE = vec3(150, 140, 0);
+
+    void setCustomCursor();
+    GLFWcursor* cursor;
 };

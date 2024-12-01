@@ -6,6 +6,8 @@
 #include <sstream>
 #include <fstream>
 #include <glm/gtc/type_ptr.inl>
+#include "stb_image.h"
+#include "core/common.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 #include "entities/general_components.hpp"
 #include "utils/spell_queue.hpp"
@@ -74,6 +76,8 @@ bool RenderSystem::initialize(IInputHandler& input_handler, const int width, con
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
+
+	setCustomCursor();
 
 	glfwSetWindowUserPointer(this->window, this);
 
@@ -171,7 +175,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		vec3 selectedColor = glm::vec3(1.0f, 1.0f, 0.0f);
 
 		drawText("Gameplay: 1", "deutsch", window_width_px / 2.0f - 200, currentY, 1.0f, globalOptions.showingTab == 1 ? selectedColor : color, true);
-		drawText("Controls: 2", "deutsch", window_width_px / 2.0f , currentY, 1.0f, globalOptions.showingTab == 2 ? selectedColor : color, true);
+		drawText("Controls: 2", "deutsch", window_width_px / 2.0f, currentY, 1.0f, globalOptions.showingTab == 2 ? selectedColor : color, true);
 		drawText("Advanced: 3", "deutsch", window_width_px / 2.0f + 200, currentY, 1.0f, globalOptions.showingTab == 3 ? selectedColor : color, true);
 		currentY -= tutFontSize * 1.5 + 20;
 
@@ -703,7 +707,7 @@ void RenderSystem::drawHUDElement(std::string textureId, vec2 translation, vec2 
 
 	mat4 transform = mat4(1.0f);
 
-	transform = glm::translate(transform, vec3({translation.x, translation.y, 0.f}));
+	transform = glm::translate(transform, vec3({ translation.x, translation.y, 0.f }));
 	transform = glm::scale(transform, vec3(scale.x, scale.y, 1.f));
 	transform = glm::ortho(0.f, (float)window_width_px, (float)window_height_px, 0.0f) * transform;
 
@@ -734,7 +738,7 @@ void RenderSystem::drawCooldownElement(vec2 translation, vec2 scale)
 	glUseProgram(shaderProgram);
 
 	mat4 transform = mat4(1.f);
-	transform = glm::translate(transform, vec3({translation.x, translation.y, 0.f}));
+	transform = glm::translate(transform, vec3({ translation.x, translation.y, 0.f }));
 	transform = glm::scale(transform, vec3(scale.x, scale.y, 1.f));
 	transform = glm::ortho(0.f, (float)window_width_px, (float)window_height_px, 0.0f) * transform;
 
@@ -790,7 +794,7 @@ void RenderSystem::drawSpellProgress(Player& player)
 
 		// plasma doesn't level
 		if (type == SpellType::PLASMA) continue;
-	
+
 		const int level = player.spell_queue.getSpellLevel(type);
 		bool is_max_level = level >= MAX_SPELL_LEVEL;
 		const int progress = player.spell_queue.getSpellUpgradeTrack(type);
@@ -808,7 +812,7 @@ void RenderSystem::drawSpellProgress(Player& player)
 		const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 		const GLint progress_loc = glGetUniformLocation(shaderProgram, "progress");
-		glUniform1f(progress_loc, is_max_level ? 1.f : (float)progress / (float) UPGRADE_KILL_COUNT[level - 1]);
+		glUniform1f(progress_loc, is_max_level ? 1.f : (float)progress / (float)UPGRADE_KILL_COUNT[level - 1]);
 		const GLint vertical_loc = glGetUniformLocation(shaderProgram, "is_vertical");
 		glUniform1i(vertical_loc, true);
 		const GLint color_loc = glGetUniformLocation(shaderProgram, "progress_color");
@@ -872,3 +876,32 @@ void RenderSystem::drawHUD()
 	drawCooldown(player);
 
 }
+
+void RenderSystem::setCustomCursor() {
+
+	std::string cursorPath = textures_path("cursor") + ".png";
+	std::cout << "Loading cursor directly from file: " << cursorPath << std::endl;
+
+	GLFWimage cursorImage;
+	cursorImage.pixels = stbi_load(cursorPath.c_str(), &cursorImage.width, &cursorImage.height, 0, 4);
+	std::cout << "Cursor image loaded: " << cursorImage.width << "x" << cursorImage.height << std::endl;
+	if (!cursorImage.pixels) {
+		std::cerr << "Failed to load cursor image from: " << cursorPath << std::endl;
+		return;
+	}
+
+	// cursor hotspot is TOP LEFT
+	cursor = glfwCreateCursor(&cursorImage, 0, 0);
+	if (!cursor) {
+		std::cerr << "Failed to create custom cursor!" << std::endl;
+		stbi_image_free(cursorImage.pixels); // Free memory if cursor creation fails
+		return;
+	}
+
+	// Set the custom cursor for the current window
+	glfwSetCursor(this->window, cursor);
+
+	// Free the image data as GLFW copies it internally
+	stbi_image_free(cursorImage.pixels);
+}
+
