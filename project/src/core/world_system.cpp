@@ -231,7 +231,7 @@ void WorldSystem::handleMovements(float elapsed_ms_since_last_update)
 			{
 				// Enemy& enemy = registry.enemies.get(entity);
 				motion.angle = atan2(player_motion.position.y - motion.position.y,
-				player_motion.position.x - motion.position.x);
+					player_motion.position.x - motion.position.x);
 
 				// printd("Enemy angle towards player: %f\n", motion.angle);
 			}
@@ -342,7 +342,7 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 				if (hit.second < PLAYER_INVINCIBILITY_TIMER - 200.f) onHit.invicibilityShader = true;
 				else onHit.invicibilityShader = false;
 			}
-			
+
 			if (hit.second < ENEMY_INVINCIBILITY_TIMER - 200.f)
 			{
 				onHit.invicibilityShader = false;
@@ -522,7 +522,7 @@ void WorldSystem::handleSpellStates(float elapsed_ms_since_last_update)
 					}
 
 					if (spell_proj.type == SpellType::LIGHTNING
-						&& registry.spellProjectiles.has(spell_ent) 
+						&& registry.spellProjectiles.has(spell_ent)
 						&& registry.spellProjectiles.get(spell_ent).level >= MAX_SPELL_LEVEL)
 					{
 						if (!spell_state.isChild)
@@ -566,7 +566,7 @@ void WorldSystem::restartGame() {
 	}
 	player_mage = this->createPlayer();
 	this->createTileGrid();
-	loadBackgroundObjects();
+	// loadBackgroundObjects(); // Not used since we removed campfire
 	this->renderer->initializeCamera();
 	powerup_timer = POWERUP_SPAWN_TIMER;
 
@@ -580,7 +580,7 @@ void WorldSystem::restartGame() {
 	enemySpawnTimers.darklord = 270000.f;
 
 	// Spawn all at start (for debug)
-	/* 
+	/*
 	enemySpawnTimers.archer = 0.f;
 	enemySpawnTimers.paladin = 0.f;
 	enemySpawnTimers.slasher = 0.f;
@@ -674,17 +674,9 @@ void WorldSystem::createEnemy(EnemyType type, vec2 position, vec2 velocity)
 	}
 }
 
+// Not used at the moment since we removed campfire
 void WorldSystem::loadBackgroundObjects() {
 	// createBackgroundObject({ window_width_px / 4, window_height_px / 4 }, { 0.75, 0.75 }, "tree", false);
-
-	Entity campfire = createBackgroundObject({ window_width_px / 2, window_height_px / 2 + 50.f }, { 0.5, 0.5 }, "campfire", true);
-	Animation& campfireAnimation = registry.animations.emplace(campfire);
-	campfireAnimation.frameTime = 100.f;
-	campfireAnimation.spriteCols = 6;
-	campfireAnimation.spriteRows = 1;
-	campfireAnimation.frameCount = 6;
-	Interactable& campfireInteractable = registry.interactables.emplace(campfire);
-	campfireInteractable.type = InteractableType::HEALER;
 }
 
 Entity WorldSystem::createBackgroundObject(vec2 position, vec2 scale, AssetId texture, bool animate)
@@ -818,7 +810,7 @@ void WorldSystem::handleCollectible(const float elapsed_ms_since_last_update)
 		SoundManager* sound_manager = sound_manager->getSoundManager();
 		const std::vector<SpellType> missing_spells = player.spell_queue.getMissingSpells();
 		int remaining_spells = missing_spells.size() - NOT_DROPPED_SPELL_COUNT;
-		std::uniform_int_distribution<int> spell_choice(0, static_cast<int>(SpellType::COUNT) -  1 - NOT_DROPPED_SPELL_COUNT);
+		std::uniform_int_distribution<int> spell_choice(0, static_cast<int>(SpellType::COUNT) - 1 - NOT_DROPPED_SPELL_COUNT);
 		while (true)
 		{
 			float x = hor_distr(gen);

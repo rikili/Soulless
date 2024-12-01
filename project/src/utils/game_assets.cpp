@@ -60,7 +60,7 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
         -1.0f, -1.0f, 0.0f,  1.0f, 1.0f, 1.f,
         1.0f,  -1.0f, 0.0f,  1.0f, 1.0f, 1.f,
         1.0f,  1.0f,  0.0f,  1.0f, 1.0f, 1.f,
-        -1.0f, 1.0f,  0.0f,  1.0f, 1.0f, 1.f};
+        -1.0f, 1.0f,  0.0f,  1.0f, 1.0f, 1.f };
 
     const std::vector<VertexAttribute> squareAttributes = {
         {3, GL_FLOAT, GL_FALSE, "position"},
@@ -183,7 +183,7 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
 
     AssetId fireballMaxTextureId = assetManager.loadTexture("fireball-max", textures_path("fireball-max") + ".png");
     assets.textures["fireball-max"] = fireballMaxTextureId;
-    
+
     AssetId fireballMaxPostTextureId = assetManager.loadTexture("fire-post", textures_path("fire-post") + ".png");
     assets.textures["fire-post"] = fireballMaxPostTextureId;
 
@@ -253,8 +253,6 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
 
     // Background Objects
     AssetId treeTextureId = assetManager.loadTexture("tree", textures_path("tree1") + ".png");
-    AssetId campfireTextureId = assetManager.loadTexture("campfire", textures_path("campfire-sheet") + ".png");
-    assets.textures["campfire"] = campfireTextureId;
     assets.textures["tree"] = treeTextureId;
 
     // UI
