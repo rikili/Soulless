@@ -272,12 +272,12 @@ void InputHandler::cast_player_spell(double x, double y, bool is_left)
     }
 
     SpellQueue& spell_queue = player.spell_queue;
-    SpellType spell = spell_queue.useSpell(is_left);
+    std::pair<SpellType, int> spell = spell_queue.useSpell(is_left);
 
-    SpellFactory::createSpellProjectile(registry, player_ent, spell, x, y);
+    SpellFactory::createSpellProjectile(registry, player_ent, spell.first, spell.second, x, y);
 
     SoundManager* soundManager = SoundManager::getSoundManager();
-    soundManager->playSound(convertSpellToSoundEffect(spell, false));
+    soundManager->playSound(convertSpellToSoundEffect(spell.first, false));
 
     invoke_player_cooldown(player, is_left);
 }

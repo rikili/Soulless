@@ -6,6 +6,7 @@
 #include "graphics/tile_generator.hpp"
 #include "utils/serializer.hpp"
 #include "utils/enemy_factory.hpp"
+#include <utils/spell_factory.hpp>
 
 WorldSystem::WorldSystem(IRenderSystem* renderer)
 {
@@ -153,10 +154,11 @@ void WorldSystem::handleProjectiles(float elapsed_ms_since_last_update)
 		Projectile& projectile = registry.projectiles.get(projectile_ent);
 		Motion& motion = registry.motions.get(projectile_ent);
 		Deadly& deadly = registry.deadlies.get(projectile_ent);
+		bool doLinear = registry.spellProjectiles.has(projectile_ent) ? !registry.spellProjectiles.get(projectile_ent).isPostAttack : true;
 
 		projectile.range -= sqrt(motion.velocity.x * motion.velocity.x + motion.velocity.y * motion.velocity.y) * elapsed_ms_since_last_update;
 
-		if (deadly.to_enemy && projectile.type == DamageType::fire)
+		if (deadly.to_enemy && projectile.type == DamageType::fire && doLinear)
 		{
 			vec2 scale_factor = FIRE_SCALE + ((FIRE_RANGE - projectile.range) / FIRE_RANGE) * (FIRE_SCALE_FACTOR * FIRE_SCALE - FIRE_SCALE);
 			motion.scale.x = scale_factor.x;
@@ -229,13 +231,17 @@ void WorldSystem::handleMovements(float elapsed_ms_since_last_update)
 			{
 				// Enemy& enemy = registry.enemies.get(entity);
 				motion.angle = atan2(player_motion.position.y - motion.position.y,
-					player_motion.position.x - motion.position.x);
+				player_motion.position.x - motion.position.x);
 
 				// printd("Enemy angle towards player: %f\n", motion.angle);
 			}
 
+			if (registry.enemies.has(entity) && registry.enemies.get(entity).movementRestricted) {
 
-			computeNewDirection(entity);
+			}
+			else {
+				computeNewDirection(entity);
+			}
 		}
 
 		// not a player nor enemy
@@ -327,16 +333,39 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 
 	for (Entity& hit_ent : registry.onHits.entities)
 	{
-		OnHit& hit = registry.onHits.get(hit_ent);
-		hit.invincibility_timer -= elapsed_ms_since_last_update;
-		if (hit.invincibility_timer < PLAYER_INVINCIBILITY_TIMER - 200.f) {
-			hit.invicibilityShader = true;
-
-			if (hit.invincibility_timer < 0)
+		OnHit& onHit = registry.onHits.get(hit_ent);
+		std::unordered_set<int> to_remove;
+		for (auto& hit : onHit.invuln_tracker)
+		{
+			if (registry.players.has(hit_ent))
 			{
-				registry.onHits.remove(hit_ent);
+				if (hit.second < PLAYER_INVINCIBILITY_TIMER - 200.f) onHit.invicibilityShader = true;
+				else onHit.invicibilityShader = false;
+			}
+			
+			if (hit.second < ENEMY_INVINCIBILITY_TIMER - 200.f)
+			{
+				onHit.invicibilityShader = false;
+			}
+			else
+			{
+				onHit.invicibilityShader = true;
+			}
+
+			hit.second -= elapsed_ms_since_last_update;
+
+			if (hit.second <= 0)
+			{
+				to_remove.insert(hit.first);
 			}
 		}
+
+		for (auto& remove : to_remove)
+		{
+			onHit.invuln_tracker.erase(remove);
+		}
+
+		onHit.isInvincible = onHit.invuln_tracker.size() > 0;
 	}
 
 	for (Entity& healed_ent : registry.onHeals.entities)
@@ -375,6 +404,14 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 		decay.timer -= elapsed_ms_since_last_update;
 		if (decay.timer < 0)
 		{
+			if (registry.spellProjectiles.has(decay_ent) && registry.spellProjectiles.get(decay_ent).type == SpellType::WIND) {
+				for (Entity e : registry.spellProjectiles.get(decay_ent).victims) {
+					if (registry.enemies.has(e)) {
+						registry.enemies.get(e).movementRestricted = false;
+					}
+				}
+				registry.spellProjectiles.get(decay_ent).victims.clear();
+			}
 			Death& death = registry.deaths.emplace(decay_ent);
 			death.timer = 0;
 		}
@@ -416,12 +453,32 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
  */
 void WorldSystem::handleSpellStates(float elapsed_ms_since_last_update)
 {
+	if (lightnings_to_create.size() > 0)
+	{
+		vec2 position = lightnings_to_create.front();
+		lightnings_to_create.pop();
+
+		std::random_device rand;
+		std::mt19937 gen(rand());
+		std::uniform_real_distribution<float> distance(MAX_LIGHTNING_POS_DIFFERENCE.x, MAX_LIGHTNING_POS_DIFFERENCE.y);
+		vec2 new_position = vec2(position);
+		SpellFactory::createSpellProjectile(
+			registry,
+			registry.players.entities[0],
+			SpellType::LIGHTNING,
+			-1,
+			(position.x + distance(gen)),
+			(position.y + distance(gen)),
+			true);
+	}
+
 	for (Entity& spell_ent : registry.spellStates.entities) {
 		SpellState& spell_state = registry.spellStates.get(spell_ent);
 		RenderRequest& request = registry.render_requests.get(spell_ent);
 		Damage& damage = registry.damages.get(spell_ent);
 		Projectile& projectile = registry.projectiles.get(spell_ent);
 		Deadly& deadly = registry.deadlies.get(spell_ent);
+		SpellProjectile& spell_proj = registry.spellProjectiles.get(spell_ent);
 
 		spell_state.timer -= elapsed_ms_since_last_update;
 
@@ -445,7 +502,7 @@ void WorldSystem::handleSpellStates(float elapsed_ms_since_last_update)
 
 				if (projectile.type == DamageType::lightning) {
 					deadly.to_enemy = true;
-					damage.value = LIGHTNING_ACTIVE_DAMAGE;
+					projectile.isActive = true;
 					request.texture = "lightning3";
 					spell_state.timer = LIGHTNING_ACTIVE_LIFETIME;
 				}
@@ -458,6 +515,25 @@ void WorldSystem::handleSpellStates(float elapsed_ms_since_last_update)
 			case State::COMPLETE: {
 				if (!registry.deaths.has(spell_ent))
 				{
+					if (spell_proj.type == SpellType::WATER)
+					{
+						Motion& motion = registry.motions.get(registry.players.entities[0]);
+						SpellFactory::createSpellResolution(registry, motion.position, PostResolution::WATER_EXPLOSION, spell_ent);
+					}
+
+					if (spell_proj.type == SpellType::LIGHTNING
+						&& registry.spellProjectiles.has(spell_ent) 
+						&& registry.spellProjectiles.get(spell_ent).level >= MAX_SPELL_LEVEL)
+					{
+						if (!spell_state.isChild)
+						{
+							Motion& motion = registry.motions.get(spell_ent);
+							for (int x = 0; x < MAX_LIGHTNING_ATTACK_COUNT; x++)
+							{
+								lightnings_to_create.push(vec2(motion.position));
+							}
+						}
+					}
 					registry.deaths.emplace(spell_ent);
 				}
 				break;
@@ -502,6 +578,14 @@ void WorldSystem::restartGame() {
 	enemySpawnTimers.paladin = 120000.f;
 	enemySpawnTimers.slasher = 180000.f;
 	enemySpawnTimers.darklord = 270000.f;
+
+	// Spawn all at start (for debug)
+	/* 
+	enemySpawnTimers.archer = 0.f;
+	enemySpawnTimers.paladin = 0.f;
+	enemySpawnTimers.slasher = 0.f;
+	enemySpawnTimers.darklord = 0.f;
+	*/
 }
 
 void WorldSystem::reloadGame() {
@@ -734,25 +818,18 @@ void WorldSystem::handleCollectible(const float elapsed_ms_since_last_update)
 		SoundManager* sound_manager = sound_manager->getSoundManager();
 		const std::vector<SpellType> missing_spells = player.spell_queue.getMissingSpells();
 		int remaining_spells = missing_spells.size() - NOT_DROPPED_SPELL_COUNT;
-		if (remaining_spells > 0)
+		std::uniform_int_distribution<int> spell_choice(0, static_cast<int>(SpellType::COUNT) -  1 - NOT_DROPPED_SPELL_COUNT);
+		while (true)
 		{
-			std::uniform_int_distribution<int> spell_choice(0, remaining_spells);
-			while (true)
+			float x = hor_distr(gen);
+			float y = ver_distr(gen);
+			if (glm::distance(motion.position, { x , y }) > MIN_POWERUP_DIST)
 			{
-				float x = hor_distr(gen);
-				float y = ver_distr(gen);
-				if (glm::distance(motion.position, { x , y }) > MIN_POWERUP_DIST)
-				{
-					if (registry.debug) printf("DEBUG: spawning powerup at %f %f\n", x, y);
-					sound_manager->playSound(SoundEffect::POWERUP_SPAWN);
-					createCollectible({ x, y }, static_cast<SpellType>(missing_spells[spell_choice(gen)]));
-					break;
-				}
+				if (registry.debug) printf("DEBUG: spawning powerup at %f %f\n", x, y);
+				sound_manager->playSound(SoundEffect::POWERUP_SPAWN);
+				createCollectible({ x, y }, static_cast<SpellType>(spell_choice(gen)));
+				break;
 			}
-		}
-		else
-		{
-			registry.debug&& printf("DEBUG: No spells left to spawn.\n");
 		}
 
 		powerup_timer = POWERUP_SPAWN_TIMER;

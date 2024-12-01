@@ -20,7 +20,7 @@ public:
 	SpellQueue();
 	~SpellQueue();
 	void collectSpell(SpellType spell);
-	SpellType useSpell(bool is_first);
+	std::pair<SpellType, int> useSpell(bool is_first);
 	void discardSpell(bool is_first);
 	void replaceSpell(int position, SpellType spell);
 	const std::deque<SpellType>& getQueue() const;
@@ -34,6 +34,13 @@ public:
 	void setLeftSpell(SpellType spell) { firstSpell = spell; }
 	void setRightSpell(SpellType spell) { secondSpell = spell; }
 
+	void levelSpell(SpellType spell);
+	const std::vector<std::pair<SpellType, int>> getCollectedSpells();
+	const int getSpellLevel(SpellType spell);
+	const int getSpellUpgradeTrack(SpellType spell);
+	void addProgressSpell(SpellType spell, int count);
+	bool hasSpell(SpellType spell);
+
 private:
 	SpellType firstSpell;
 	SpellType secondSpell;
@@ -43,4 +50,6 @@ private:
 	std::deque<SpellType> queue;
 	std::unordered_map<SpellType, int, SpellTypeHash> collectedSpells;
 	std::mt19937 rng;
+
+	std::unordered_map<SpellType, int, SpellTypeHash> upgradeTracker;
 };

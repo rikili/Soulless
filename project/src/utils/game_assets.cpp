@@ -14,6 +14,7 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     assets.shaders["font"] = assetManager.loadShader("font", shader_path("font") + ".vs.glsl", shader_path("font") + ".fs.glsl");
     assets.shaders["particle"] = assetManager.loadShader("particle", shader_path("particle") + ".vs.glsl", shader_path("particle") + ".fs.glsl");
     assets.shaders["screen"] = assetManager.loadShader("screen", shader_path("screen") + ".vs.glsl", shader_path("screen") + ".fs.glsl");
+    assets.shaders["progressbar"] = assetManager.loadShader("progressbar", shader_path("progressbar") + ".vs.glsl", shader_path("progressbar") + ".fs.glsl");
 
     // fonts
     AssetId deutschFont = assetManager.loadFont("deutsch", font_path("deutsch") + ".ttf", 30.0f);
@@ -67,6 +68,19 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     };
 
     AssetId squareMeshId = assetManager.loadMesh("square", squareVertices, quadIndices, squareAttributes);
+
+    const std::vector<float> uncoloredSquareVertices = {
+        // positions       
+        -1.0f, -1.0f, 0.0f,
+        1.0f,  -1.0f, 0.0f,
+        1.0f,  1.0f,  0.0f,
+        -1.0f, 1.0f,  0.0f };
+
+    const std::vector<VertexAttribute> uncoloredSquareAttributes = {
+        {3, GL_FLOAT, GL_FALSE, "position"}
+    };
+
+    AssetId uncoloredSquare = assetManager.loadMesh("uncoloredSquare", uncoloredSquareVertices, quadIndices, uncoloredSquareAttributes);
 
     const std::vector<float> mageCollisionVertices = {
         -0.25f, .6f, 0.f,
@@ -167,8 +181,23 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId fireballTextureId = assetManager.loadTexture("fireball", textures_path("fireball") + ".png");
     assets.textures["fireball"] = fireballTextureId;
 
-    AssetId barrierTextureId = assetManager.loadTexture("barrier", textures_path("barrier") + ".png");
-    assets.textures["barrier"] = barrierTextureId;
+    AssetId fireballMaxTextureId = assetManager.loadTexture("fireball-max", textures_path("fireball-max") + ".png");
+    assets.textures["fireball-max"] = fireballMaxTextureId;
+    
+    AssetId fireballMaxPostTextureId = assetManager.loadTexture("fire-post", textures_path("fire-post") + ".png");
+    assets.textures["fire-post"] = fireballMaxPostTextureId;
+
+    AssetId waterPostTextureId = assetManager.loadTexture("water-post", textures_path("water-post") + ".png");
+    assets.textures["water-post"] = waterPostTextureId;
+
+    AssetId barrierTextureId = assetManager.loadTexture("barrier-1", textures_path("barrier-1") + ".png");
+    assets.textures["barrier-1"] = barrierTextureId;
+
+    AssetId barrierTexture2Id = assetManager.loadTexture("barrier-2", textures_path("barrier-2") + ".png");
+    assets.textures["barrier-2"] = barrierTexture2Id;
+
+    AssetId barrierTexture3Id = assetManager.loadTexture("barrier-3", textures_path("barrier-3") + ".png");
+    assets.textures["barrier-3"] = barrierTexture3Id;
 
     AssetId lightning1TextureId = assetManager.loadTexture("lightning1", textures_path("lightning1") + ".png");
     assets.textures["lightning1"] = lightning1TextureId;
@@ -184,6 +213,9 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
 
     AssetId windTextureId = assetManager.loadTexture("wind", textures_path("wind-sheet") + ".png");
     assets.textures["wind"] = windTextureId;
+
+    AssetId windMaxTextureId = assetManager.loadTexture("wind-max", textures_path("wind-max-sheet") + ".png");
+    assets.textures["wind-max"] = windMaxTextureId;
 
     AssetId plasmaTextureId = assetManager.loadTexture("plasma", textures_path("plasma") + ".png");
     assets.textures["plasma"] = plasmaTextureId;
@@ -231,6 +263,9 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
 
     AssetId queueId = assetManager.loadTexture("queue", textures_path("queue") + ".png");
     assets.textures["queue"] = queueId;
+
+    AssetId gaugeId = assetManager.loadTexture("gauge", textures_path("gauge") + ".png");
+    assets.textures["gauge"] = gaugeId;
 
     // Add a new mesh for the background (full screen quad)
     const std::vector<float> bgVertices = {

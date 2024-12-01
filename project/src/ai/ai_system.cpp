@@ -139,6 +139,10 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
                 return NodeState::SUCCESS;
             }
 
+            if (enemy.movementRestricted) {
+                return NodeState::FAILURE;
+            }
+
             float speed = 0.0f;
             EnemyType type = enemy.type;
             switch (type) {
@@ -229,6 +233,7 @@ void AI_SYSTEM::create_enemy_projectile(const Entity& enemy_ent)
 
     projectile.type = DamageType::elementless;
     projectile.range = enemy.range;
+    projectile.isActive = true;
 
     float attack_velocity;
     float attack_damage;
@@ -254,7 +259,7 @@ void AI_SYSTEM::create_enemy_projectile(const Entity& enemy_ent)
         attack_damage = DARKLORD_RAZOR_DAMAGE;
         attack_texture = "plasma";
         projectile_motion.scale = { 0.75f, 0.75f };
-        projectile_motion.collider = { 75.f, 75.f };
+        projectile_motion.collider = { 37.5f, 37.5f };
         projectile.type = DamageType::plasma;
         break;
     default:

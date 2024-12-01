@@ -13,7 +13,13 @@ private:
 
 public:
 	CollisionRegistry() {}
-
+	~CollisionRegistry() {
+		for (auto& collision : collision_mapping)
+		{
+			collision.second.clear();
+		}
+		collision_mapping.clear();
+	};
 	void register_collision(const Entity& entity, const Entity& other_entity);
 	std::unordered_set<Entity> get_collision_by_ent(const Entity& entity);
 	bool check_collision(const Entity& entity, const Entity& other_entity);

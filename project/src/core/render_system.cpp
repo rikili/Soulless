@@ -341,7 +341,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 						glUniform1i(glGetUniformLocation(shaderProgram, "visible"), 1);
 					}
 
-					if (registry.players.has(entity) && registry.onHits.has(entity)) {
+					if (registry.players.has(entity) && registry.onHits.has(entity) && registry.onHits.get(entity).isInvincible) {
 						if (registry.onHits.get(entity).invicibilityShader) {
 							glUniform1i(glGetUniformLocation(shaderProgram, "state"), 2);
 						}
@@ -349,6 +349,12 @@ void RenderSystem::drawFrame(float elapsed_ms)
 							glUniform1i(glGetUniformLocation(shaderProgram, "state"), 1);
 						}
 					}
+					else if (registry.enemies.has(entity) && registry.onHits.has(entity) && registry.onHits.get(entity).isInvincible)
+					{
+						if (registry.onHits.get(entity).invicibilityShader) glUniform1i(glGetUniformLocation(shaderProgram, "state"), 1);
+						else glUniform1i(glGetUniformLocation(shaderProgram, "state"), 0);
+					}
+
 					else {
 						glUniform1i(glGetUniformLocation(shaderProgram, "state"), 0);
 					}
@@ -674,7 +680,6 @@ void RenderSystem::updateRenderOrder(ComponentContainer<RenderRequest>& render_r
 		});
 }
 
-
 /**
  * @brief Draw textured elements onto screen.
  * Translation in screen coordinates (pixels).
@@ -697,13 +702,11 @@ void RenderSystem::drawHUDElement(std::string textureId, vec2 translation, vec2 
 	glUniform1i(glGetUniformLocation(shaderProgram, "image"), 0);
 
 	mat4 transform = mat4(1.0f);
-	vec3 ndcTranslate = glm::vec3(2.f * translation.x / window_width_px, 2.f * translation.y / window_height_px, 0.f);
 
-	transform = glm::translate(transform, ndcTranslate);
+	transform = glm::translate(transform, vec3({translation.x, translation.y, 0.f}));
 	transform = glm::scale(transform, vec3(scale.x, scale.y, 1.f));
+	transform = glm::ortho(0.f, (float)window_width_px, (float)window_height_px, 0.0f) * transform;
 
-	GLint flipLoc = glGetUniformLocation(shaderProgram, "flip");
-	glUniform1f(flipLoc, true);
 	const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 	const Mesh* mesh = this->asset_manager->getMesh("sprite");
@@ -731,9 +734,9 @@ void RenderSystem::drawCooldownElement(vec2 translation, vec2 scale)
 	glUseProgram(shaderProgram);
 
 	mat4 transform = mat4(1.f);
-	vec3 ndcTranslate = glm::vec3(2.f * translation.x / window_width_px, 2.f * translation.y / window_height_px, 0.f);
-	transform = glm::translate(transform, ndcTranslate);
+	transform = glm::translate(transform, vec3({translation.x, translation.y, 0.f}));
 	transform = glm::scale(transform, vec3(scale.x, scale.y, 1.f));
+	transform = glm::ortho(0.f, (float)window_width_px, (float)window_height_px, 0.0f) * transform;
 
 	const GLint opacity_loc = glGetUniformLocation(shaderProgram, "opacity");
 	glUniform1f(opacity_loc, 0.8f);
@@ -768,19 +771,83 @@ void RenderSystem::drawCooldown(const Player& player)
 	}
 }
 
+void RenderSystem::drawSpellProgress(Player& player)
+{
+	const Shader* shader = this->asset_manager->getShader("progressbar");
+	if (!shader)
+	{
+		std::cerr << "Could not find shader with id sprite" << std::endl;
+		return;
+	}
+	const GLuint shaderProgram = shader->program;
+	glUseProgram(shaderProgram);
+
+	vec3 bar_translate = LEFTMOST_GAUGE_POS;
+	vec3 spell_translate = LEFTMOST_GAUGE_TEXT_POS;
+
+	for (int i = 0; i < static_cast<int>(SpellType::COUNT); i++) {
+		SpellType type = static_cast<SpellType>(i);
+
+		// plasma doesn't level
+		if (type == SpellType::PLASMA) continue;
+	
+		const int level = player.spell_queue.getSpellLevel(type);
+		bool is_max_level = level >= MAX_SPELL_LEVEL;
+		const int progress = player.spell_queue.getSpellUpgradeTrack(type);
+
+		if (level < 1) continue;
+
+		glUseProgram(shaderProgram);
+		const vec3 color = spellTypeToColor(type);
+
+		mat4 transform = mat4(1.f);
+		transform = glm::translate(transform, bar_translate);
+		transform = glm::scale(transform, GAUGE_SCALE);
+		transform = glm::ortho(0.f, (float)window_width_px, (float)window_height_px, 0.0f) * transform;
+
+		const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+		const GLint progress_loc = glGetUniformLocation(shaderProgram, "progress");
+		glUniform1f(progress_loc, is_max_level ? 1.f : (float)progress / (float) UPGRADE_KILL_COUNT[level - 1]);
+		const GLint vertical_loc = glGetUniformLocation(shaderProgram, "is_vertical");
+		glUniform1i(vertical_loc, true);
+		const GLint color_loc = glGetUniformLocation(shaderProgram, "progress_color");
+		glUniform3f(color_loc, color.r, color.g, color.b);
+
+		const float darken = NON_PROGRESS_DARKEN_FACTOR;
+		const GLint non_color_loc = glGetUniformLocation(shaderProgram, "non_progress_color");
+		glUniform3f(non_color_loc, color.r + darken, color.g + darken, color.b + darken);
+
+		const Mesh* mesh = this->asset_manager->getMesh("uncoloredSquare");
+		if (!mesh)
+		{
+			std::cerr << "Could not find mesh with id square" << std::endl;
+			return;
+		}
+
+		glBindVertexArray(mesh->vao);
+		glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
+		gl_has_errors();
+
+		drawText(is_max_level ? "*" : std::to_string(level), "king", spell_translate.x, spell_translate.y, 0.3, is_max_level ? color + NON_PROGRESS_DARKEN_FACTOR : color + TEXT_LIGHTEN_FACTOR, false);
+
+		bar_translate.x += GAUGE_SPACING;
+		spell_translate.x += GAUGE_SPACING;
+	}
+}
+
 /**
  * @brief Draw HUD elements
  */
 void RenderSystem::drawHUD()
 {
 	vec2 translate_spells = TRANSLATE_QUEUE_SPELLS;
-
 	// Spell Queue Bar Rendering
 	drawHUDElement("queue", QUEUE_TRANSLATE, QUEUE_SCALE);
 
 
 	// Spells in Queue Rendering
-	const Player& player = registry.players.get(registry.players.entities[0]); // hard-coded player get
+	Player& player = registry.players.get(registry.players.entities[0]); // hard-coded player get
 	const SpellQueue spell_queue = player.spell_queue;
 	const std::deque<SpellType>& queue = spell_queue.getQueue();
 	int count = 0;
@@ -797,6 +864,11 @@ void RenderSystem::drawHUD()
 
 	// Spells in R Hand Rendering
 	drawHUDElement(spellTypeToCollect(spell_queue.getRightSpell()), RIGHT_SLOT_TRANSLATE, SCALE_QUEUE_SPELLS);
+
+	// Gauge Rendering
+	drawHUDElement("gauge", GAUGE_TEXTURE_TRANSLATE, GAUGE_TEXTURE_SCALE);
+
+	drawSpellProgress(player);
 	drawCooldown(player);
 
 }

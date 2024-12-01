@@ -7,6 +7,8 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <unordered_set>
 #include <glm/vec2.hpp>
 
 using AssetId = std::string;
@@ -63,6 +65,7 @@ struct Enemy {
     EnemyType type;
     float range = 0;
     float cooldown = -1.f;
+    bool movementRestricted = false;
 };
 
 struct Player {
@@ -76,6 +79,14 @@ struct Player {
 struct Projectile {
     DamageType type;
     float range = 0;
+    bool isActive = false;
+};
+
+struct SpellProjectile {
+    SpellType type = SpellType::COUNT;
+    int level = 1;
+    bool isPostAttack = false;
+    std::unordered_set<Entity> victims;
 };
 
 struct Interactable {
@@ -97,8 +108,17 @@ struct Decay {
 
 // Spell State Component
 struct SpellState {
+    //SpellType type = SpellType::COUNT;
     State state = State::CASTING;
     float timer = 0;
+
+    // lightning vars
+    bool isChild = false;
+
+    // water barrier vars
+    bool isBarrier = false;
+    int barrier_level = 0;
+    std::unordered_set<Entity> seen;
 };
 
 // Structure to store collision information
@@ -109,11 +129,13 @@ struct Collision
     explicit Collision(Entity& other) { this->other = other; };
 };
 
-// Structure to store information on being hit
+// Structure to store information on being hit, setting same entity as attached as bypass for player immunity (TODO)
 struct OnHit
 {
-    float invincibility_timer = 0;
+    bool isAllImmune = false; // is immune to all damage
     bool invicibilityShader = false;
+    bool isInvincible = false; // toggled to true when tracker is populated
+    std::unordered_map<int, float> invuln_tracker;
 };
 
 // Structure to store information on being healed

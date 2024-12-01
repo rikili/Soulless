@@ -39,6 +39,7 @@ public:
 	ComponentContainer<AIComponent> ai_systems;
 	ComponentContainer<SpellUnlock> spellUnlocks;
 	ComponentContainer<Decay> decays;
+	ComponentContainer<SpellProjectile> spellProjectiles;
 	CollisionRegistry collision_registry;
 	mat4 viewMatrix;
 	mat4 projectionMatrix;
@@ -74,6 +75,7 @@ public:
 		registry_list.push_back(&ai_systems);
 		registry_list.push_back(&spellUnlocks);
 		registry_list.push_back(&decays);
+		registry_list.push_back(&spellProjectiles);
 
 	}
 

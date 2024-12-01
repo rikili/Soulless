@@ -14,14 +14,16 @@ SpellQueue::SpellQueue() {
   for (int i = 0; i < static_cast<int>(SpellType::COUNT); i++) {
     SpellType spell = static_cast<SpellType>(i);
     collectedSpells[spell] = 0;
+    upgradeTracker[spell] = 0;
   }
 
   collectedSpells[SpellType::FIRE] = 1;
-  //collectedSpells[SpellType::WIND] = 1;
+
   // Uncomment to add all spells to start
-  //collectedSpells[SpellType::WATER] = 1;
+  //collectedSpells[SpellType::WIND] = 1;
+  //collectedSpells[SpellType::WATER] = MAX_SPELL_LEVEL;
   //collectedSpells[SpellType::LIGHTNING] = 1;
-  //collectedSpells[SpellType::ICE] = 1;
+  //collectedSpells[SpellType::ICE] = 2;
   //collectedSpells[SpellType::PLASMA] = 1;
 
   for (int i = 0; i < QUEUE_SIZE; i++) {
@@ -32,7 +34,9 @@ SpellQueue::SpellQueue() {
   secondSpell = getRandomSpell();
 }
 
-SpellQueue::~SpellQueue() {}
+SpellQueue::~SpellQueue() {
+    this->upgradeTracker.clear();
+}
 
 /**
  * Increments count of collected spell. Does not add the spell to the queue.
@@ -40,7 +44,7 @@ SpellQueue::~SpellQueue() {}
  * @param spell Type of spell to be collected
  */
 void SpellQueue::collectSpell(SpellType spell) {
-  collectedSpells[spell]++;
+    levelSpell(spell);
 };
 
 
@@ -51,7 +55,7 @@ void SpellQueue::collectSpell(SpellType spell) {
  * @param is_first Whether to use the first (left click) or second (right click) spell from the queue
  * @return Type of spell used
  */
-SpellType SpellQueue::useSpell(bool is_first) {
+std::pair<SpellType, int> SpellQueue::useSpell(bool is_first) {
   SpellType new_spell = queue.front();
   queue.pop_front();
   addSpell(); // update queue
@@ -66,7 +70,8 @@ SpellType SpellQueue::useSpell(bool is_first) {
     secondSpell = new_spell;
   }
 
-  return used_spell;
+
+  return std::pair<SpellType, int>(used_spell, collectedSpells[used_spell]);
 }
 
 /**
@@ -98,7 +103,7 @@ const std::deque<SpellType>& SpellQueue::getQueue() const {
 };
 
 void SpellQueue::unlockSpell(SpellType type) {
-  this->collectedSpells[type] = 1;
+    levelSpell(type);
 }
 
 const std::vector<SpellType> SpellQueue::getMissingSpells() {
@@ -108,6 +113,16 @@ const std::vector<SpellType> SpellQueue::getMissingSpells() {
     if (!pair.second) ret.push_back(pair.first);
   }
   return ret;
+}
+
+const std::vector<std::pair<SpellType, int>> SpellQueue::getCollectedSpells()
+{
+    std::vector<std::pair<SpellType, int>> ret;
+    for (auto& pair : collectedSpells)
+    {
+        if (pair.second) ret.push_back({pair.first, pair.second});
+    }
+    return ret;
 }
 
 /**
@@ -148,4 +163,40 @@ void SpellQueue::replaceSpell(int position, SpellType spell) {
   if (position >= 0 && position < static_cast<int>(queue.size())) {
     queue[position] = spell;
   }
+}
+
+void SpellQueue::levelSpell(SpellType spell)
+{
+    if (spell == SpellType::PLASMA) return;
+    this->collectedSpells[spell]++;
+}
+
+void SpellQueue::addProgressSpell(SpellType spell, int count)
+{
+    if (collectedSpells[spell] >= MAX_SPELL_LEVEL) return;
+
+    if (UPGRADE_KILL_COUNT[collectedSpells[spell] - 1] <= upgradeTracker[spell] + count)
+    {
+        levelSpell(spell);
+        if (collectedSpells[spell] >= MAX_SPELL_LEVEL) upgradeTracker[spell] = UPGRADE_KILL_COUNT[MAX_SPELL_LEVEL - 1];
+    }
+    else
+    {
+        upgradeTracker[spell] += count;
+    }
+}
+
+bool SpellQueue::hasSpell(SpellType spell)
+{
+    return collectedSpells[spell] > 0;
+}
+
+const int SpellQueue::getSpellUpgradeTrack(SpellType spell)
+{
+    return upgradeTracker[spell];
+}
+
+const int SpellQueue::getSpellLevel(SpellType spell)
+{
+    return collectedSpells[spell];
 }

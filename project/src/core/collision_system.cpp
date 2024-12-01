@@ -1,7 +1,9 @@
 #include "core/collision_system.hpp"
 #include "entities/ecs_registry.hpp"
+#include "utils/spell_factory.hpp"
 #include "sound/sound_manager.hpp"
 #include <glm/ext/matrix_clip_space.hpp>
+#include <random>
 
 CollisionSystem::CollisionSystem(IRenderSystem* renderer)
 {
@@ -220,48 +222,149 @@ bool CollisionSystem::is_mesh_colliding(const Entity& primary, const Entity& oth
     return result;
 }
 
+bool CollisionSystem::isWaterProtected(const Entity& player, const Entity& attacker)
+{
+    for (auto& spell : registry.spellStates.entities)
+    {
+        SpellState& state = registry.spellStates.get(spell);
+        if (state.isBarrier)
+        {
+            if (state.seen.find(attacker) != state.seen.end()) return true;
+
+            RenderRequest& request = registry.render_requests.get(spell);
+            state.barrier_level++;
+            if (state.barrier_level >= 3) state.barrier_level = 3;
+            state.seen.insert(attacker);
+            printf("level %d\n", state.barrier_level);
+            request.texture = "barrier-" + std::to_string(state.barrier_level);
+            return true;
+        }
+    }
+    return false;
+}
+
 void CollisionSystem::resolve_collisions()
 {
     // Ordering matters for which types of entites are checked (careful when changing)
 
     // Water Barrier with other projectile collisions (can't be done within the projectile <-> projectile logic below)
-    for (const Entity& barrier_entity : registry.projectiles.entities) {
-        const Projectile& projectile = registry.projectiles.get(barrier_entity);
-
-        if (projectile.type != DamageType::water) continue;
-
-        // const Deadly& deadly = registry.deadlies.get(barrier_entity);
-        std::unordered_set<Entity> other_entities = registry.collision_registry.get_collision_by_ent(barrier_entity);
-
-        for (const Entity& other_entity : other_entities)
-        {
-            // Only interested in projectile vs projectile collisions
-            if (!registry.projectiles.has(other_entity) || !registry.deadlies.has(other_entity)) continue;
-            if (!registry.deadlies.get(other_entity).to_player) continue;
-            if (!registry.collision_registry.check_collision(barrier_entity, other_entity)) continue;
-
-            applyDamage(other_entity, barrier_entity);
-
-            registry.collision_registry.remove_collision(barrier_entity, other_entity);
-        }
-    }
+    std::unordered_map<SpellType, int, SpellTypeHash> cycle_progress;
+    std::unordered_map<PostResolution, std::pair<Entity, std::vector<Entity>>> post_resolutions;
+    std::unordered_set<Entity> to_deactivate;
+    std::unordered_set<Entity> to_delete;
 
     // Projectile collisions
     for (const Entity& proj_entity : registry.projectiles.entities)
     {
+        Projectile& projectile = registry.projectiles.get(proj_entity);
+
         std::unordered_set<Entity> other_entities = registry.collision_registry.get_collision_by_ent(proj_entity);
         const Deadly& deadly = registry.deadlies.get(proj_entity);
         for (const Entity& other_entity : other_entities)
         {
-            if (!registry.collision_registry.check_collision(proj_entity, other_entity)) continue;
+
+            // projectile <-> player
             if (registry.players.has(other_entity) && deadly.to_player)
             {
-                if (is_mesh_colliding(other_entity, proj_entity)) applyDamage(proj_entity, other_entity);
+                if (is_mesh_colliding(other_entity, proj_entity))
+                {
+                    HitTypes hit_response = applyDamage(proj_entity, other_entity, cycle_progress);
+                    if (hit_response == HitTypes::hit || hit_response == HitTypes::absorbed)
+                    {
+                        registry.deaths.emplace(proj_entity);
+                    }
+                    projectile.isActive = false;
+                }
             }
+
+            // projectile <-> enemies
             else if (registry.enemies.has(other_entity) && deadly.to_enemy)
             {
-                applyDamage(proj_entity, other_entity);
+                // if not a spell, currently not a case OR inactive
+                if (!registry.spellProjectiles.has(proj_entity))
+                {
+                    registry.collision_registry.remove_collision(proj_entity, other_entity);
+                    continue;
+                }
+
+                // must be spell
+                SpellProjectile& spell_proj = registry.spellProjectiles.get(proj_entity);
+                bool isMaxLevel = spell_proj.level >= MAX_SPELL_LEVEL;
+                bool didHit = false;
+                
+                // Max level wind pull effect
+                if (isMaxLevel && spell_proj.type == SpellType::WIND) {
+                    spell_proj.victims.insert(other_entity);
+                    Motion& enemyMotion = registry.motions.get(other_entity);
+                    Motion& windMotion = registry.motions.get(proj_entity);
+                    vec2 direction_normalized = glm::normalize(windMotion.position - enemyMotion.position);
+                    enemyMotion.velocity = direction_normalized * 0.05f;
+                    registry.enemies.get(other_entity).movementRestricted = true;
+                }
+                
+                if (projectile.isActive)
+                {
+                    didHit = applyDamage(proj_entity, other_entity, cycle_progress, !isMaxLevel) == HitTypes::hit;
+                }
+
+                if (isMaxLevel)
+                {
+                    switch (spell_proj.type)
+                    {
+                    case (SpellType::FIRE):
+                    {
+                        if (spell_proj.isPostAttack)
+                        {
+                            // splash
+                            to_deactivate.insert(proj_entity);
+                        }
+                        else
+                        {
+                            // projectile
+                            to_delete.insert(proj_entity);
+                            if (post_resolutions.find(PostResolution::FIRE_PROJECTILE) != post_resolutions.end())
+                            {
+                                post_resolutions[PostResolution::FIRE_PROJECTILE].second.push_back(other_entity);
+                            }
+                            else
+                            {
+                                post_resolutions[PostResolution::FIRE_PROJECTILE].first = proj_entity;
+                                post_resolutions[PostResolution::FIRE_PROJECTILE].second.push_back(other_entity);
+                            }
+                        }
+                    }
+                    case (SpellType::LIGHTNING):
+                    {
+                        to_deactivate.insert(proj_entity);
+                    }
+                    case (SpellType::WATER): { }
+                    }
+                }
+                else
+                {
+                    switch (spell_proj.type)
+                    {
+                    case (SpellType::WATER):
+                    {
+                        to_deactivate.insert(proj_entity);
+                        break;
+                    }
+                    case (SpellType::ICE):
+                    case (SpellType::FIRE):
+                    {
+                        projectile.isActive = false;
+                        to_delete.insert(proj_entity);
+                    }
+                    case (SpellType::LIGHTNING):
+                    case (SpellType::PLASMA):
+                    case (SpellType::WIND):
+                    {
+                        break;
+                    }
+                    }
+                }
             }
+
             else if (registry.projectiles.has(other_entity) && deadly.to_projectile)
             {
                 // projectile <-> projectile interaction
@@ -278,11 +381,15 @@ void CollisionSystem::resolve_collisions()
         const Deadly& deadly = registry.deadlies.get(enemy_entity);
         for (const Entity& other_entity : other_entities)
         {
-            if (!registry.collision_registry.check_collision(enemy_entity, other_entity)) continue;
+
             if (registry.players.has(other_entity) && deadly.to_player)
             {
-                if (is_mesh_colliding(other_entity, enemy_entity)) applyDamage(enemy_entity, other_entity);
+                if (is_mesh_colliding(other_entity, enemy_entity))
+                {
+                    applyDamage(enemy_entity, other_entity, cycle_progress);
+                }
             }
+
             else if (registry.enemies.has(other_entity) && deadly.to_enemy)
             {
                 // enemy <-> enemy interaction
@@ -308,8 +415,9 @@ void CollisionSystem::resolve_collisions()
                 {
                     SoundManager* sound = SoundManager::getSoundManager();
                     sound->playSound(SoundEffect::POWERUP_PICKUP);
+
                     SpellUnlock& unlock = registry.spellUnlocks.get(interactable_entity);
-                    unlockSpell(other_entity, unlock.type);
+                    pickupSpell(other_entity, unlock.type);
                     Decay& decay = registry.decays.get(interactable_entity);
                     decay.timer = 0;
                 }
@@ -318,38 +426,107 @@ void CollisionSystem::resolve_collisions()
             registry.collision_registry.remove_collision(interactable_entity, other_entity);
         }
     }
-}
 
-void CollisionSystem::applyDamage(Entity attacker, Entity victim)
-{
-    if ((registry.onHits.has(victim) && registry.players.has(victim)) || registry.deaths.has(attacker) || registry.deaths.has(victim))
+    // Post-collision resolutions
+    Player& player = registry.players.get(registry.players.entities[0]);
+    for (const auto& spell : cycle_progress)
     {
-        return;
+        player.spell_queue.addProgressSpell(spell.first, spell.second);
+    }
+    resolve_post_effects(post_resolutions);
+    post_resolutions.clear();
+    for (const Entity& ent : to_delete)
+    {
+        registry.deaths.emplace(ent);
+    }
+    for (const Entity& ent : to_deactivate)
+    {
+        Projectile& proj = registry.projectiles.get(ent);
+        proj.isActive = false;
     }
 
-    if (registry.onHits.has(victim)) {
-        if (registry.players.has(victim) && registry.projectiles.has(attacker) && !registry.deaths.has(attacker)) {
-            registry.deaths.emplace(attacker);
-            return;
-        }
-        // spells (besides ice) shouldn't register more than once
-        if (registry.projectiles.has(attacker)) {
-            Projectile& projectile = registry.projectiles.get(attacker);
-            if (projectile.type != DamageType::ice) {
-                return;
+}
+
+void CollisionSystem::resolve_post_effects(std::unordered_map<PostResolution, std::pair<Entity, std::vector<Entity>>> resolutions)
+{
+    for (auto& resolution : resolutions)
+    {
+        switch (resolution.first)
+        {
+            case PostResolution::FIRE_PROJECTILE:
+            {
+                for (const Entity& target : resolution.second.second)
+                {
+                    Motion& motion = registry.motions.get(target);
+                    SpellFactory::createSpellResolution(registry, motion.position, PostResolution::FIRE_PROJECTILE, resolution.second.first);
+
+                }
             }
         }
     }
+}
 
+HitTypes CollisionSystem::applyDamage(Entity attacker, Entity victim, std::unordered_map<SpellType, int, SpellTypeHash>& tracker, bool do_scaling)
+{
     SoundManager* soundManager = SoundManager::getSoundManager();
 
     if (registry.healths.has(victim)) {
         const Damage& damage = registry.damages.get(attacker);
+        float damageValue = damage.value;
+
+        // check on-hits
+        if (registry.onHits.has(victim)) {
+            OnHit& hit = registry.onHits.get(victim);
+
+            if (hit.invuln_tracker[victim] > 0.f && hit.isAllImmune)
+            {
+                return HitTypes::notHit;
+            }
+            else
+            {
+                if (hit.invuln_tracker.find(attacker) != hit.invuln_tracker.end())
+                {
+                    if (hit.invuln_tracker[attacker] > 0.f) return HitTypes::notHit;
+                }
+            }
+        }
+
+        if (do_scaling && registry.spellProjectiles.has(attacker))
+        {
+            const SpellProjectile& proj = registry.spellProjectiles.get(attacker);
+            switch (proj.type)
+            {
+            case SpellType::WATER:
+                damageValue *= WATER_SCALING[proj.level - 1];
+                break;
+            case SpellType::FIRE:
+                damageValue *= FIRE_SCALING[proj.level - 1];
+                break;
+            case SpellType::LIGHTNING:
+                damageValue *= LIGHTNING_SCALING[proj.level - 1];
+                break;
+            case SpellType::ICE:
+                damageValue *= ICE_SCALING[proj.level - 1];
+                break;
+
+            }
+        }
+
         Health& health = registry.healths.get(victim);
-        if (health.health - damage.value <= 0 && !registry.deaths.has(victim)) {
+
+        if (registry.players.has(victim))
+        {
+            if (isWaterProtected(victim, attacker)) return HitTypes::absorbed;
+        }
+
+        printf("%f\n", damageValue);
+
+        // if damage is greater than remaining health
+        if (health.health - damageValue <= 0 && !registry.deaths.has(victim)) {
             health.health = 0;
             Death& death = registry.deaths.emplace(victim);
 
+            // if player death
             if (registry.players.has(victim))
             {
                 printd("Player has died!\n");
@@ -363,10 +540,22 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
             else {
                 // particleSystem.particleBurst(registry.motions.get(victim).position);
                 death.timer = 10;
-            }
 
-        }
-        else {
+                if (registry.spellProjectiles.has(attacker) && registry.enemies.has(victim))
+                {
+                    const SpellProjectile& spell = registry.spellProjectiles.get(attacker);
+                    if (tracker[spell.type])
+                    {
+                        tracker[spell.type]++;
+                    }
+                    else
+                    {
+                        tracker[spell.type] = 1;
+                    }
+
+                }
+            }
+        } else {
             // TODO: Need to change based on entity type
             if (!registry.players.has(victim)) {
                 soundManager->playSound(SoundEffect::VILLAGER_DAMAGE);
@@ -375,46 +564,32 @@ void CollisionSystem::applyDamage(Entity attacker, Entity victim)
                 soundManager->playSound(SoundEffect::PITCHFORK_DAMAGE);
             }
 
-            health.health -= damage.value;
-            if (!registry.onHits.has(victim)) {
-                OnHit& hit = registry.onHits.emplace(victim);
+            health.health -= damageValue;
 
-                if (registry.players.has(victim))
+            if (registry.players.has(victim))
+            {
+                OnHit& onHit = registry.onHits.has(victim) ? registry.onHits.get(victim) : registry.onHits.emplace(victim);
+                printd("Player has been hit! Remaining health: %f\n", health.health);
+                onHit.isAllImmune = true;
+                onHit.invuln_tracker[victim] = PLAYER_INVINCIBILITY_TIMER;
+            }
+            else if (registry.enemies.has(victim))
+            {
+                OnHit& onHit = registry.onHits.has(victim) ? registry.onHits.get(victim) : registry.onHits.emplace(victim);
+                if (damage.type == DamageType::wind)
                 {
-                    printd("Player has been hit! Remaining health: %f\n", health.health);
-                    hit.invincibility_timer = PLAYER_INVINCIBILITY_TIMER;
+                    onHit.invuln_tracker[attacker] = ENEMY_INVINCIBILITY_TIMER;
                 }
-                else
-                {
-                    hit.invincibility_timer = ENEMY_INVINCIBILITY_TIMER;
-                }
+
+                onHit.invuln_tracker[victim] = ENEMY_INVINCIBILITY_TIMER;
             }
 
         }
     }
     // projectile <-> projectile -- projectiles don't have health
     else {
-        Projectile& victim_projectile = registry.projectiles.get(victim);
-        if (victim_projectile.type == DamageType::water && !registry.deaths.has(victim)) {
-            registry.deaths.emplace(victim);
-        }
     }
-
-    if (registry.projectiles.has(attacker) && !registry.deaths.has(attacker))
-    {
-        Projectile& attacker_projectile = registry.projectiles.get(attacker);
-
-        // lightning spell shouldn't die after hitting one target
-        if (attacker_projectile.type == DamageType::lightning || attacker_projectile.type == DamageType::wind)
-        {
-            // do nothing
-        }
-        else {
-            registry.deaths.emplace(attacker);
-        }
-
-        // printd("Marked for removal due to collision -> Entity value: %u\n", static_cast<unsigned>(attacker));
-    }
+    return HitTypes::notHit;
 }
 
 void CollisionSystem::applyHealing(Entity target)
@@ -432,8 +607,15 @@ void CollisionSystem::applyHealing(Entity target)
     heal.heal_time = PLAYER_HEAL_COOLDOWN;
 }
 
-void CollisionSystem::unlockSpell(Entity target, SpellType type)
+void CollisionSystem::pickupSpell(Entity target, SpellType type)
 {
     Player& player = registry.players.get(target);
-    player.spell_queue.unlockSpell(type);
+    if (player.spell_queue.hasSpell(type))
+    {
+        player.spell_queue.addProgressSpell(type, 10);
+    }
+    else
+    {
+        player.spell_queue.levelSpell(type);
+    }
 }

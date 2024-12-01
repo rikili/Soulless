@@ -8,6 +8,7 @@
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include <SDL_mixer.h>
+#include <queue>
 
 class WorldSystem final : public IWorldSystem {
 public:
@@ -53,4 +54,6 @@ private:
    Entity player_mage;
    ParticleSystem particleSystem;
    float powerup_timer;
+
+   std::queue<vec2> lightnings_to_create; // positions to source lightning from, only for MAX lightning
 };
