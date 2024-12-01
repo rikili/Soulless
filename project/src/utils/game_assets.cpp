@@ -72,10 +72,10 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
         -0.25f, .6f, 0.f,
         -.3999999f, 0.2f, 0.f,
         .3999999f, .2f, 0.f,
-        -.4333333f, -0.2f, 0.f,
+        -.5f, -0.2f, 0.f,
         -0.35f, -.6666667f, 0.f,
         0.35f, -.6666667f, 0.f,
-        0.4333333f, -0.2f, 0.f,
+        0.5f, -0.2f, 0.f,
         0.25f, 0.6f, 0.f,
     };
 

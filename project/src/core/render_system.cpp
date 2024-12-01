@@ -226,11 +226,14 @@ void RenderSystem::drawFrame(float elapsed_ms)
 	}
 
 	Entity player = registry.players.entities[0];
-	float playerX = registry.motions.get(player).position.x - window_width_px / 2.0 * zoomFactor;
-	float playerY = registry.motions.get(player).position.y - window_height_px / 2.0 * zoomFactor;
+	float playerX = registry.motions.get(player).position.x - window_width_px / 6.0;
+	float playerY = registry.motions.get(player).position.y - window_height_px / 6.0;
 
-	updateCameraPosition(clamp(playerX, 0.f, (float)(window_width_px / 2.0 + window_width_px * zoomFactor)),
-		clamp(playerY, 0.f, (float)(window_height_px / 2.0 + window_height_px * zoomFactor)));
+	updateCameraPosition(clamp(playerX, 0.f, (float)(2.0 * window_width_px / 3.0)),
+		clamp(playerY, 0.f, (float)(2.0 * window_height_px / 3.0)));
+
+	//printd("Camera: X:%f Y: %f \n", registry.cameras.get(camera).position.x, registry.cameras.get(camera).position.y);
+	//printd("Player: X:%f Y: %f \n", registry.motions.get(player).position.x, registry.motions.get(player).position.y);
 
 	drawBackgroundObjects();
 
@@ -254,9 +257,9 @@ void RenderSystem::drawFrame(float elapsed_ms)
 
 		Camera& gameCamera = registry.cameras.get(camera);
 		if (motion.position.x < gameCamera.position.x - RENDER_PAST_SCREEN_OFFSET
-			|| motion.position.x > gameCamera.position.x + window_width_px / 2.0 + RENDER_PAST_SCREEN_OFFSET
+			|| motion.position.x > gameCamera.position.x + 3.0 * window_width_px / 4.0 + RENDER_PAST_SCREEN_OFFSET
 			|| motion.position.y < gameCamera.position.y - RENDER_PAST_SCREEN_OFFSET
-			|| motion.position.y > gameCamera.position.y + window_height_px / 2.0 + RENDER_PAST_SCREEN_OFFSET) {
+			|| motion.position.y > gameCamera.position.y + 3.0 * window_height_px / 4.0 + RENDER_PAST_SCREEN_OFFSET) {
 			continue;
 		}
 
@@ -561,10 +564,11 @@ void RenderSystem::drawParticles() {
 
 void RenderSystem::updateCameraPosition(float x, float y) {
 	Camera& gameCamera = registry.cameras.get(camera);
-	gameCamera.position.x = x;
-	gameCamera.position.y = y;
+	gameCamera.position.x = 3 * x / 4;
+	gameCamera.position.y = 3 * y / 4;
 
 	viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-gameCamera.position, 0.0f));
+	viewMatrix = glm::scale(viewMatrix, glm::vec3(0.75, 0.75, 1.0));
 	registry.viewMatrix = viewMatrix;
 }
 
