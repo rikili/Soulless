@@ -35,7 +35,9 @@ enum class SoundEffect {
 enum class Song {
     MAIN,
     DEFEAT,
-    BOSS
+    INTRO,
+    BOSS,
+    LEVELMAX,
 };
 
 class SoundManager {

@@ -251,6 +251,7 @@ struct Camera
     vec2 position = { 0, 0 };
 };
 
+
 struct GlobalOptions {
     bool tutorial = true;
     int showingTab = 0;
@@ -258,6 +259,7 @@ struct GlobalOptions {
     int fps = 0;
     bool showFps = false;
     bool loadingOldGame = false;
+    bool introPlayed = false;
 
     // -- DEBUG options, will refactor --
     bool debugSpellSpawn = false;

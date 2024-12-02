@@ -19,10 +19,14 @@ public:
 
 	void reset();
 
+	void setRenderer(IRenderSystem* renderer) override;
+
 private:
 	// keeps track of pressed movement keys (up, right, left, down) 
 	std::unordered_set<int> activeMoveKeys;
 	vec2 worldMousePosition;
+
+	IRenderSystem* renderer;
 
 	void updateVelocity();
 	void cast_player_spell(double x, double y, bool is_left);

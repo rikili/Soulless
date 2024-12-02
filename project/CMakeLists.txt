@@ -99,6 +99,58 @@ endif()
 set(glm_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ext/glm/cmake/glm) # if necessary
 find_package(glm REQUIRED)
 
+# FFmpeg configuration
+if (IS_OS_WINDOWS)
+    # Windows-specific FFmpeg setup
+    set(FFMPEG_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/ext/ffmpeg")
+    set(FFMPEG_INCLUDE_DIRS "${FFMPEG_ROOT}/include")
+    set(FFMPEG_LIBRARY_DIRS "${FFMPEG_ROOT}/lib")
+
+    if (${CMAKE_SIZEOF_VOID_P} MATCHES "8")
+        # 64-bit Windows
+        set(FFMPEG_LIBRARIES
+            "${FFMPEG_LIBRARY_DIRS}/avcodec.lib"
+            "${FFMPEG_LIBRARY_DIRS}/avformat.lib"
+            "${FFMPEG_LIBRARY_DIRS}/avutil.lib"
+            "${FFMPEG_LIBRARY_DIRS}/swscale.lib"
+            "${FFMPEG_LIBRARY_DIRS}/swresample.lib"
+            "${FFMPEG_LIBRARY_DIRS}/avdevice.lib"
+        )
+        
+        # Copy DLLs to output directory
+        set(FFMPEG_DLLS
+            "${FFMPEG_ROOT}/bin/avcodec-61.dll"
+            "${FFMPEG_ROOT}/bin/avformat-61.dll"
+            "${FFMPEG_ROOT}/bin/avutil-59.dll"
+            "${FFMPEG_ROOT}/bin/swscale-8.dll"
+            "${FFMPEG_ROOT}/bin/swresample-5.dll"
+            "${FFMPEG_ROOT}/bin/avdevice-61.dll"
+        )
+
+        foreach(DLL ${FFMPEG_DLLS})
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "${DLL}"
+                    "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
+        endforeach()
+    else()
+        # 32-bit Windows configuration if needed
+    endif()
+    
+    target_include_directories(${PROJECT_NAME} PUBLIC ${FFMPEG_INCLUDE_DIRS})
+else()
+    # Unix-like systems (Linux, macOS) use pkg-config
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(FFMPEG REQUIRED IMPORTED_TARGET
+        libavcodec
+        libavformat
+        libavutil
+        libswscale
+        libswresample
+        libavdevice
+    )
+endif()
+
 # GLFW, SDL2 could be precompiled (on windows) or installed by a package manager (on OSX and Linux)
 if (IS_OS_LINUX OR IS_OS_MAC)
     # Try to find packages rather than to use the precompiled ones
@@ -130,19 +182,19 @@ elseif (IS_OS_WINDOWS)
     if (${CMAKE_SIZEOF_VOID_P} MATCHES "8")
         set(GLFW_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/lib/glfw3dll-x64.lib")
         set(SDL2_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2-x64.lib")
-	set(SDL2MIXER_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2_mixer-x64.lib")
+        set(SDL2MIXER_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2_mixer-x64.lib")
 
-	set(GLFW_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/lib/glfw3-x64.dll")
-	set(SDL2_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2-x64.dll")
-	set(SDL2MIXER_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2_mixer-x64.dll")
+        set(GLFW_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/lib/glfw3-x64.dll")
+        set(SDL2_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2-x64.dll")
+        set(SDL2MIXER_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2_mixer-x64.dll")
     else()
         set(GLFW_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/lib/glfw3dll-x86.lib")
         set(SDL2_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2-x86.lib")
-	set(SDL2MIXER_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2_mixer-x86.lib")
+        set(SDL2MIXER_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2_mixer-x86.lib")
 
-	set(GLFW_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/lib/glfw3-x86.dll")
-	set(SDL2_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2-x86.dll")
-	set(SDL2MIXER_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2_mixer-x86.dll")
+        set(GLFW_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/lib/glfw3-x86.dll")
+        set(SDL2_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2-x86.dll")
+        set(SDL2MIXER_DLL "${CMAKE_CURRENT_SOURCE_DIR}/ext/sdl/lib/SDL2_mixer-x86.dll")
     endif()
 
     # FreeType - Windows-specific (x64 only)
@@ -205,8 +257,15 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/ext/freetype/include")
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLFW_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SDL2_INCLUDE_DIRS})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${GLFW_LIBRARIES} ${SDL2_LIBRARIES} ${SDL2MIXER_LIBRARIES} glm::glm ${FREETYPE_LIBRARY})
-
+target_link_libraries(${PROJECT_NAME} PUBLIC
+        ${GLFW_LIBRARIES}
+        ${SDL2_LIBRARIES}
+        ${SDL2MIXER_LIBRARIES}
+        glm::glm
+        ${FREETYPE_LIBRARY}
+        $<$<NOT:$<BOOL:${IS_OS_WINDOWS}>>:PkgConfig::FFMPEG>
+        $<$<BOOL:${IS_OS_WINDOWS}>:${FFMPEG_LIBRARIES}>
+)
 
 # Needed to add this
 if(IS_OS_LINUX)

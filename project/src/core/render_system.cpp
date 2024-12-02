@@ -9,7 +9,10 @@
 #include "stb_image.h"
 #include "core/common.hpp"
 #include <glm/gtc/matrix_transform.hpp>
+#include <libavformat/avformat.h>
+
 #include "entities/general_components.hpp"
+#include "graphics/video_player.hpp"
 #include "utils/spell_queue.hpp"
 #include "utils/isometric_helper.hpp"
 
@@ -46,7 +49,8 @@ glm::vec3 spellTypeToColor(SpellType spell) {
  * @return true: if the render system is initialized successfully
  * @return false: if the render system is not initialized successfully
  */
-bool RenderSystem::initialize(IInputHandler& input_handler, const int width, const int height, const char* title)
+bool RenderSystem::initialize(IInputHandler& input_handler,
+	const int width, const int height, const char* title)
 {
 	glm::mat4 iso = glm::mat4(1.0f);
 	iso = glm::rotate(iso, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));  // X rotation
@@ -57,6 +61,8 @@ bool RenderSystem::initialize(IInputHandler& input_handler, const int width, con
 	registry.projectionMatrix = projectionMatrix;
 
 	initializeCamera();
+
+	this->sound_manager = sound_manager;
 
 	if (!glfwInit()) { // Initialize the window
 		exit(EXIT_FAILURE);
@@ -112,7 +118,7 @@ bool RenderSystem::initialize(IInputHandler& input_handler, const int width, con
 	glfwSwapBuffers(this->window);
 
 	this->input_handler = &input_handler;
-
+	this->input_handler->setRenderer(this);
 	return true;
 }
 
@@ -162,7 +168,8 @@ void RenderSystem::drawFrame(float elapsed_ms)
 	// and alpha blending, one would have to sort
 	// sprites back to front
 
-	if (globalOptions.tutorial) {
+
+	if (globalOptions.tutorial && !this->isPlayingVideo()) {
 		float titleFontSize = this->asset_manager->getFont("king")->size;
 		float tutFontSize = this->asset_manager->getFont("deutsch")->size;
 		float currentY = window_height_px - titleFontSize;
@@ -246,6 +253,25 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		std::string message = "Press SPACE or click to ";
 		std::string start = globalOptions.pause ? "resume." : "start.";
 		drawText(message + start, "deutsch", window_width_px / 2.0f, tutFontSize * 1.5, 1.0f, selectedColor);
+		return;
+	}
+
+	if (is_playing_video && video_player) {
+		updateVideo();
+
+		int w, h;
+		glfwGetFramebufferSize(window, &w, &h);
+		// Use simple orthographic projection for testing
+		glm::mat4 proj = glm::ortho(0.0f, static_cast<float>(w),
+								   static_cast<float>(h), 0.0f, -1.0f, 1.0f);
+		glm::mat4 view = glm::mat4(1.0f);  // Identity matrix
+
+		video_player->draw(proj, view);
+		return;
+	}
+
+	if (globalOptions.pause) {
+		drawText("Paused", "king", window_width_px / 2.0f, window_height_px / 2.0f, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 		return;
 	}
 
@@ -908,13 +934,13 @@ void RenderSystem::drawHUD()
 void RenderSystem::setCustomCursor() {
 
 	std::string cursorPath = textures_path("cursor") + ".png";
-	std::cout << "Loading cursor directly from file: " << cursorPath << std::endl;
+	// std::cout << "Loading cursor directly from file: " << cursorPath << std::endl;
 
 	GLFWimage cursorImage;
 	cursorImage.pixels = stbi_load(cursorPath.c_str(), &cursorImage.width, &cursorImage.height, 0, 4);
-	std::cout << "Cursor image loaded: " << cursorImage.width << "x" << cursorImage.height << std::endl;
+	// std::cout << "Cursor image loaded: " << cursorImage.width << "x" << cursorImage.height << std::endl;
 	if (!cursorImage.pixels) {
-		std::cerr << "Failed to load cursor image from: " << cursorPath << std::endl;
+		// std::cerr << "Failed to load cursor image from: " << cursorPath << std::endl;
 		return;
 	}
 
@@ -933,3 +959,72 @@ void RenderSystem::setCustomCursor() {
 	stbi_image_free(cursorImage.pixels);
 }
 
+
+
+bool RenderSystem::playVideo(const std::string& filename) {
+	static bool ffmpeg_initialized = false;
+	if (!ffmpeg_initialized) {
+	#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)
+			// Old FFmpeg version (before 4.0)
+			av_register_all();
+	#endif
+			avformat_network_init();
+			ffmpeg_initialized = true;
+	}
+
+
+	// Create video player if it doesn't exist
+	if (!video_player) {
+		video_player = std::make_unique<VideoPlayer>();
+	}
+
+	// Get or create video shader
+	const Shader* video_shader = this->asset_manager->getShader("video");
+	if (!video_shader) {
+		// Load video shader if not already loaded
+		this->asset_manager->loadShader("video", shader_path("video") + ".vs.glsl", shader_path("video") + ".fs.glsl");
+		video_shader = this->asset_manager->getShader("video");
+	}
+
+	// Initialize video player with the file
+	if (!video_player->initialize(filename, video_shader->program)) {
+		std::cerr << "Failed to initialize video player with file: " << filename << std::endl;
+		return false;
+	}
+
+	is_playing_video = true;
+	return true;
+}
+
+void RenderSystem::stopVideo() {
+	if (video_player) {
+		video_player->cleanup();
+		is_playing_video = false;
+		globalOptions.pause = false;
+		SoundManager* soundManager = SoundManager::getSoundManager();
+		soundManager->playMusic(Song::MAIN);
+	}
+}
+
+void RenderSystem::updateVideo() {
+	if (!is_playing_video || !video_player) return;
+
+	if (!video_player->readFrame()) {
+		// End of video or error
+		stopVideo();
+		return;
+	}
+}
+
+bool RenderSystem::isPlayingVideo() const {
+	return is_playing_video;
+}
+
+void RenderSystem::playCutscene(const std::string& filename, Song song) {
+	globalOptions.pause = true;
+	stopVideo();
+	SoundManager* soundManager = SoundManager::getSoundManager();
+	soundManager->playMusic(song);
+	this->playVideo(filename);
+
+}

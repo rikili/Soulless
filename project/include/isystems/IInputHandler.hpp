@@ -22,4 +22,6 @@ public:
         int mods) = 0;
 
     virtual void reset() = 0;
+
+    virtual void setRenderer(IRenderSystem* renderer) = 0;
 };

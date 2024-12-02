@@ -37,7 +37,9 @@ bool SoundManager::initialize() {
 
     registerMusic(Song::MAIN, "background_music.wav");
     registerMusic(Song::DEFEAT, "player_defeated_music.wav");
+    registerMusic(Song::INTRO, "intro.wav");
     registerMusic(Song::BOSS, "boss_background_music.wav");
+    registerMusic(Song::LEVELMAX, "levelmax.wav");
 
     registerSound(SoundEffect::FIRE, "fireball.wav");
     registerSound(SoundEffect::FIRE_MAX, "fireball_max.wav");
@@ -65,6 +67,7 @@ bool SoundManager::initialize() {
     registerSound(SoundEffect::SHIELD_BLOCK, "shield_block.wav");
     registerSound(SoundEffect::COMEHERE, "darklord_comehere.wav");
     registerSound(SoundEffect::PORTAL_DAMAGE, "portal_damage.wav");
+
 
     return true;
 }

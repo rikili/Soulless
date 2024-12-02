@@ -9,6 +9,17 @@
 #include <vector>
 #include <map>
 
+#include "graphics/video_player.hpp"
+
+extern "C" {
+#include <libavcodec/version.h>
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavutil/avutil.h>
+#include <libswscale/swscale.h>
+#include <libavdevice/avdevice.h>
+}
+
 class RenderSystem final : public IRenderSystem {
 public:
     bool initialize(IInputHandler& input_handler,
@@ -79,6 +90,13 @@ public:
         }
     }
 
+    bool playVideo(const std::string& filename) override;
+    void stopVideo() override;
+    void updateVideo() override;
+    bool isPlayingVideo() const override;
+
+    void playCutscene(const std::string& filename, Song song) override;
+
 private:
     struct RenderIndex {
         size_t index;
@@ -100,6 +118,9 @@ private:
     GLFWwindow* window = nullptr;
     IAssetManager* asset_manager = nullptr;
     IInputHandler* input_handler = nullptr;
+
+    std::unique_ptr<VideoPlayer> video_player;
+    bool is_playing_video;
 
     std::map<std::string, ISubRenderer*> sub_renderers;
     std::vector<RenderRequest> render_requests;
@@ -132,4 +153,6 @@ private:
 
     void setCustomCursor();
     GLFWcursor* cursor;
+
+    SoundManager* sound_manager;
 };

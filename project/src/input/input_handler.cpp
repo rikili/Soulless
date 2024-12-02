@@ -9,6 +9,7 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
+#include "isystems/IRenderSystem.hpp"
 #include "utils/serializer.hpp"
 
 /*
@@ -54,27 +55,46 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
 
     if (isTutorialOn() || globalOptions.pause)
     {
-        if (key == GLFW_KEY_SPACE && !globalOptions.loadingOldGame) {
+        if (key == GLFW_KEY_SPACE && !globalOptions.loadingOldGame && action == GLFW_PRESS) {
             if (!globalOptions.pause)
             {
-                soundManager->playMusic(Song::MAIN);
+                // soundManager->playMusic(Song::MAIN);
             }
             else
             {
-                soundManager->toggleMusic();
+                // soundManager->toggleMusic();
             }
             globalOptions.tutorial = false;
-            globalOptions.pause = false;
+            if (!renderer->isPlayingVideo() && !globalOptions.introPlayed)
+            {
+                this->renderer->playCutscene("intro.mp4", Song::INTRO);
+                globalOptions.introPlayed  = true;
+                return;
+            }
+            if (globalOptions.introPlayed)
+            {
+                globalOptions.pause = false;
+                globalOptions.tutorial = false;
+            }
+
+            if (renderer->isPlayingVideo())
+            {
+                renderer->stopVideo();
+                globalOptions.tutorial = false;
+                globalOptions.pause = false;
+                soundManager->playMusic(Song::MAIN);
+            }
         }
 
         if (key == GLFW_KEY_1 || key == GLFW_KEY_2 || key == GLFW_KEY_3 || key == GLFW_KEY_4)
         {
             globalOptions.showingTab = key - GLFW_KEY_0;
         }
+
         return;
     }
 
-    if (isPlayerDead())
+    if (isPlayerDead() || globalOptions.pause)
     {
         return;
     }
@@ -303,4 +323,11 @@ void InputHandler::updateVelocity()
 
     //  printd("New velocity is: %f, %f\n", playerMotion.velocity.x, playerMotion.velocity.y);
     //  printd("New position is: %f, %f\n", playerMotion.position.x, playerMotion.position.y);
+}
+
+
+
+void InputHandler::setRenderer(IRenderSystem* renderer)
+{
+    this->renderer = renderer;
 }

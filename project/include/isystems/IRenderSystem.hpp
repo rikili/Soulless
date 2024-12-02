@@ -4,6 +4,8 @@
 #include <glm/mat4x4.hpp>
 #include <string>
 
+#include "sound/sound_manager.hpp"
+
 class IRenderSystem
 {
 public:
@@ -35,4 +37,10 @@ public:
     virtual void addSubRenderer(const std::string &name, ISubRenderer *sub_renderer) = 0;
     virtual void removeSubRenderer(const std::string &name) = 0;
     virtual std::map<std::string, ISubRenderer *> &getSubRenderersMap() = 0;
+
+    virtual bool playVideo(const std::string& filename) = 0;
+    virtual void stopVideo() = 0;
+    virtual void updateVideo() = 0;
+    virtual bool isPlayingVideo() const = 0;
+    virtual void playCutscene(const std::string& filename, Song song) = 0;
 };
