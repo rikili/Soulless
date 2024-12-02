@@ -5,19 +5,25 @@
 #include <iostream>
 #include <map>
 #include "core/common.hpp"
+#include "utils/constants.hpp"
 
 enum class SoundEffect {
     FIRE,
+    FIRE_MAX,
+    FIRE_MAX_EXPLODE,
     VILLAGER_DAMAGE,
     PITCHFORK_DAMAGE,
     LIGHTNING,
     WATER,
+    WATER_EXPLODE,
     PLAYER_DEFEATED,
     DISCARD_SPELL,
     POWERUP_PICKUP,
     POWERUP_SPAWN,
     ICE,
+    ICE_MAX,
     WIND,
+    WIND_MAX,
     PLASMA
 };
 
@@ -39,6 +45,8 @@ public:
     void toggleMusic();
 
     void removeSoundManager();
+
+    static SoundEffect convertSpellToSoundEffect(SpellType spellType, int level);
 
 private:
     SoundManager();

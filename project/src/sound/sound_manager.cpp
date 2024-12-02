@@ -39,16 +39,25 @@ bool SoundManager::initialize() {
     registerMusic(Song::DEFEAT, "player_defeated_music.wav");
 
     registerSound(SoundEffect::FIRE, "fireball.wav");
+    registerSound(SoundEffect::FIRE_MAX, "fireball_max.wav");
+    registerSound(SoundEffect::FIRE_MAX_EXPLODE, "fireball_max_explode.wav");
+
+    registerSound(SoundEffect::ICE, "ice.wav");
+    registerSound(SoundEffect::ICE_MAX, "ice_max.wav");
+
+    registerSound(SoundEffect::WATER, "water.wav");
+    registerSound(SoundEffect::WATER_EXPLODE, "water_explode.wav");
+
+    registerSound(SoundEffect::WIND, "wind.wav");
+    registerSound(SoundEffect::WIND_MAX, "wind_max.wav");
+
     registerSound(SoundEffect::VILLAGER_DAMAGE, "villager_damage.wav");
     registerSound(SoundEffect::PITCHFORK_DAMAGE, "pitchfork_damage.wav");
     registerSound(SoundEffect::PLAYER_DEFEATED, "player_defeated.wav");
     registerSound(SoundEffect::LIGHTNING, "lightning.wav");
-    registerSound(SoundEffect::WATER, "water.wav");
     registerSound(SoundEffect::DISCARD_SPELL, "discard_spell.wav");
     registerSound(SoundEffect::POWERUP_PICKUP, "powerup-pickup.wav");
     registerSound(SoundEffect::POWERUP_SPAWN, "powerup-spawn.wav");
-    registerSound(SoundEffect::ICE, "ice.wav");
-    registerSound(SoundEffect::WIND, "wind.wav");
     registerSound(SoundEffect::PLASMA, "plasma.wav");
 
     return true;
@@ -124,5 +133,24 @@ void SoundManager::registerMusic(Song song, const char* filePath) {
     }
     else {
         music[song] = backgroundMusic;
+    }
+}
+
+SoundEffect SoundManager::convertSpellToSoundEffect(SpellType spellType, int level) {
+    switch (spellType) {
+        case SpellType::FIRE:
+            return level == MAX_SPELL_LEVEL ? SoundEffect::FIRE_MAX : SoundEffect::FIRE;
+        case SpellType::WATER:
+            return SoundEffect::WATER;
+        case SpellType::LIGHTNING:
+            return SoundEffect::LIGHTNING;
+        case SpellType::ICE:
+            return level == MAX_SPELL_LEVEL ? SoundEffect::ICE_MAX : SoundEffect::ICE;
+        case SpellType::WIND:
+            return level == MAX_SPELL_LEVEL ? SoundEffect::WIND_MAX : SoundEffect::WIND;
+        case SpellType::PLASMA:
+            return SoundEffect::PLASMA;
+        default:
+            throw std::invalid_argument("Unknown SpellType");
     }
 }

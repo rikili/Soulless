@@ -1,4 +1,5 @@
 #include "utils/spell_factory.hpp"
+#include "sound/sound_manager.hpp"
 
 namespace SpellFactory {
 
@@ -89,6 +90,9 @@ namespace SpellFactory {
     default:
       break;
     }
+
+    SoundManager* soundManager = SoundManager::getSoundManager();
+    soundManager->playSound(SoundManager::convertSpellToSoundEffect(spell, player.spell_queue.getSpellLevel(spell)));
   }
 
   void createSpellResolution(ECSRegistry& registry, vec2& position, PostResolution resolution, Entity& source_ent)
@@ -96,17 +100,21 @@ namespace SpellFactory {
       int level = registry.spellProjectiles.has(source_ent) ? clamp(registry.spellProjectiles.get(source_ent).level, 1, MAX_SPELL_LEVEL - 1) : 1;
       Entity spell_ent = initSpellEntity(registry, position, 0.f, { 0, 0 }, level);
 
+      SoundManager* soundManager = SoundManager::getSoundManager();
+
       switch (resolution)
       {
       case PostResolution::FIRE_PROJECTILE:
       {
           configureMaxFireProjectile(registry, spell_ent);
+          soundManager->playSound(SoundEffect::FIRE_MAX_EXPLODE);
           break;
       }
       case PostResolution::WATER_EXPLOSION:
       {
           int state_level = registry.spellStates.has(source_ent) ? clamp(registry.spellStates.get(source_ent).barrier_level, 1, 3) : 1;
           configureMaxWaterExplosion(registry, spell_ent, state_level);
+          soundManager->playSound(SoundEffect::WATER_EXPLODE);
           break;
       }
       default:

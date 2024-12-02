@@ -221,29 +221,6 @@ void InputHandler::reset()
     activeMoveKeys.clear();
 }
 
-SoundEffect convertSpellToSoundEffect(SpellType spellType, bool drop) {
-    if (drop) {
-        return SoundEffect::DISCARD_SPELL;
-    }
-
-    switch (spellType) {
-    case SpellType::FIRE:
-        return SoundEffect::FIRE;
-    case SpellType::WATER:
-        return SoundEffect::WATER;
-    case SpellType::LIGHTNING:
-        return SoundEffect::LIGHTNING;
-    case SpellType::ICE:
-        return SoundEffect::ICE;
-    case SpellType::WIND:
-        return SoundEffect::WIND;
-    case SpellType::PLASMA:
-        return SoundEffect::PLASMA;
-    default:
-        throw std::invalid_argument("Unknown SpellType");
-    }
-}
-
 void InputHandler::drop_player_spell(bool is_left) {
     Entity& player_ent = registry.players.entities[0];
     Player& player = registry.players.get(player_ent);
@@ -258,7 +235,7 @@ void InputHandler::drop_player_spell(bool is_left) {
     health.health = std::min(PLAYER_HEALTH, health.health + 2.5f);
 
     SoundManager* soundManager = SoundManager::getSoundManager();
-    soundManager->playSound(convertSpellToSoundEffect(SpellType::COUNT, true));
+    soundManager->playSound(SoundEffect::DISCARD_SPELL);
 
     invoke_player_cooldown(player, is_left);
 }
@@ -275,9 +252,6 @@ void InputHandler::cast_player_spell(double x, double y, bool is_left)
     std::pair<SpellType, int> spell = spell_queue.useSpell(is_left);
 
     SpellFactory::createSpellProjectile(registry, player_ent, spell.first, spell.second, x, y);
-
-    SoundManager* soundManager = SoundManager::getSoundManager();
-    soundManager->playSound(convertSpellToSoundEffect(spell.first, false));
 
     invoke_player_cooldown(player, is_left);
 }
