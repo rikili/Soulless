@@ -76,7 +76,9 @@ enum class AnimationState
 // --- Player Constants ---
 const float PLAYER_HEALTH = 100.f;
 const float PLAYER_MAX_HEALTH = 100.f;
-const float PLAYER_HEAL_COOLDOWN = 10000.f;
+const float PLAYER_SPELL_COOLDOWN = 1000.f;
+const float PLAYER_HEAL_AMOUNT = 5.f;
+const float PLAYER_HEAL_COOLDOWN = 1500.f;
 const float PLAYER_VELOCITY = 0.1f;
 
 // --- Player Spells ---
@@ -163,17 +165,17 @@ const float MAX_ICE_RANGE = 400.f;
 const float MAX_ICE_DAMAGE = 30.f;
 const float ICE_SCALING[4] = { 1.0, 1.1, 1.1, 1.1 };
 
-const float WIND_DAMAGE = 4.f;
+const float WIND_DAMAGE = 6.f;
 const float WIND_RANGE = FLT_MAX;
 const vec2 WIND_SCALE = { 0.75f, 0.75f };
 const float WIND_SCALE_FACTOR = 1.f;
 const vec2 WIND_COLLIDER = { 40.f, 40.f };
-const float WIND_PLACEMENT_LIFETIME = 5000.f;
+const float WIND_PLACEMENT_LIFETIME = 3000.f;
 
-const float PLASMA_DAMAGE = 25.f;
+const float PLASMA_DAMAGE = 30.f;
 const float PLASMA_SPEED = 0.01f;
-const float PLASMA_MAX_SPEED = 0.5f;
-const float PLASMA_RANGE = 200.f;
+const float PLASMA_MAX_SPEED = 0.6f;
+const float PLASMA_RANGE = 225.f;
 const vec2 PLASMA_SCALE = { 0.4f, 0.4f };
 const vec2 PLASMA_COLLIDER = { 20.f, 20.f };
 
@@ -194,7 +196,7 @@ const float ENEMY_BASIC_RANGE = 100.f;
 // Knight + Pitchfork
 const float KNIGHT_HEALTH = 30.f;
 const float KNIGHT_COOLDOWN = 4000.f;
-const float KNIGHT_VELOCITY = 0.02f;
+const float KNIGHT_VELOCITY = 0.03f;
 const float KNIGHT_RANGE = 100.f;
 const float KNIGHT_DAMAGE = 5.f;
 const float PITCHFORK_VELOCITY = 0.125f;
@@ -205,7 +207,7 @@ const float KNIGHT_RETREAT_DISTANCE = 200.f;
 // Archer + Arrow
 const float ARCHER_HEALTH = 50.f;
 const float ARCHER_COOLDOWN = 2500.f;
-const float ARCHER_VELOCITY = 0.015f;
+const float ARCHER_VELOCITY = 0.025f;
 const float ARCHER_RANGE = 200.f;
 const float ARCHER_DAMAGE = 5.f;
 const float ARROW_VELOCITY = 0.175f;
@@ -215,7 +217,7 @@ const float ARCHER_RETREAT_DISTANCE = 250.f;
 // Paladin + Sword
 const float PALADIN_HEALTH = 100.f;
 const float PALADIN_COOLDOWN = 3000.f;
-const float PALADIN_VELOCITY = 0.015f;
+const float PALADIN_VELOCITY = 0.03f;
 const float PALADIN_RANGE = 20.f; // Melee range
 const float PALADIN_DAMAGE = 25.f;
 const float SWORD_VELOCITY = 0.175f;
@@ -230,20 +232,14 @@ const float SLASHER_DAMAGE = 20.f;
 
 // Dark Lord + Razor Wind + Claw Pull
 const float DARKLORD_HEALTH = 750.f;
-const float DARKLORD_VELOCITY = 0.03f;
+const float DARKLORD_VELOCITY = 0.025f;
 const float DARKLORD_DAMAGE = 20.f;
 const float DARKLORD_RANGE = 250.f;
-const float DARKLORD_RAZOR_COOLDOWN = 4000.f;
+const float DARKLORD_RAZOR_COOLDOWN = 3500.f;
 const float DARKLORD_PORTAL_COOLDOWN = 20000.f;
-// const float DARKLORD_RAZOR_COOLDOWN = 5000.f;
-// const float DARKLORD_CLAW_COOLDOWN = 10000.f;
-// const float DARKLORD_RAZOR_RANGE = 350.f;
-// const float DARKLORD_CLAW_RANGE = 400.f;
 const float DARKLORD_RAZOR_DAMAGE = 25.f;
-// const float DARKLORD_CLAW_DAMAGE = 10.f;
 const float DARKLORD_RAZOR_SPEED = 0.05f;
 const float DARKLORD_RAZOR_MAX_SPEED = 0.75f;
-// const float DARKLORD_CLAW_VELOCITY = 0.3f;
 
 // --- World Interactables ---
 enum class InteractableType
@@ -258,7 +254,7 @@ const int UPGRADE_KILL_COUNT[5] = { 10, 20, 30, 40, 40 };
 
 // --- Interactable Timers ---
 const float POWERUP_DECAY = 30000.f;
-const float POWERUP_SPAWN_TIMER =  35000.f;
+const float POWERUP_SPAWN_TIMER = 35000.f;
 const float POWERUP_SPAWN_BUFFER = 180.f; // distance from edge to spawn
 const float MIN_POWERUP_DIST = 80;
 

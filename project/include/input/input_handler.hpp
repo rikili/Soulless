@@ -27,5 +27,5 @@ private:
 	void updateVelocity();
 	void cast_player_spell(double x, double y, bool is_left);
 	void drop_player_spell(bool is_left);
-	void invoke_player_cooldown(Player& player, bool is_left);
+	void invoke_player_cooldown(Player& player, bool is_left, bool is_heal);
 };

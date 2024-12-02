@@ -232,12 +232,12 @@ void InputHandler::drop_player_spell(bool is_left) {
     spell_queue.discardSpell(is_left);
 
     Health& health = registry.healths.get(player_ent);
-    health.health = std::min(PLAYER_HEALTH, health.health + 2.5f);
+    health.health = std::min(PLAYER_HEALTH, health.health + PLAYER_HEAL_AMOUNT);
 
     SoundManager* soundManager = SoundManager::getSoundManager();
     soundManager->playSound(SoundEffect::DISCARD_SPELL);
 
-    invoke_player_cooldown(player, is_left);
+    invoke_player_cooldown(player, is_left, true);
 }
 
 void InputHandler::cast_player_spell(double x, double y, bool is_left)
@@ -253,12 +253,13 @@ void InputHandler::cast_player_spell(double x, double y, bool is_left)
 
     SpellFactory::createSpellProjectile(registry, player_ent, spell.first, spell.second, x, y);
 
-    invoke_player_cooldown(player, is_left);
+    invoke_player_cooldown(player, is_left, false);
 }
 
-void InputHandler::invoke_player_cooldown(Player& player, bool is_left)
+void InputHandler::invoke_player_cooldown(Player& player, bool is_left, bool is_heal)
 {
-    float cooldown = 700.f;
+
+    float cooldown = is_heal ? PLAYER_HEAL_COOLDOWN : PLAYER_SPELL_COOLDOWN;
 
     if (is_left)
     {

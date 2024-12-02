@@ -249,10 +249,10 @@ void WorldSystem::handleMovements(float elapsed_ms_since_last_update)
 
 			float slowFactor = 1;
 			if (registry.debuffs.has(entity)) {
-					Debuff &debuff = registry.debuffs.get(entity);
-					if (debuff.type == DebuffType::SLOW) {
-						slowFactor = debuff.strength;
-					}
+				Debuff& debuff = registry.debuffs.get(entity);
+				if (debuff.type == DebuffType::SLOW) {
+					slowFactor = debuff.strength;
+				}
 			}
 
 			motion.position = glm::clamp(motion.position + motion.velocity * slowFactor * elapsed_ms_since_last_update, { x_offset, y_offset }, { window_width_px - x_offset, window_height_px - y_offset });
@@ -650,7 +650,7 @@ void WorldSystem::restartGame() {
 	enemySpawnTimers.archer = 60000.f;
 	enemySpawnTimers.paladin = 120000.f;
 	enemySpawnTimers.slasher = 180000.f;
-	enemySpawnTimers.darklord = 0.0f;
+	enemySpawnTimers.darklord = 270000.0f;
 
 	// Spawn all at start (for debug)
 	/*

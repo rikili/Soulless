@@ -337,7 +337,7 @@ void CollisionSystem::resolve_collisions()
                     {
                         to_deactivate.insert(proj_entity);
                     }
-                    case (SpellType::WATER): { }
+                    case (SpellType::WATER): {}
                     }
                 }
                 else
@@ -404,13 +404,12 @@ void CollisionSystem::resolve_collisions()
     for (const Entity& interactable_entity : registry.interactables.entities)
     {
         std::unordered_set<Entity> other_entities = registry.collision_registry.get_collision_by_ent(interactable_entity);
-         const Interactable& interactable = registry.interactables.get(interactable_entity);
+        const Interactable& interactable = registry.interactables.get(interactable_entity);
         for (const Entity& other_entity : other_entities)
         {
             if (!registry.collision_registry.check_collision(interactable_entity, other_entity)) continue;
             if (registry.players.has(other_entity))
             {
-                if (interactable.type == InteractableType::HEALER && is_mesh_colliding(other_entity, interactable_entity)) applyHealing(other_entity);
                 if (interactable.type == InteractableType::POWER && is_mesh_colliding(other_entity, interactable_entity))
                 {
                     SoundManager* sound = SoundManager::getSoundManager();
@@ -453,15 +452,15 @@ void CollisionSystem::resolve_post_effects(std::unordered_map<PostResolution, st
     {
         switch (resolution.first)
         {
-            case PostResolution::FIRE_PROJECTILE:
+        case PostResolution::FIRE_PROJECTILE:
+        {
+            for (const Entity& target : resolution.second.second)
             {
-                for (const Entity& target : resolution.second.second)
-                {
-                    Motion& motion = registry.motions.get(target);
-                    SpellFactory::createSpellResolution(registry, motion.position, PostResolution::FIRE_PROJECTILE, resolution.second.first);
+                Motion& motion = registry.motions.get(target);
+                SpellFactory::createSpellResolution(registry, motion.position, PostResolution::FIRE_PROJECTILE, resolution.second.first);
 
-                }
             }
+        }
         }
     }
 }
@@ -469,13 +468,13 @@ void CollisionSystem::resolve_post_effects(std::unordered_map<PostResolution, st
 HitTypes CollisionSystem::applyDamage(Entity attacker, Entity victim, std::unordered_map<SpellType, int, SpellTypeHash>& tracker, bool do_scaling)
 {
     SoundManager* soundManager = SoundManager::getSoundManager();
-  
+
     if (registry.players.has(victim) && registry.projectiles.has(attacker) && registry.projectiles.get(attacker).type == DamageType::portal && !registry.deaths.has(victim)) {
         soundManager->playSound(SoundEffect::PORTAL_DAMAGE);
-        Motion &playerMotion = registry.motions.get(victim);
-        Projectile &projectile = registry.projectiles.get(attacker);
+        Motion& playerMotion = registry.motions.get(victim);
+        Projectile& projectile = registry.projectiles.get(attacker);
         playerMotion.position = projectile.sourcePosition;
-        Debuff &debuff = registry.debuffs.emplace(victim);
+        Debuff& debuff = registry.debuffs.emplace(victim);
         debuff.type = DebuffType::SLOW;
         debuff.timer = 2000.f;
         debuff.strength = 0.3f;
@@ -537,7 +536,7 @@ HitTypes CollisionSystem::applyDamage(Entity attacker, Entity victim, std::unord
             const SpellProjectile& proj = registry.spellProjectiles.get(attacker);
 
             // Knight will block non-max fire and ice spells
-            if (registry.enemies.get(victim).blocking && 
+            if (registry.enemies.get(victim).blocking &&
                 ((proj.type == SpellType::FIRE || proj.type == SpellType::ICE) && proj.level != MAX_SPELL_LEVEL)) {
                 soundManager->playSound(SoundEffect::SHIELD_BLOCK);
                 return HitTypes::absorbed;
@@ -610,7 +609,7 @@ HitTypes CollisionSystem::applyDamage(Entity attacker, Entity victim, std::unord
                 soundManager->playSound(SoundEffect::VILLAGER_DAMAGE);
             }
             else if (registry.players.has(victim)) {
-                    soundManager->playSound(SoundEffect::PITCHFORK_DAMAGE);
+                soundManager->playSound(SoundEffect::PITCHFORK_DAMAGE);
             }
 
             health.health -= damageValue;
@@ -625,7 +624,8 @@ HitTypes CollisionSystem::applyDamage(Entity attacker, Entity victim, std::unord
             else if (registry.enemies.has(victim))
             {
                 OnHit& onHit = registry.onHits.has(victim) ? registry.onHits.get(victim) : registry.onHits.emplace(victim);
-                if (damage.type == DamageType::wind)
+                // add invulnerability timer for entity
+                if (damage.type == DamageType::wind || damage.type == DamageType::plasma)
                 {
                     onHit.invuln_tracker[attacker] = ENEMY_INVINCIBILITY_TIMER;
                 }
