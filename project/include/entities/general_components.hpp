@@ -65,6 +65,7 @@ struct Enemy {
     EnemyType type;
     float range = 0;
     float cooldown = -1.f;
+    float secondCooldown = -1.f;
     float eTimer = -1.f;
     bool blocking = false;
     bool altAttackPattern = false;

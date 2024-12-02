@@ -26,7 +26,7 @@ enum class SoundEffect {
     PLASMA,
     BOSS_DEATH_BELL,
     CHOIR,
-    SHIELD_BLOCK
+    SHIELD_BLOCK,
     WIND_MAX,
     COMEHERE,
     PORTAL_DAMAGE,
