@@ -42,6 +42,7 @@ public:
 	ComponentContainer<Debuff> debuffs;
 	ComponentContainer<SpellProjectile> spellProjectiles;
 	CollisionRegistry collision_registry;
+	float worldTimer = START_WORLD_TIME;
 	mat4 viewMatrix;
 	mat4 projectionMatrix;
 
@@ -77,7 +78,6 @@ public:
 		registry_list.push_back(&spellUnlocks);
 		registry_list.push_back(&decays);
 		registry_list.push_back(&spellProjectiles);
-
 	}
 
 	void clear_all_components() const
@@ -113,6 +113,13 @@ public:
 
 		for (ContainerInterface* reg : registry_list)
 			reg->remove(e);
+	}
+
+	void reset_registry()
+	{
+		clear_all_components();
+		worldTimer = START_WORLD_TIME;
+		collision_registry.clear_collisions();
 	}
 };
 

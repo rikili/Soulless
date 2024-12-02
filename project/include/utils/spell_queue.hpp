@@ -40,6 +40,8 @@ public:
 	const int getSpellUpgradeTrack(SpellType spell);
 	void addProgressSpell(SpellType spell, int count);
 	bool hasSpell(SpellType spell);
+	void doPlasmaSacrifice();
+	bool isAbleToSacrifice();
 
 private:
 	SpellType firstSpell;

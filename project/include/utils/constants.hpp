@@ -11,7 +11,6 @@ const float KNIGHT_SPAWN_INTERVAL_MS = 8000.f;
 const float ARCHER_SPAWN_INTERVAL_MS = 16000.f;
 const float PALADIN_SPAWN_INTERVAL_MS = 20000.f;
 const float SLASHER_SPAWN_INTERVAL_MS = 20000.f;
-const float DARKLORD_SPAWN_INTERVAL_MS = 270000.f;
 
 const unsigned int QUEUE_SIZE = 6;
 
@@ -22,6 +21,7 @@ const float ENEMY_INVINCIBILITY_TIMER = 800.f;
 const float PLAYER_INVINCIBILITY_TIMER = 1500.f;
 
 const int MAX_PARTICLES = 10000;
+const float START_WORLD_TIME = 10 * 60000.f + 1000; // 10 minutes, plus a bit for showing 10 on the clock
 
 // --- Damage Types ---
 enum class DamageType
@@ -178,6 +178,7 @@ const float PLASMA_MAX_SPEED = 0.6f;
 const float PLASMA_RANGE = 225.f;
 const vec2 PLASMA_SCALE = { 0.4f, 0.4f };
 const vec2 PLASMA_COLLIDER = { 20.f, 20.f };
+const float PLASMA_SCALE_FACTOR = 4.f;
 
 // --- Enemy Types ---
 enum class EnemyType
@@ -240,12 +241,16 @@ const float DARKLORD_PORTAL_COOLDOWN = 20000.f;
 const float DARKLORD_RAZOR_DAMAGE = 25.f;
 const float DARKLORD_RAZOR_SPEED = 0.05f;
 const float DARKLORD_RAZOR_MAX_SPEED = 0.75f;
+const vec2 DARKLORD_SPAWN_POS = { window_width_px / 2.f, window_height_px / 2.f };
+const vec2 DARKLORD_SPAWN_VEL = { 0, 0 };
 
 // --- World Interactables ---
 enum class InteractableType
 {
     HEALER,
-    POWER
+    POWER,
+    BOSS,
+    PLASMA
 };
 
 // --- Upgrade Requirements ---
@@ -257,6 +262,19 @@ const float POWERUP_DECAY = 30000.f;
 const float POWERUP_SPAWN_TIMER = 35000.f;
 const float POWERUP_SPAWN_BUFFER = 180.f; // distance from edge to spawn
 const float MIN_POWERUP_DIST = 80;
+
+const std::string ALTAR_INTERACT = "Press R to meet (END) your fate";
+const vec2 ALTAR_POSITION = vec2(window_width_px / 2.f, window_height_px / 2.f + 150.f);
+const vec2 ALTAR_COLLIDER = vec2(50, 50);
+
+const std::string PLASMA_ALTAR_INTERACT = "Press R to take a gamble (Need 5 spell upgrades)";
+const vec2 PLASMA_ALTAR_POSITION = vec2(window_width_px / 2.f, window_height_px / 2.f - 150.f);
+const vec2 PLASMA_ALTAR_COLLIDER = vec2({ 80, 60 });
+const vec2 PLASMA_ALTAR_SCALE = { 2.5, 2.5 };
+const float PLASMA_ALTAR_SPAWN = 2.5 * 60000.f;
+
+const int PLASMA_SACRIFICE_COST = 5;
+const vec2 PLASMA_SPAWN_LOCATION = vec2(PLASMA_ALTAR_POSITION.x, PLASMA_ALTAR_POSITION.y + 100.f);
 
 // --- Offsets ---
 const float HEALTH_BAR_Y_OFFSET = -15.f;

@@ -45,6 +45,10 @@ private:
    void handleRain();
    void handleCollectible(const float elapsed_ms_since_last_update);
    void createCollectible(const vec2 position, const SpellType);
+   void createAltar();
+   void createPlasmaAltar();
+   void handleInteractable();
+   void removeInteractable(InteractableType type);
 
    // Mix_Music* background_music;
    GLFWwindow* window{};
@@ -54,7 +58,11 @@ private:
    Entity player_mage;
    ParticleSystem particleSystem;
    float powerup_timer;
+
+   bool did_boss_spawn = false;
+   bool did_plasma_altar_spawn = false;
    float boss_music_delay_timer = 0;
    bool bossDefeated = false;
+   
    std::queue<vec2> lightnings_to_create; // positions to source lightning from, only for MAX lightning
 };

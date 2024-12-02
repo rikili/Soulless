@@ -420,6 +420,14 @@ void CollisionSystem::resolve_collisions()
                     Decay& decay = registry.decays.get(interactable_entity);
                     decay.timer = 0;
                 }
+                if (interactable.type == InteractableType::BOSS)
+                {
+                    interactProx.in_proximity = Proximity::BOSS_ALTAR;
+                }
+                else if (interactable.type == InteractableType::PLASMA)
+                {
+                    interactProx.in_proximity = Proximity::PLASMA_SUMMON;
+                }
             }
 
             registry.collision_registry.remove_collision(interactable_entity, other_entity);
@@ -543,7 +551,7 @@ HitTypes CollisionSystem::applyDamage(Entity attacker, Entity victim, std::unord
             }
         }
 
-        printf("%f\n", damageValue);
+        printd("Damage dealt: %f\n", damageValue);
 
         // if damage is greater than remaining health
         if (health.health - damageValue <= 0 && !registry.deaths.has(victim)) {
@@ -632,6 +640,7 @@ HitTypes CollisionSystem::applyDamage(Entity attacker, Entity victim, std::unord
 
                 onHit.invuln_tracker[victim] = ENEMY_INVINCIBILITY_TIMER;
             }
+            return HitTypes::hit;
         }
     }
     // projectile <-> projectile -- projectiles don't have health

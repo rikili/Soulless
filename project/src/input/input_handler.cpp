@@ -119,6 +119,23 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
             drop_player_spell(false);
             break;
             // TODO: NEED A NEW KEY FOR... interact with item on ground (unused for now)
+        case GLFW_KEY_R:
+            switch (interactProx.in_proximity)
+            {
+            case Proximity::BOSS_ALTAR:
+            {
+                printd("Interact - spawning dark lord\n");
+                enemySpawnTimers.darklord = true;
+                break;
+            }
+            case Proximity::PLASMA_SUMMON:
+            {
+                printd("Interact - plasma request\n");
+                instanceEvents.activate_plasma_altar = true;
+                break;
+            }
+            }
+            break;
         case GLFW_KEY_F:
             if (mods & GLFW_MOD_SHIFT)
             {
@@ -259,6 +276,7 @@ void InputHandler::drop_player_spell(bool is_left) {
 
     invoke_player_cooldown(player, is_left, true);
 }
+
 
 void InputHandler::cast_player_spell(double x, double y, bool is_left)
 {

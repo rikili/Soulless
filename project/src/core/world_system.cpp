@@ -26,10 +26,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	if (!registry.players.has(player_mage) || registry.game_over) {
 		printd("\n----------------\nGame Over! Resetting...\n----------------\n");
 		registry.game_over = false;
-		registry.clear_all_components();
 		this->restartGame();
 		return true;
 	}
+
+	interactProx.in_proximity = Proximity::NONE;
 
 	this->handleProjectiles(elapsed_ms_since_last_update);
 	this->handle_enemy_logic(elapsed_ms_since_last_update);
@@ -42,6 +43,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	this->handleTimers(elapsed_ms_since_last_update);
 	this->handleAI(elapsed_ms_since_last_update);
 	this->handleSpellStates(elapsed_ms_since_last_update);
+	this->handleInteractable();
 	particleSystem.updateParticles(elapsed_ms_since_last_update);
 	registry.collision_registry.clear_collisions();
 	return true;
@@ -213,7 +215,10 @@ void WorldSystem::handleProjectiles(float elapsed_ms_since_last_update)
 
 			float new_speed = speed + (MAX_SPEED - speed) * log_factor;
 
-			// printf("Range Progress: %f, Logistic Factor: %f, Plasma Speed: %f\n", range_progress, log_factor, new_speed);
+			// Plasma Linear Interp
+			vec2 scale_factor = PLASMA_SCALE + ((PLASMA_RANGE - projectile.range) / PLASMA_RANGE) * (PLASMA_SCALE_FACTOR * PLASMA_SCALE - PLASMA_SCALE);
+			motion.scale.x = scale_factor.x;
+			motion.scale.y = scale_factor.y;
 
 			motion.velocity = normalize(motion.velocity) * new_speed;
 		}
@@ -261,7 +266,7 @@ void WorldSystem::handleMovements(float elapsed_ms_since_last_update)
 			{
 				// Enemy& enemy = registry.enemies.get(entity);
 				motion.angle = atan2(player_motion.position.y - motion.position.y,
-					player_motion.position.x - motion.position.x);
+				player_motion.position.x - motion.position.x);
 
 				// printd("Enemy angle towards player: %f\n", motion.angle);
 			}
@@ -363,6 +368,19 @@ void WorldSystem::computeNewDirection(Entity e) {
 void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 {
 	handleCollectible(elapsed_ms_since_last_update);
+	if (registry.worldTimer >= 0)
+	{
+		registry.worldTimer -= elapsed_ms_since_last_update;
+		if (registry.worldTimer >= 0 && registry.worldTimer < PLASMA_ALTAR_SPAWN && !did_plasma_altar_spawn)
+		{
+			createPlasmaAltar();
+			did_plasma_altar_spawn = true;
+		}
+	}
+	else if (!did_boss_spawn)
+	{
+		enemySpawnTimers.darklord = true;
+	}
 
 	for (Entity& hit_ent : registry.onHits.entities)
 	{
@@ -375,7 +393,7 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 				if (hit.second < PLAYER_INVINCIBILITY_TIMER - 200.f) onHit.invicibilityShader = true;
 				else onHit.invicibilityShader = false;
 			}
-
+			
 			if (hit.second < ENEMY_INVINCIBILITY_TIMER - 200.f)
 			{
 				onHit.invicibilityShader = false;
@@ -424,8 +442,6 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 			if (registry.enemies.has(dead_ent)
 				&& registry.enemies.get(dead_ent).type == EnemyType::DARKLORD)
 			{
-				Motion& motion = registry.motions.get(dead_ent);
-				createCollectible(motion.position, SpellType::PLASMA);
 				bossDefeated = true;
 				boss_music_delay_timer = 10.f;
 			}
@@ -595,7 +611,7 @@ void WorldSystem::handleSpellStates(float elapsed_ms_since_last_update)
 					}
 
 					if (spell_proj.type == SpellType::LIGHTNING
-						&& registry.spellProjectiles.has(spell_ent)
+						&& registry.spellProjectiles.has(spell_ent) 
 						&& registry.spellProjectiles.get(spell_ent).level >= MAX_SPELL_LEVEL)
 					{
 						if (!spell_state.isChild)
@@ -629,6 +645,7 @@ void WorldSystem::initialize() {
 }
 
 void WorldSystem::restartGame() {
+	registry.reset_registry();
 	if (registry.players.entities.size() > 0)
 	{
 		registry.clear_all_components();
@@ -642,6 +659,11 @@ void WorldSystem::restartGame() {
 	// loadBackgroundObjects(); // Not used since we removed campfire
 	this->renderer->initializeCamera();
 	powerup_timer = POWERUP_SPAWN_TIMER;
+	createAltar();
+
+	did_boss_spawn = false;
+	did_plasma_altar_spawn = false;
+	instanceEvents.activate_plasma_altar = false;
 
 	//createCollectible({ 1000, 200 }, SpellType::LIGHTNING);
 
@@ -650,15 +672,16 @@ void WorldSystem::restartGame() {
 	enemySpawnTimers.archer = 60000.f;
 	enemySpawnTimers.paladin = 120000.f;
 	enemySpawnTimers.slasher = 180000.f;
-	enemySpawnTimers.darklord = 270000.0f;
+	//enemySpawnTimers.darklord = 270000.f;
 
 	// Spawn all at start (for debug)
-	/*
+	/* 
 	enemySpawnTimers.archer = 0.f;
 	enemySpawnTimers.paladin = 0.f;
 	enemySpawnTimers.slasher = 0.f;
 	enemySpawnTimers.darklord = 0.f;
 	*/
+	lightnings_to_create = {};
 }
 
 void WorldSystem::reloadGame() {
@@ -788,13 +811,13 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 	enemySpawnTimers.archer -= elapsed_ms_since_last_update;
 	enemySpawnTimers.paladin -= elapsed_ms_since_last_update;
 	enemySpawnTimers.slasher -= elapsed_ms_since_last_update;
-	enemySpawnTimers.darklord -= elapsed_ms_since_last_update;
+	//enemySpawnTimers.darklord -= elapsed_ms_since_last_update;
 
 	const bool should_spawn_knight = enemySpawnTimers.knight <= 0;
 	const bool should_spawn_archer = enemySpawnTimers.archer <= 0;
 	const bool should_spawn_paladin = enemySpawnTimers.paladin <= 0;
 	const bool should_spawn_slasher = enemySpawnTimers.slasher <= 0;
-	const bool should_spawn_darklord = enemySpawnTimers.darklord <= 0;
+	const bool should_spawn_darklord = enemySpawnTimers.darklord;
 
 	if (should_spawn_knight || should_spawn_archer || should_spawn_paladin || should_spawn_slasher || should_spawn_darklord)
 	{
@@ -864,10 +887,13 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 			
 			vec2 spawnPosition = { registry.motions.get(player_mage).position.x, registry.motions.get(player_mage).position.y - 100.f };
 			spawnPosition.y = glm::clamp(spawnPosition.y, 0.f, (float)window_height_px);
-			enemySpawnTimers.darklord = DARKLORD_SPAWN_INTERVAL_MS;
+			enemySpawnTimers.darklord = false;
+			this->did_boss_spawn = true;
+			if (registry.worldTimer >= 0) registry.worldTimer = 0;
+			removeInteractable(InteractableType::BOSS);
 			
 
-			this->createEnemy(EnemyType::DARKLORD, spawnPosition, { 0, 0 });
+			this->createEnemy(EnemyType::DARKLORD, DARKLORD_SPAWN_POS, DARKLORD_SPAWN_VEL);
 		}
 	}
 }
@@ -892,7 +918,7 @@ void WorldSystem::handleCollectible(const float elapsed_ms_since_last_update)
 		SoundManager* sound_manager = SoundManager::getSoundManager();
 		const std::vector<SpellType> missing_spells = player.spell_queue.getMissingSpells();
 		int remaining_spells = missing_spells.size() - NOT_DROPPED_SPELL_COUNT;
-		std::uniform_int_distribution<int> spell_choice(0, static_cast<int>(SpellType::COUNT) - 1 - NOT_DROPPED_SPELL_COUNT);
+		std::uniform_int_distribution<int> spell_choice(0, static_cast<int>(SpellType::COUNT) -  1 - NOT_DROPPED_SPELL_COUNT);
 		while (true)
 		{
 			float x = hor_distr(gen);
@@ -948,6 +974,83 @@ void WorldSystem::createCollectible(const vec2 position, const SpellType type)
 		break;
 	default:
 		registry.remove_all_components_of(entity);
+	}
+}
+
+void WorldSystem::createAltar()
+{
+	Entity entity;
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = ALTAR_POSITION;
+	motion.collider = ALTAR_COLLIDER;
+
+	RenderRequest& request = registry.render_requests.emplace(entity);
+	request.mesh = "sprite";
+	request.shader = "sprite";
+	request.texture = "altar";
+	request.type = PLAYER;
+
+	Interactable& interact = registry.interactables.emplace(entity);
+	interact.type = InteractableType::BOSS;
+}
+
+void WorldSystem::createPlasmaAltar()
+{
+	Entity entity;
+
+	Animation& animation = registry.animations.emplace(entity);
+	animation.spriteCols = 17;
+	animation.spriteRows = 6;
+	animation.spriteCount = 8;
+	animation.frameCount = 8;
+	animation.frameTime = 200;
+	animation.initializeAtFrame(0);
+	animation.initializeAtRow(1);
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = PLASMA_ALTAR_POSITION;
+	motion.scale = PLASMA_ALTAR_SCALE;
+	motion.collider = PLASMA_ALTAR_COLLIDER;
+
+	Interactable& interact = registry.interactables.emplace(entity);
+	interact.type = InteractableType::PLASMA;
+
+	RenderRequest& request = registry.render_requests.emplace(entity);
+	request.texture = "necromancer";
+	request.shader = "animatedsprite";
+	request.mesh = "sprite";
+	request.type = PLAYER;
+}
+
+void WorldSystem::removeInteractable(InteractableType type)
+{
+	for (Entity& ent : registry.interactables.entities)
+	{
+		if (registry.interactables.get(ent).type == type)
+		{
+			registry.remove_all_components_of(ent);
+			break;
+		}
+	}
+}
+
+void WorldSystem::handleInteractable()
+{
+	if (instanceEvents.activate_plasma_altar)
+	{
+		Player& player = registry.players.get(registry.players.entities[0]);
+		instanceEvents.activate_plasma_altar = false;
+		if (player.spell_queue.isAbleToSacrifice())
+		{
+			removeInteractable(InteractableType::PLASMA);
+			player.spell_queue.doPlasmaSacrifice();
+			createCollectible(PLASMA_SPAWN_LOCATION, SpellType::PLASMA);
+		}
+		else
+		{
+			// TODO: plasma isn't capable of being created
+		}
 	}
 }
 

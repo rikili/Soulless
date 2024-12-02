@@ -2,3 +2,5 @@
 
 GlobalOptions globalOptions;
 EnemySpawnTimers enemySpawnTimers;
+InteractableProximity interactProx;
+InstanceEvents instanceEvents;

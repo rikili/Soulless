@@ -112,6 +112,9 @@ private:
     void drawCooldown(const Player& player);
     void drawCooldownElement(vec2 translation, vec2 scale);
     void drawSpellProgress(Player& player);
+    void drawProgressBar(const mat4 transform_mat, float progress, bool is_vertical, const vec3& progress_color, const vec3& non_progress_color);
+    void drawTimer();
+    void drawInteractions();
 
     std::vector<RenderIndex> sorted_indices;
     Entity screen_state_entity;
@@ -141,16 +144,36 @@ private:
     const vec2 COOLDOWN_SCALE = SCALE_QUEUE_SPELLS;
 
     // Progress Gauge rendering constants
-    const std::string MAX_LEVEL_STR = "*";
+    const std::string MAX_LEVEL_STR = "M";
     const vec3 LEFTMOST_GAUGE_POS = vec3(30, 710, 0);
-    const vec3 LEFTMOST_GAUGE_TEXT_POS = vec3(23, window_height_px - LEFTMOST_GAUGE_POS.y + 31.f, 0.f);
+    const vec3 LEFTMOST_GAUGE_TEXT_POS = vec3(30, window_height_px - LEFTMOST_GAUGE_POS.y + 31.f, 0.f);
     const float NON_PROGRESS_DARKEN_FACTOR = -0.5f;
-    const float TEXT_LIGHTEN_FACTOR = 0.2f;
+    const float TEXT_DARKEN_FACTOR = -0.7f;
+    const float GAUGE_TEXT_SCALE = 0.3f;
     const vec3 GAUGE_SCALE = vec3(20, 50, 1);
     const float GAUGE_SPACING = 50.f;
     const vec3 GAUGE_TEXTURE_TRANSLATE = vec3(140, 700, 0);
     const vec3 GAUGE_TEXTURE_SCALE = vec3(150, 140, 0);
 
+    // Timer rendering constants
+    const vec2 TIMER_POS = vec2(window_width_px / 2.f, 66);
+    const vec2 TIMER_SCALE = vec2(300, 240);
+    const vec3 TIMER_BAR_TRANSLATE = vec3(window_width_px / 2.f, 60, 0);
+    const vec3 TIMER_BAR_SCALE = vec3(207, 15, 1);
+    const vec3 TIMER_TEXT_TRANSLATE = vec3(window_width_px / 2.f, window_height_px + 27, 0);
+    const float TIMER_TEXT_SCALE = 0.3f;
+    const vec3 TIMER_TEXT_COLOR = vec3(.8f, .1f, .1f);
+    const vec3 TIMER_BAR_COLOR_PROGRESS = vec3(.8f, .1f, .1f);
+    const vec3 TIMER_BAR_COLOR_NON_PROGRESS = vec3(.5f, 0, 0);
+
+    const vec3 ALTAR_TEXT_POSITON = vec3(window_width_px / 2.f, window_height_px / 2.f - 50.f, 0.f);
+    const float ALTAR_TEXT_SCALE = 1.f;
+    const vec3 ALTAR_TEXT_COLOR = vec3({ 1.f, .3f, .3f });
+
+    const float PLASMA_TEXT_SCALE = 1.f;
+    const vec3 PLASMA_TEXT_COLOR = vec3({ 0.949f, 0.082f, 0.957f });
+
+    
     void setCustomCursor();
     GLFWcursor* cursor;
 

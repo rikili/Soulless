@@ -272,7 +272,8 @@ struct EnemySpawnTimers {
     float archer = 60000.0f;
     float paladin = 120000.0f;
     float slasher = 180000.0f;
-    float darklord = 0.0f; // 4.5 min
+    bool darklord = false;
+    //float darklord = 270000.0f; // 4.5 min
 
     std::unordered_map<std::string, float&> asMap() {
         return {
@@ -280,11 +281,27 @@ struct EnemySpawnTimers {
             {"archer", archer},
             {"paladin", paladin},
             {"slasher", slasher},
-            {"darklord", darklord}
+            //{"darklord", darklord}
         };
     }
 };
 extern EnemySpawnTimers enemySpawnTimers;
+
+struct InstanceEvents {
+    bool activate_plasma_altar = false;
+};
+extern InstanceEvents instanceEvents;
+
+enum class Proximity {
+    BOSS_ALTAR,
+    PLASMA_SUMMON,
+    NONE
+};
+
+struct InteractableProximity {
+    Proximity in_proximity = Proximity::NONE;
+};
+extern InteractableProximity interactProx;
 
 enum TileType {
     GRASS1,

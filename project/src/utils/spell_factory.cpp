@@ -230,7 +230,6 @@ namespace SpellFactory {
   }
 
   void configureLightningSpell(ECSRegistry& registry, Entity& spell_ent, int level, vec2 direction, bool is_chain) {
-    printf("config level:%d\n", level);
     Motion& spell_motion = registry.motions.get(spell_ent);
     Projectile& projectile = registry.projectiles.get(spell_ent);
     SpellProjectile& spell = registry.spellProjectiles.get(spell_ent);
@@ -262,10 +261,9 @@ namespace SpellFactory {
     }
     else
     {
-      printf("else\n");
-      spell.level = level;
-      spellState.isChild = false;
-      spellState.timer = LIGHTNING_CASTING_LIFETIME;
+        spell.level = level;
+        spellState.isChild = false;
+        spellState.timer = LIGHTNING_CASTING_LIFETIME;
     }
 
     request.texture = "lightning1";

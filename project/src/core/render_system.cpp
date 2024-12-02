@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <iomanip>
 #include <glm/gtc/type_ptr.inl>
 #include "stb_image.h"
 #include "core/common.hpp"
@@ -457,6 +458,8 @@ void RenderSystem::drawFrame(float elapsed_ms)
 	drawParticles();
 	drawHealthBars();
 	drawHUD();
+	drawTimer();
+	drawInteractions();
 
 	for (const Entity& debug_entity : registry.debug_requests.entities)
 	{
@@ -829,6 +832,40 @@ void RenderSystem::drawCooldown(const Player& player)
 	}
 }
 
+void RenderSystem::drawProgressBar(const mat4 transform_mat, float progress, bool is_vertical, const vec3& progress_color, const vec3& non_progress_color)
+{
+	const Shader* shader = this->asset_manager->getShader("progressbar");
+	if (!shader)
+	{
+		std::cerr << "Could not find shader with id sprite" << std::endl;
+		return;
+	}
+	const GLuint shaderProgram = shader->program;
+	glUseProgram(shaderProgram);
+
+	const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform_mat));
+	const GLint progress_loc = glGetUniformLocation(shaderProgram, "progress");
+	glUniform1f(progress_loc, progress);
+	const GLint vertical_loc = glGetUniformLocation(shaderProgram, "is_vertical");
+	glUniform1i(vertical_loc, is_vertical);
+	const GLint color_loc = glGetUniformLocation(shaderProgram, "progress_color");
+	glUniform3f(color_loc, progress_color.r, progress_color.g, progress_color.b);
+	const GLint non_color_loc = glGetUniformLocation(shaderProgram, "non_progress_color");
+	glUniform3f(non_color_loc, non_progress_color.r, non_progress_color.g, non_progress_color.b);
+
+	const Mesh* mesh = this->asset_manager->getMesh("uncoloredSquare");
+	if (!mesh)
+	{
+		std::cerr << "Could not find mesh with id square" << std::endl;
+		return;
+	}
+
+	glBindVertexArray(mesh->vao);
+	glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
+	gl_has_errors();
+}
+
 void RenderSystem::drawSpellProgress(Player& player)
 {
 	const Shader* shader = this->asset_manager->getShader("progressbar");
@@ -843,55 +880,57 @@ void RenderSystem::drawSpellProgress(Player& player)
 	vec3 bar_translate = LEFTMOST_GAUGE_POS;
 	vec3 spell_translate = LEFTMOST_GAUGE_TEXT_POS;
 
+	mat4 ortho_mat = glm::ortho(0.f, (float)window_width_px, (float)window_height_px, 0.0f);
+
 	for (int i = 0; i < static_cast<int>(SpellType::COUNT); i++) {
 		SpellType type = static_cast<SpellType>(i);
 
 		// plasma doesn't level
 		if (type == SpellType::PLASMA) continue;
-
+	
 		const int level = player.spell_queue.getSpellLevel(type);
 		bool is_max_level = level >= MAX_SPELL_LEVEL;
 		const int progress = player.spell_queue.getSpellUpgradeTrack(type);
 
 		if (level < 1) continue;
 
-		glUseProgram(shaderProgram);
+		//glUseProgram(shaderProgram);
 		const vec3 color = spellTypeToColor(type);
 
 		mat4 transform = mat4(1.f);
 		transform = glm::translate(transform, bar_translate);
 		transform = glm::scale(transform, GAUGE_SCALE);
-		transform = glm::ortho(0.f, (float)window_width_px, (float)window_height_px, 0.0f) * transform;
+		transform = ortho_mat * transform;
 
-		const GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
-		const GLint progress_loc = glGetUniformLocation(shaderProgram, "progress");
-		glUniform1f(progress_loc, is_max_level ? 1.f : (float)progress / (float)UPGRADE_KILL_COUNT[level - 1]);
-		const GLint vertical_loc = glGetUniformLocation(shaderProgram, "is_vertical");
-		glUniform1i(vertical_loc, true);
-		const GLint color_loc = glGetUniformLocation(shaderProgram, "progress_color");
-		glUniform3f(color_loc, color.r, color.g, color.b);
+		const float progress_percent = is_max_level ? 1.f : (float)progress / (float)UPGRADE_KILL_COUNT[level - 1];
+		const vec3 darken_color = color + NON_PROGRESS_DARKEN_FACTOR;
 
-		const float darken = NON_PROGRESS_DARKEN_FACTOR;
-		const GLint non_color_loc = glGetUniformLocation(shaderProgram, "non_progress_color");
-		glUniform3f(non_color_loc, color.r + darken, color.g + darken, color.b + darken);
-
-		const Mesh* mesh = this->asset_manager->getMesh("uncoloredSquare");
-		if (!mesh)
-		{
-			std::cerr << "Could not find mesh with id square" << std::endl;
-			return;
-		}
-
-		glBindVertexArray(mesh->vao);
-		glDrawElements(GL_TRIANGLES, mesh->indexCount, GL_UNSIGNED_INT, 0);
-		gl_has_errors();
-
-		drawText(is_max_level ? "*" : std::to_string(level), "king", spell_translate.x, spell_translate.y, 0.3, is_max_level ? color + NON_PROGRESS_DARKEN_FACTOR : color + TEXT_LIGHTEN_FACTOR, false);
+		drawProgressBar(transform, progress_percent, true, color, darken_color);
+		drawText(is_max_level ? MAX_LEVEL_STR : std::to_string(level), "king", spell_translate.x, spell_translate.y, GAUGE_TEXT_SCALE, is_max_level ? color + NON_PROGRESS_DARKEN_FACTOR : color + TEXT_DARKEN_FACTOR, true);
 
 		bar_translate.x += GAUGE_SPACING;
 		spell_translate.x += GAUGE_SPACING;
 	}
+}
+
+void RenderSystem::drawTimer()
+{
+	if (registry.worldTimer < 0) return;
+	mat4 transform = mat4(1.f);
+	transform = glm::translate(transform, TIMER_BAR_TRANSLATE);
+	transform = glm::scale(transform, TIMER_BAR_SCALE);
+	transform = glm::ortho(0.f, (float)window_width_px, (float)window_height_px, 0.0f) * transform;
+	drawProgressBar(transform, 1 - registry.worldTimer / START_WORLD_TIME, false, TIMER_BAR_COLOR_PROGRESS, TIMER_BAR_COLOR_NON_PROGRESS);
+
+	int time = static_cast<int>(registry.worldTimer / 1000);
+	int minutes = time / 60;
+	int seconds = time % 60;
+	std::ostringstream string_stream;
+	string_stream << std::setfill('0') << std::setw(2) << minutes << ":" << std::setfill('0') << std::setw(2) << seconds;
+
+	drawHUDElement("timer", TIMER_POS, TIMER_SCALE);
+	drawText(string_stream.str(), "king", TIMER_TEXT_TRANSLATE.x, TIMER_TEXT_TRANSLATE.y, TIMER_TEXT_SCALE, TIMER_TEXT_COLOR, true);
+	string_stream.clear();
 }
 
 /**
@@ -928,7 +967,18 @@ void RenderSystem::drawHUD()
 
 	drawSpellProgress(player);
 	drawCooldown(player);
+}
 
+void RenderSystem::drawInteractions()
+{
+	if (interactProx.in_proximity == Proximity::BOSS_ALTAR)
+	{
+		drawText(ALTAR_INTERACT, "deutsch", ALTAR_TEXT_POSITON.x, ALTAR_TEXT_POSITON.y,  ALTAR_TEXT_SCALE, ALTAR_TEXT_COLOR, true);
+	}
+	else if (interactProx.in_proximity == Proximity::PLASMA_SUMMON)
+	{
+		drawText(PLASMA_ALTAR_INTERACT, "deutsch", PLASMA_ALTAR_POSITION.x, PLASMA_ALTAR_POSITION.y, PLASMA_TEXT_SCALE, PLASMA_TEXT_COLOR, true);
+	}
 }
 
 void RenderSystem::setCustomCursor() {

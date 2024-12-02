@@ -213,7 +213,7 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
 
     AssetId fireballMaxTextureId = assetManager.loadTexture("fireball-max", textures_path("fireball-max") + ".png");
     assets.textures["fireball-max"] = fireballMaxTextureId;
-
+    
     AssetId fireballMaxPostTextureId = assetManager.loadTexture("fire-post", textures_path("fire-post") + ".png");
     assets.textures["fire-post"] = fireballMaxPostTextureId;
 
@@ -280,6 +280,13 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId plasmaCollectibleId = assetManager.loadTexture("plasma-collect", textures_path("plasma-collect") + ".png");
     assets.textures["plasma"] = plasmaCollectibleId;
 
+    // Interactions
+    AssetId altarInteractableId = assetManager.loadTexture("altar", textures_path("altar") + ".png");
+    assets.textures["altar"] = altarInteractableId;
+
+    AssetId necromancerId = assetManager.loadTexture("necromancer", textures_path("necromancer") + ".png");
+    assets.textures["necromancer"] = necromancerId;
+
     // Used for paladin's MELEE sword slash
     AssetId fillerTextureId = assetManager.loadTexture("filler", textures_path("filler") + ".png");
     assets.textures["filler"] = fillerTextureId;
@@ -294,6 +301,9 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
 
     AssetId queueId = assetManager.loadTexture("queue", textures_path("queue") + ".png");
     assets.textures["queue"] = queueId;
+
+    AssetId timerId = assetManager.loadTexture("timer", textures_path("timer") + ".png");
+    assets.textures["timer"] = timerId;
 
     AssetId gaugeId = assetManager.loadTexture("gauge", textures_path("gauge") + ".png");
     assets.textures["gauge"] = gaugeId;

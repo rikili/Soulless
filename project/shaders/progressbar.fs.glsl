@@ -23,9 +23,9 @@ void main()
 	}
 	else
 	{
-		if (vertexPos.x < (1 - 2 * progress))
+		if (vertexPos.x > (1 - 2 * progress))
 		{
-			color = vec4(0, 0, 0, 1);
+			color = vec4(non_progress_color, 1);
 		}
 		else
 		{

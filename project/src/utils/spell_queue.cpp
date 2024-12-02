@@ -23,7 +23,7 @@ SpellQueue::SpellQueue() {
   // collectedSpells[SpellType::WIND] = 1;
   // collectedSpells[SpellType::WATER] = MAX_SPELL_LEVEL;
   // collectedSpells[SpellType::LIGHTNING] = 1;
-  // collectedSpells[SpellType::ICE] = 2;
+   //collectedSpells[SpellType::ICE] = 2;
   // collectedSpells[SpellType::PLASMA] = 1;
 
   for (int i = 0; i < QUEUE_SIZE; i++) {
@@ -183,6 +183,41 @@ void SpellQueue::addProgressSpell(SpellType spell, int count)
     else
     {
         upgradeTracker[spell] += count;
+    }
+}
+
+bool SpellQueue::isAbleToSacrifice()
+{
+    int total_levels = 0;
+    for (int x = 0; x <= static_cast<int>(SpellType::COUNT) - 1 - NOT_DROPPED_SPELL_COUNT; x++)
+    {
+        SpellType type = static_cast<SpellType>(x);
+        if (collectedSpells[type] > 1)
+        {
+            total_levels += collectedSpells[type] - 1;
+        }
+    }
+
+    return total_levels >= PLASMA_SACRIFICE_COST;
+}
+
+void SpellQueue::doPlasmaSacrifice()
+{
+    std::random_device rd;
+
+    std::uniform_int_distribution<int> spell_choice(0, (static_cast<int>(SpellType::COUNT) - 1 - NOT_DROPPED_SPELL_COUNT));
+    std::mt19937 gen(rd());
+
+    if (!isAbleToSacrifice()) return;
+
+    for (int x = 0; x < PLASMA_SACRIFICE_COST; x++)
+    {
+        SpellType choice = static_cast<SpellType>(spell_choice(gen));
+        while (collectedSpells[choice] <= 1)
+        {
+            choice = static_cast<SpellType>(spell_choice(gen));
+        }
+        collectedSpells[choice]--;
     }
 }
 
