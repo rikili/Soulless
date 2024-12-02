@@ -168,15 +168,16 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		float currentY = window_height_px - titleFontSize;
 
 		drawText("Soulless", "king", window_width_px / 2.0f, currentY, 1.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-		currentY -= titleFontSize * 1.2;
+		currentY -= titleFontSize * 0.9f;
 
 		vec3 color = glm::vec3(0.83f, 0.83f, 0.83f);
 
 		vec3 selectedColor = glm::vec3(1.0f, 1.0f, 0.0f);
-
-		drawText("Gameplay: 1", "deutsch", window_width_px / 2.0f - 200, currentY, 1.0f, globalOptions.showingTab == 1 ? selectedColor : color, true);
-		drawText("Controls: 2", "deutsch", window_width_px / 2.0f, currentY, 1.0f, globalOptions.showingTab == 2 ? selectedColor : color, true);
-		drawText("Advanced: 3", "deutsch", window_width_px / 2.0f + 200, currentY, 1.0f, globalOptions.showingTab == 3 ? selectedColor : color, true);
+    
+		drawText("Gameplay: 1", "deutsch", window_width_px / 2.0f - 300, currentY, 1.0f, globalOptions.showingTab == 1 ? selectedColor : color, true);
+		drawText("Controls: 2", "deutsch", window_width_px / 2.0f - 100, currentY, 1.0f, globalOptions.showingTab == 2 ? selectedColor : color, true);
+		drawText("Advanced: 3", "deutsch", window_width_px / 2.0f + 100, currentY, 1.0f, globalOptions.showingTab == 3 ? selectedColor : color, true);
+		drawText("Spells: 4", "deutsch", window_width_px / 2.0f + 300, currentY, 1.0f, globalOptions.showingTab == 4 ? selectedColor : color, true);
 		currentY -= tutFontSize * 1.5 + 20;
 
 
@@ -197,6 +198,12 @@ void RenderSystem::drawFrame(float elapsed_ms)
 			currentY -= tutFontSize * 1.5;
 			drawText("You can cast two spells at a time, so choose wisely to drop or cast it.", "deutsch", 20, currentY, 1.0f, color, false);
 			currentY -= tutFontSize * 1.5;
+			drawText("Spells are leveled up by killing enemies with the spell or by picking it up off the ground.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("Once a spell reaches its max level, it will evolve, gaining unique effects.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("Progress can be seen at the bottom left corner of the screen.", "deutsch", 20, currentY, 1.0f, color, false);
+
 			break;
 
 		case 2:
@@ -220,6 +227,19 @@ void RenderSystem::drawFrame(float elapsed_ms)
 			drawText("Press shift + f to show FPS.", "deutsch", 20, currentY, 1.0f, color, false);
 			currentY -= tutFontSize * 1.5;
 			drawText("Press k to display collision boxes.", "deutsch", 20, currentY, 1.0f, color, false);
+			break;
+		case 4:
+			drawText("Fire: shoots a fireball, damaging the first enemy hit; Max level: explodes on impact.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("Water: shields the player and explodes; Max level: teleports the player and explodes twice.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("Wind: damages enemies over time; Max level: pulls enemies towards it.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("Lightning: after a short delay, damages enemies; Max level: spawns a chain of strikes.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("Ice: shoots ice shards; Max level: shoots only one ice shard that pierces enemies.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("Plasma: slowly accelerating arc that damages enemies it passes through. Not upgradable.", "deutsch", 20, currentY, 1.0f, color, false);
 			break;
 		}
 

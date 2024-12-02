@@ -20,11 +20,11 @@ SpellQueue::SpellQueue() {
   collectedSpells[SpellType::FIRE] = 1;
 
   // Uncomment to add all spells to start
-  //collectedSpells[SpellType::WIND] = 1;
-  //collectedSpells[SpellType::WATER] = MAX_SPELL_LEVEL;
-  //collectedSpells[SpellType::LIGHTNING] = 1;
-  //collectedSpells[SpellType::ICE] = 2;
-  //collectedSpells[SpellType::PLASMA] = 1;
+  // collectedSpells[SpellType::WIND] = 1;
+  // collectedSpells[SpellType::WATER] = MAX_SPELL_LEVEL;
+  // collectedSpells[SpellType::LIGHTNING] = 1;
+  // collectedSpells[SpellType::ICE] = 2;
+  // collectedSpells[SpellType::PLASMA] = 1;
 
   for (int i = 0; i < QUEUE_SIZE; i++) {
     addSpell();
