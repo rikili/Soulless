@@ -65,7 +65,10 @@ struct Enemy {
     EnemyType type;
     float range = 0;
     float cooldown = -1.f;
-    float secondCooldown = -1.f;
+    float eTimer = -1.f;
+    bool blocking = false;
+    bool altAttackPattern = false;
+    bool normalBehaviour = false;
     bool movementRestricted = false;
 };
 
@@ -229,7 +232,7 @@ struct Animation
 
     int frameCount = 4;
 
-    EntityState state = EntityState::IDLE;
+    AnimationState state = AnimationState::IDLE;
 
     void initializeAtFrame(float frame) {
         startFrame = frame;

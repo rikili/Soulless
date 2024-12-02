@@ -131,6 +131,9 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId mageAttackTextureId = assetManager.loadTexture("mage-attack", textures_path("mage-attack") + ".png");
     assets.textures["mage-attack"] = mageAttackTextureId;
 
+    AssetId mageDieTextureId = assetManager.loadTexture("mage-die", textures_path("mage-die") + ".png");
+    assets.textures["mage-die"] = mageDieTextureId;
+
     // Enemies
     AssetId knightTextureId = assetManager.loadTexture("knight-idle", textures_path("knight-idle") + ".png");
     assets.textures["knight-idle"] = knightTextureId;
@@ -141,6 +144,12 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId knightAttackTextureId = assetManager.loadTexture("knight-attack", textures_path("knight-attack") + ".png");
     assets.textures["knight-attack"] = knightAttackTextureId;
 
+    AssetId knightDieTextureId = assetManager.loadTexture("knight-die", textures_path("knight-die") + ".png");
+    assets.textures["knight-die"] = knightDieTextureId;
+
+    AssetId knightBlockTextureId = assetManager.loadTexture("knight-block", textures_path("knight-block") + ".png");
+    assets.textures["knight-block"] = knightBlockTextureId;
+
     AssetId archerTextureId = assetManager.loadTexture("archer-idle", textures_path("archer-idle") + ".png");
     assets.textures["archer-idle"] = archerTextureId;
 
@@ -149,6 +158,12 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
 
     AssetId archerAttackTextureId = assetManager.loadTexture("archer-attack", textures_path("archer-attack") + ".png");
     assets.textures["archer-attack"] = archerAttackTextureId;
+
+    AssetId archerDieTextureId = assetManager.loadTexture("archer-die", textures_path("archer-die") + ".png");
+    assets.textures["archer-die"] = archerDieTextureId;
+
+    AssetId archerRunTextureId = assetManager.loadTexture("archer-run", textures_path("archer-run") + ".png");
+    assets.textures["archer-run"] = archerRunTextureId;
 
     AssetId paladinTextureId = assetManager.loadTexture("paladin-idle", textures_path("paladin-idle") + ".png");
     assets.textures["paladin-idle"] = paladinTextureId;
@@ -159,6 +174,15 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId paladinAttackTextureId = assetManager.loadTexture("paladin-attack", textures_path("paladin-attack") + ".png");
     assets.textures["paladin-attack"] = paladinAttackTextureId;
 
+    AssetId paladinRunTextureId = assetManager.loadTexture("paladin-run", textures_path("paladin-run") + ".png");
+    assets.textures["paladin-run"] = paladinRunTextureId;
+
+    AssetId paladinBattleCryTextureId = assetManager.loadTexture("paladin-battlecry", textures_path("paladin-battlecry") + ".png");
+    assets.textures["paladin-battlecry"] = paladinBattleCryTextureId;
+
+    AssetId paladinDieTextureId = assetManager.loadTexture("paladin-die", textures_path("paladin-die") + ".png");
+    assets.textures["paladin-die"] = paladinDieTextureId;
+
     AssetId slasherIdleTextureId = assetManager.loadTexture("slasher-idle", textures_path("slasher-idle") + ".png");
     assets.textures["slasher-idle"] = slasherIdleTextureId;
 
@@ -168,6 +192,9 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId slasherAttackTextureId = assetManager.loadTexture("slasher-attack", textures_path("slasher-attack") + ".png");
     assets.textures["slasher-attack"] = slasherAttackTextureId;
 
+    AssetId slasherDieTextureId = assetManager.loadTexture("slasher-die", textures_path("slasher-die") + ".png");
+    assets.textures["slasher-die"] = slasherDieTextureId;
+
     AssetId darkLordIdleTextureId = assetManager.loadTexture("darklord-idle", textures_path("darklord-idle") + ".png");
     assets.textures["darklord-idle"] = darkLordIdleTextureId;
 
@@ -176,6 +203,9 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
 
     AssetId darkLordAttackTextureId = assetManager.loadTexture("darklord-attack", textures_path("darklord-attack") + ".png");
     assets.textures["darklord-attack"] = darkLordAttackTextureId;
+
+    AssetId darkLordDieTextureId = assetManager.loadTexture("darklord-die", textures_path("darklord-die") + ".png");
+    assets.textures["darklord-die"] = darkLordDieTextureId;
 
     // Projectiles / Spells
     AssetId fireballTextureId = assetManager.loadTexture("fireball", textures_path("fireball") + ".png");

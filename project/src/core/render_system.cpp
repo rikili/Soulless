@@ -321,10 +321,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 
 
 			if (render_request.shader == "sprite" || render_request.shader == "animatedsprite") {
-				if (registry.players.has(entity) && registry.deaths.has(entity)) {
-					transform = rotate(transform, (float)M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
-				}
-
+				
 				const Texture* texture = this->asset_manager->getTexture(render_request.texture);
 				if (!texture)
 				{
@@ -343,16 +340,21 @@ void RenderSystem::drawFrame(float elapsed_ms)
 					if (animation.elapsedTime > animation.frameTime) {
 						animation.elapsedTime = 0;
 						animation.currentFrame++;
-						/*if (registry.players.has(entity)) {
-							printd("Frame: %f\n", animation.currentFrame);
-						}*/
+						
 						if (animation.currentFrame - animation.startFrame >= animation.frameCount) {
-							animation.currentFrame = animation.startFrame;
+							if (animation.state == AnimationState::DYING) {
+								// "Freeze" at last frame until entity gets removed
+								animation.currentFrame -= 1;
+								animation.frameTime = 7000.f;
+							}
+							else {
+								animation.currentFrame = animation.startFrame;
 
-							if (animation.oneTime) {
-								animation.state = EntityState::IDLE;
-								animation.frameTime = DEFAULT_LOOP_TIME;
-								animation.oneTime = false;
+								if (animation.oneTime) {
+									animation.state = AnimationState::IDLE;
+									animation.frameTime = DEFAULT_LOOP_TIME;
+									animation.oneTime = false;
+								}
 							}
 						}
 					}

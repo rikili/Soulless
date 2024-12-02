@@ -54,6 +54,7 @@ private:
    Entity player_mage;
    ParticleSystem particleSystem;
    float powerup_timer;
-
+   float boss_music_delay_timer = 0;
+   bool bossDefeated = false;
    std::queue<vec2> lightnings_to_create; // positions to source lightning from, only for MAX lightning
 };

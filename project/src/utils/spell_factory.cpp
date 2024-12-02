@@ -27,7 +27,7 @@ namespace SpellFactory {
     if (!skip_animation)
     {
         Animation& player_animation = registry.animations.get(player_ent);
-        player_animation.state = EntityState::ATTACKING;
+        player_animation.state = AnimationState::ATTACKING;
         player_animation.frameTime = 30.f;
         player_motion.currentDirection = angleToDirection(find_closest_angle(player_motion.angle));
         player_animation.initializeAtRow((int)player_motion.currentDirection);
@@ -378,7 +378,7 @@ namespace SpellFactory {
       Projectile& projectile = registry.projectiles.get(spell_ent);
       RenderRequest& request = registry.render_requests.get(spell_ent);
       Decay& decay = registry.decays.emplace(spell_ent);
-      
+
       spell_motion.collider = MAX_FIRE_SPLASH_COLLIDER;
       spell_motion.scale = MAX_FIRE_SPLASH_SCALE;
       damage.value = MAX_FIRE_DAMAGE_SPLASH;
@@ -403,10 +403,10 @@ namespace SpellFactory {
       Projectile& projectile = registry.projectiles.get(spell_ent);
       RenderRequest& request = registry.render_requests.get(spell_ent);
       Decay& decay = registry.decays.emplace(spell_ent);
-      
+
       spell.type = SpellType::WATER;
       spell.isPostAttack = true;
-      
+
       spell_motion.collider = WATER_EXPLOSION_COLLIDER;
       spell_motion.scale = WATER_EXPLOSION_SCALE;
       damage.value = WATER_DAMAGE * WATER_ABSORB_DMG_BOOST[barrier_level - 1];

@@ -291,7 +291,7 @@ void CollisionSystem::resolve_collisions()
                 SpellProjectile& spell_proj = registry.spellProjectiles.get(proj_entity);
                 bool isMaxLevel = spell_proj.level >= MAX_SPELL_LEVEL;
                 bool didHit = false;
-                
+
                 // Max level wind pull effect
                 if (isMaxLevel && spell_proj.type == SpellType::WIND) {
                     spell_proj.victims.insert(other_entity);
@@ -301,7 +301,7 @@ void CollisionSystem::resolve_collisions()
                     enemyMotion.velocity = direction_normalized * 0.05f;
                     registry.enemies.get(other_entity).movementRestricted = true;
                 }
-                
+
                 if (projectile.isActive)
                 {
                     didHit = applyDamage(proj_entity, other_entity, cycle_progress, !isMaxLevel) == HitTypes::hit;
@@ -533,43 +533,78 @@ HitTypes CollisionSystem::applyDamage(Entity attacker, Entity victim, std::unord
             if (isWaterProtected(victim, attacker)) return HitTypes::absorbed;
         }
 
+        if (registry.enemies.has(victim)) {
+            const SpellProjectile& proj = registry.spellProjectiles.get(attacker);
+
+            // Knight will block non-max fire and ice spells
+            if (registry.enemies.get(victim).blocking && 
+                ((proj.type == SpellType::FIRE || proj.type == SpellType::ICE) && proj.level != MAX_SPELL_LEVEL)) {
+                soundManager->playSound(SoundEffect::SHIELD_BLOCK);
+                return HitTypes::absorbed;
+            }
+        }
+
         printf("%f\n", damageValue);
 
         // if damage is greater than remaining health
         if (health.health - damageValue <= 0 && !registry.deaths.has(victim)) {
             health.health = 0;
             Death& death = registry.deaths.emplace(victim);
+            bool bossDeath = false;
 
             // if player death
             if (registry.players.has(victim))
             {
                 printd("Player has died!\n");
-                // set player velocity to 0: to prevent bug where player moves after death
-                Motion& motion = registry.motions.get(victim);
-                motion.velocity = { 0.0f, 0.0f };
                 soundManager->playSound(SoundEffect::PLAYER_DEFEATED);
+
+                if (!soundManager->isMusicPlaying()) {
+                    soundManager->toggleMusic();
+                }
                 soundManager->playMusic(Song::DEFEAT);
                 death.timer = 7000;
             }
             else {
-                // particleSystem.particleBurst(registry.motions.get(victim).position);
-                death.timer = 10;
-
-                if (registry.spellProjectiles.has(attacker) && registry.enemies.has(victim))
-                {
-                    const SpellProjectile& spell = registry.spellProjectiles.get(attacker);
-                    if (tracker[spell.type])
-                    {
-                        tracker[spell.type]++;
-                    }
-                    else
-                    {
-                        tracker[spell.type] = 1;
-                    }
-
+                // Assumed this has to be an enemy
+                death.timer = 1000.f;
+                if (registry.enemies.get(victim).type == EnemyType::DARKLORD) {
+                    death.timer = 4000.f;
+                    bossDeath = true;
+                    soundManager->toggleMusic();
+                    soundManager->playSound(SoundEffect::CHOIR);
                 }
             }
-        } else {
+
+            if (registry.spellProjectiles.has(attacker) && registry.enemies.has(victim))
+            {
+                const SpellProjectile& spell = registry.spellProjectiles.get(attacker);
+                if (tracker[spell.type])
+                {
+                    tracker[spell.type]++;
+                }
+                else
+                {
+                    tracker[spell.type] = 1;
+                }
+
+            }
+
+            // Stop movement and remove from AI system to prevent any future movement
+            Motion& motion = registry.motions.get(victim);
+            motion.velocity = { 0.0f, 0.0f };
+            registry.ai_systems.remove(victim);
+
+            // Trigger death animation
+            Animation& dead_ent_animation = registry.animations.get(victim);
+            dead_ent_animation.state = AnimationState::DYING;
+            dead_ent_animation.frameTime = 50.f;
+            if (bossDeath) {
+                dead_ent_animation.frameTime = 175.f;
+            }
+            dead_ent_animation.initializeAtRow((int)motion.currentDirection);
+
+        }
+        else {
             // TODO: Need to change based on entity type
             if (!registry.players.has(victim)) {
                 soundManager->playSound(SoundEffect::VILLAGER_DAMAGE);

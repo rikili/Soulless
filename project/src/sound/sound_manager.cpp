@@ -15,7 +15,7 @@
 
 SoundManager* SoundManager::instance = nullptr;
 
-SoundManager::SoundManager() : musicPlaying(false) {}
+SoundManager::SoundManager() : musicPlaying(true) {}
 
 SoundManager* SoundManager::getSoundManager() {
     if (instance == nullptr) {
@@ -37,6 +37,7 @@ bool SoundManager::initialize() {
 
     registerMusic(Song::MAIN, "background_music.wav");
     registerMusic(Song::DEFEAT, "player_defeated_music.wav");
+    registerMusic(Song::BOSS, "boss_background_music.wav");
 
     registerSound(SoundEffect::FIRE, "fireball.wav");
     registerSound(SoundEffect::FIRE_MAX, "fireball_max.wav");
@@ -59,6 +60,9 @@ bool SoundManager::initialize() {
     registerSound(SoundEffect::POWERUP_PICKUP, "powerup-pickup.wav");
     registerSound(SoundEffect::POWERUP_SPAWN, "powerup-spawn.wav");
     registerSound(SoundEffect::PLASMA, "plasma.wav");
+    registerSound(SoundEffect::BOSS_DEATH_BELL, "death_bell.wav");
+    registerSound(SoundEffect::CHOIR, "choir.wav");
+    registerSound(SoundEffect::SHIELD_BLOCK, "shield_block.wav");
     registerSound(SoundEffect::COMEHERE, "darklord_comehere.wav");
     registerSound(SoundEffect::PORTAL_DAMAGE, "portal_damage.wav");
 
@@ -89,6 +93,16 @@ void SoundManager::playMusic(Song song) {
     }
 }
 
+void SoundManager::fadeInMusic(Song song) {
+    if (music.find(song) != music.end()) {
+        Mix_FadeInMusic(music[song], -1, 1000);
+        musicPlaying = true;
+    }
+    else {
+        std::cerr << "Song not found!" << std::endl;
+    }
+}
+
 void SoundManager::toggleMusic() {
     if (musicPlaying) {
         Mix_PauseMusic();
@@ -98,6 +112,10 @@ void SoundManager::toggleMusic() {
         Mix_ResumeMusic();
         musicPlaying = true;
     }
+}
+
+bool SoundManager::isMusicPlaying() {
+    return musicPlaying;
 }
 
 void SoundManager::removeSoundManager() {

@@ -23,15 +23,19 @@ enum class SoundEffect {
     ICE,
     ICE_MAX,
     WIND,
+    PLASMA,
+    BOSS_DEATH_BELL,
+    CHOIR,
+    SHIELD_BLOCK
     WIND_MAX,
     COMEHERE,
     PORTAL_DAMAGE,
-    PLASMA
 };
 
 enum class Song {
     MAIN,
-    DEFEAT
+    DEFEAT,
+    BOSS
 };
 
 class SoundManager {
@@ -44,9 +48,13 @@ public:
 
     void playMusic(Song song);
 
+    void fadeInMusic(Song song);
+
     void toggleMusic();
 
     void removeSoundManager();
+
+    bool isMusicPlaying();
 
     static SoundEffect convertSpellToSoundEffect(SpellType spellType, int level);
 

@@ -15,8 +15,8 @@ const float DARKLORD_SPAWN_INTERVAL_MS = 270000.f;
 
 const unsigned int QUEUE_SIZE = 6;
 
-constexpr float LOW_HEALTH_THRESHOLD = 0.3f;
-constexpr float HEALTH_RECOVERY_RATE = 0.2f;
+constexpr float LOW_HEALTH_THRESHOLD = 0.35f;
+constexpr float BOSS_LOW_HEALTH_THRESHOLD = 0.5f;
 
 const float ENEMY_INVINCIBILITY_TIMER = 800.f;
 const float PLAYER_INVINCIBILITY_TIMER = 1500.f;
@@ -62,11 +62,15 @@ enum class Direction
 };
 
 // --- States ---
-enum class EntityState
+enum class AnimationState
 {
     IDLE,
     WALKING,
-    ATTACKING
+    ATTACKING,
+    DYING,
+    BLOCKING,
+    RUNNING,
+    BATTLECRY,
 };
 
 // --- Player Constants ---
@@ -98,7 +102,7 @@ enum class PostResolution
 };
 
 // Fire Constants
-const float FIRE_DAMAGE = 15.f;
+const float FIRE_DAMAGE = 25.f;
 const float FIRE_VELOCITY = 0.8f;
 const float FIRE_RANGE = 250.f;
 const vec2 FIRE_SCALE = { 0.3, 0.3 };
@@ -186,6 +190,7 @@ enum class EnemyType
 // --- Enemy Constants ---
 const float ENEMY_BASIC_RANGE = 100.f;
 
+
 // Knight + Pitchfork
 const float KNIGHT_HEALTH = 30.f;
 const float KNIGHT_COOLDOWN = 4000.f;
@@ -194,6 +199,8 @@ const float KNIGHT_RANGE = 100.f;
 const float KNIGHT_DAMAGE = 5.f;
 const float PITCHFORK_VELOCITY = 0.125f;
 const float PITCHFORK_DAMAGE = 10.f;
+const float KNIGHT_BLOCK_COOLDOWN = 4000.f;
+const float KNIGHT_RETREAT_DISTANCE = 200.f;
 
 // Archer + Arrow
 const float ARCHER_HEALTH = 50.f;
@@ -203,13 +210,14 @@ const float ARCHER_RANGE = 200.f;
 const float ARCHER_DAMAGE = 5.f;
 const float ARROW_VELOCITY = 0.175f;
 const float ARROW_DAMAGE = 20.f;
+const float ARCHER_RETREAT_DISTANCE = 250.f;
 
 // Paladin + Sword
 const float PALADIN_HEALTH = 100.f;
 const float PALADIN_COOLDOWN = 3000.f;
 const float PALADIN_VELOCITY = 0.015f;
 const float PALADIN_RANGE = 20.f; // Melee range
-const float PALADIN_DAMAGE = 15.f;
+const float PALADIN_DAMAGE = 25.f;
 const float SWORD_VELOCITY = 0.175f;
 const float SWORD_DAMAGE = 35.f;
 
@@ -222,10 +230,10 @@ const float SLASHER_DAMAGE = 20.f;
 
 // Dark Lord + Razor Wind + Claw Pull
 const float DARKLORD_HEALTH = 750.f;
-const float DARKLORD_VELOCITY = 0.01f;
+const float DARKLORD_VELOCITY = 0.03f;
 const float DARKLORD_DAMAGE = 20.f;
 const float DARKLORD_RANGE = 250.f;
-const float DARKLORD_RAZOR_COOLDOWN = 5000.f;
+const float DARKLORD_RAZOR_COOLDOWN = 4000.f;
 const float DARKLORD_PORTAL_COOLDOWN = 20000.f;
 // const float DARKLORD_RAZOR_COOLDOWN = 5000.f;
 // const float DARKLORD_CLAW_COOLDOWN = 10000.f;

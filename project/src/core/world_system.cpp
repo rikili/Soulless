@@ -115,17 +115,38 @@ void WorldSystem::handleAnimations() {
 		Animation& animation = registry.animations.get(e);
 		RenderRequest& rr = registry.render_requests.get(e);
 
-		if (animation.state == EntityState::ATTACKING) {
+		if (animation.state == AnimationState::ATTACKING) {
 			animation.oneTime = true;
 			rr.texture = peToString(e) + "-attack";
+		}
+		else if (animation.state == AnimationState::DYING) {
+			animation.oneTime = true;
+			rr.texture = peToString(e) + "-die";
+		}
+		else if (animation.state == AnimationState::BATTLECRY) {
+			// Currently only supported for paladin
+			animation.oneTime = true;
+			rr.texture = peToString(e) + "-battlecry";
 		}
 		else {
 
 			if (motion.velocity.x == 0 && motion.velocity.y == 0) {
-				rr.texture = peToString(e) + "-idle";
+				if (animation.state == AnimationState::BLOCKING) { 
+					// Currently only supported for knight
+					rr.texture = peToString(e) + "-block";
+				}
+				else {
+					rr.texture = peToString(e) + "-idle";
+				}	
 			}
 			else {
-				rr.texture = peToString(e) + "-walk";
+				if (animation.state == AnimationState::RUNNING) {
+					// Currently only supported for archer, paladin
+					rr.texture = peToString(e) + "-run";
+				}
+				else {
+					rr.texture = peToString(e) + "-walk";
+				}
 			}
 
 			if (motion.currentDirection == motion.oldDirection) {
@@ -276,7 +297,10 @@ void WorldSystem::handleMovements(float elapsed_ms_since_last_update)
 void WorldSystem::computeNewDirection(Entity e) {
 
 	// Do not recompute direction while attack animation is in progress, otherwise the direction of that animation will be lost before it's finished
-	if (registry.animations.has(e) && registry.animations.get(e).state == EntityState::ATTACKING) {
+	if (registry.animations.has(e) && 
+		(registry.animations.get(e).state == AnimationState::ATTACKING) ||
+		(registry.animations.get(e).state == AnimationState::BLOCKING) || 
+		(registry.animations.get(e).state == AnimationState::BATTLECRY)) {
 		return;
 	}
 
@@ -402,6 +426,8 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 			{
 				Motion& motion = registry.motions.get(dead_ent);
 				createCollectible(motion.position, SpellType::PLASMA);
+				bossDefeated = true;
+				boss_music_delay_timer = 10.f;
 			}
 			registry.remove_all_components_of(dead_ent);
 		}
@@ -466,6 +492,30 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 		}
 		if (enemy.secondCooldown < 0) {
 			enemy.secondCooldown = 0;
+		}
+	}
+
+	if (boss_music_delay_timer > 0) {
+		
+		boss_music_delay_timer -= elapsed_ms_since_last_update;
+		
+		if (boss_music_delay_timer <= 0) {
+			SoundManager* soundManager = SoundManager::getSoundManager();
+			
+			if (bossDefeated) {
+				bossDefeated = false;
+				if (!soundManager->isMusicPlaying()) {
+					soundManager->toggleMusic();
+					soundManager->fadeInMusic(Song::MAIN);
+				}
+			}
+			else {
+				if (!soundManager->isMusicPlaying()) {
+					soundManager->toggleMusic();
+					soundManager->playMusic(Song::BOSS);
+				}	
+			}
+			boss_music_delay_timer = 0;
 		}
 	}
 }
@@ -807,8 +857,17 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 		}
 
 		if (should_spawn_darklord) {
+			SoundManager* soundManager = SoundManager::getSoundManager();
+			soundManager->playSound(SoundEffect::BOSS_DEATH_BELL);
+			soundManager->toggleMusic();
+			boss_music_delay_timer = 3700.f;
+			
+			vec2 spawnPosition = { registry.motions.get(player_mage).position.x, registry.motions.get(player_mage).position.y - 100.f };
+			spawnPosition.y = glm::clamp(spawnPosition.y, 0.f, (float)window_height_px);
 			enemySpawnTimers.darklord = DARKLORD_SPAWN_INTERVAL_MS;
-			this->createEnemy(EnemyType::DARKLORD, position, { 0, 0 });
+			
+
+			this->createEnemy(EnemyType::DARKLORD, spawnPosition, { 0, 0 });
 		}
 	}
 }
