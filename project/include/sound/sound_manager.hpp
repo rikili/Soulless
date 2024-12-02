@@ -25,7 +25,7 @@ enum class SoundEffect {
     WIND,
     WIND_MAX,
     COMEHERE,
-    PORTAL_DAMAGE
+    PORTAL_DAMAGE,
     PLASMA
 };
 
