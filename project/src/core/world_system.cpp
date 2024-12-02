@@ -156,7 +156,7 @@ void WorldSystem::handleProjectiles(float elapsed_ms_since_last_update)
 		Deadly& deadly = registry.deadlies.get(projectile_ent);
 		bool doLinear = registry.spellProjectiles.has(projectile_ent) ? !registry.spellProjectiles.get(projectile_ent).isPostAttack : true;
 
-		projectile.range -= sqrt(motion.velocity.x * motion.velocity.x + motion.velocity.y * motion.velocity.y) * elapsed_ms_since_last_update;
+		projectile.range -= projectile.type == DamageType::portal ? elapsed_ms_since_last_update : sqrt(motion.velocity.x * motion.velocity.x + motion.velocity.y * motion.velocity.y) * elapsed_ms_since_last_update;
 
 		if (deadly.to_enemy && projectile.type == DamageType::fire && doLinear)
 		{
@@ -225,7 +225,16 @@ void WorldSystem::handleMovements(float elapsed_ms_since_last_update)
 		{
 			float x_offset = motion.collider.x * motion.scale.x;
 			float y_offset = motion.collider.y * motion.scale.y;
-			motion.position = glm::clamp(motion.position + motion.velocity * elapsed_ms_since_last_update, { x_offset, y_offset }, { window_width_px - x_offset, window_height_px - y_offset });
+
+			float slowFactor = 1;
+			if (registry.debuffs.has(entity)) {
+					Debuff &debuff = registry.debuffs.get(entity);
+					if (debuff.type == DebuffType::SLOW) {
+						slowFactor = debuff.strength;
+					}
+			}
+
+			motion.position = glm::clamp(motion.position + motion.velocity * slowFactor * elapsed_ms_since_last_update, { x_offset, y_offset }, { window_width_px - x_offset, window_height_px - y_offset });
 
 			if (registry.enemies.has(entity))
 			{
@@ -417,6 +426,16 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 		}
 	}
 
+	for (Entity& debuff_ent : registry.debuffs.entities)
+	{
+		Debuff& debuff = registry.debuffs.get(debuff_ent);
+		debuff.timer -= elapsed_ms_since_last_update;
+		if (debuff.timer < 0)
+		{
+			registry.debuffs.remove(debuff_ent);
+		}
+	}
+
 	for (Entity& player_ent : registry.players.entities)
 	{
 		Player& player = registry.players.get(player_ent);
@@ -439,10 +458,14 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 	{
 		Enemy& enemy = registry.enemies.get(enemy_ent);
 		enemy.cooldown -= elapsed_ms_since_last_update;
+		enemy.secondCooldown -= elapsed_ms_since_last_update;
 		if (enemy.cooldown < 0)
 		{
 			// printd("Enemy cooldown is less than 0\n");
 			enemy.cooldown = 0;
+		}
+		if (enemy.secondCooldown < 0) {
+			enemy.secondCooldown = 0;
 		}
 	}
 }
@@ -577,7 +600,7 @@ void WorldSystem::restartGame() {
 	enemySpawnTimers.archer = 60000.f;
 	enemySpawnTimers.paladin = 120000.f;
 	enemySpawnTimers.slasher = 180000.f;
-	enemySpawnTimers.darklord = 270000.f;
+	enemySpawnTimers.darklord = 0.0f;
 
 	// Spawn all at start (for debug)
 	/*
@@ -807,7 +830,7 @@ void WorldSystem::handleCollectible(const float elapsed_ms_since_last_update)
 
 		Motion& motion = registry.motions.get(player_mage);
 		Player& player = registry.players.get(player_mage);
-		SoundManager* sound_manager = sound_manager->getSoundManager();
+		SoundManager* sound_manager = SoundManager::getSoundManager();
 		const std::vector<SpellType> missing_spells = player.spell_queue.getMissingSpells();
 		int remaining_spells = missing_spells.size() - NOT_DROPPED_SPELL_COUNT;
 		std::uniform_int_distribution<int> spell_choice(0, static_cast<int>(SpellType::COUNT) - 1 - NOT_DROPPED_SPELL_COUNT);

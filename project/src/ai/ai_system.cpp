@@ -2,6 +2,8 @@
 #include "entities/ecs_registry.hpp"
 #include "utils/angle_functions.hpp"
 
+#include "sound/sound_manager.hpp"
+
 AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
     AIComponent aiComponent;
 
@@ -79,6 +81,11 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
             auto& enemy = registry.enemies.get(entity);
             float range = enemy.range;
             float distance = glm::distance(motion.position, player_motion.position);
+
+            if (enemy.type == EnemyType::DARKLORD && enemy.secondCooldown <= 0) {
+                return true; 
+            }
+
             return distance < range;
         }
     );
@@ -101,9 +108,21 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
                     slash(entity);
                 }
                 else {
-                    create_enemy_projectile(entity);
+                    create_enemy_projectile(entity, true);
                 }
-                invoke_enemy_cooldown(entity);
+                invoke_enemy_cooldown(entity, true);
+            }
+
+            if (enemy.type == EnemyType::DARKLORD && enemy.secondCooldown <= 0) {
+                Entity player = registry.players.entities[0];
+                Motion &motionPlayer = registry.motions.get(player);
+                Motion &motionDarkLord = registry.motions.get(entity);
+                float distance = glm::distance(motionPlayer.position, motionDarkLord.position);
+
+                SoundManager* soundManager = SoundManager::getSoundManager();
+                soundManager->playSound(SoundEffect::COMEHERE);
+                create_enemy_projectile(entity, false);
+                invoke_enemy_cooldown(entity, false);
             }
             return NodeState::SUCCESS;
         },
@@ -208,7 +227,7 @@ void AI_SYSTEM::tickForEntity(Entity* entity, float elapsed_ms) {
     }
 }
 
-void AI_SYSTEM::create_enemy_projectile(const Entity& enemy_ent)
+void AI_SYSTEM::create_enemy_projectile(const Entity& enemy_ent, bool mainSpell)
 {
     Entity projectile_ent;
     Projectile& projectile = registry.projectiles.emplace(projectile_ent);
@@ -255,12 +274,40 @@ void AI_SYSTEM::create_enemy_projectile(const Entity& enemy_ent)
         attack_texture = "filler";
         break;
     case EnemyType::DARKLORD:
-        attack_velocity = DARKLORD_RAZOR_SPEED;
-        attack_damage = DARKLORD_RAZOR_DAMAGE;
-        attack_texture = "plasma";
-        projectile_motion.scale = { 0.75f, 0.75f };
-        projectile_motion.collider = { 37.5f, 37.5f };
-        projectile.type = DamageType::plasma;
+        if (mainSpell) {
+            attack_velocity = DARKLORD_RAZOR_SPEED;
+            attack_damage = DARKLORD_RAZOR_DAMAGE;
+            attack_texture = "plasma";
+            projectile_motion.scale = { 0.75f, 0.75f };
+            projectile_motion.collider = { 37.5f, 37.5f };
+            projectile.type = DamageType::plasma;
+        } else {
+            Entity player = registry.players.entities[0];
+            Motion &motionPlayer = registry.motions.get(player);
+
+            attack_velocity = 0.0f;
+            attack_damage = 0;
+            attack_texture = "portal";
+            projectile_motion.collider = { 35.f, 40.f };
+            projectile.type = DamageType::portal;
+            projectile.range = DARKLORD_PORTAL_COOLDOWN / 4.0f;
+            projectile.sourcePosition = enemy_motion.position;
+
+            projectile_motion.angle = 0.0f;
+            projectile_motion.scale = { 0.5f, 0.5f };
+
+            float distanceAway = 1000;
+
+            vec2 initial_position = vec2(
+                motionPlayer.position.x + distanceAway * motionPlayer.velocity.x,
+                motionPlayer.position.y + distanceAway * motionPlayer.velocity.y
+            );
+
+            initial_position.x = std::max(0.0f + projectile_motion.collider.x, std::min(initial_position.x, static_cast<float>(window_width_px) - projectile_motion.collider.x));
+            initial_position.y = std::max(0.0f + projectile_motion.collider.y, std::min(initial_position.y, static_cast<float>(window_height_px) - projectile_motion.collider.y));
+
+            projectile_motion.position = initial_position;
+        }
         break;
     default:
         attack_velocity = PITCHFORK_VELOCITY;
@@ -279,7 +326,7 @@ void AI_SYSTEM::create_enemy_projectile(const Entity& enemy_ent)
     request.type = PROJECTILE;
 }
 
-void AI_SYSTEM::invoke_enemy_cooldown(const Entity& enemy_ent)
+void AI_SYSTEM::invoke_enemy_cooldown(const Entity& enemy_ent, bool first)
 {
     Enemy& enemy = registry.enemies.get(enemy_ent);
     EnemyType enemy_type = enemy.type;
@@ -298,7 +345,11 @@ void AI_SYSTEM::invoke_enemy_cooldown(const Entity& enemy_ent)
         enemy.cooldown = SLASHER_COOLDOWN;
         break;
     case EnemyType::DARKLORD:
-        enemy.cooldown = DARKLORD_COOLDOWN;
+        if (first) {
+            enemy.cooldown = DARKLORD_RAZOR_COOLDOWN;
+        } else {
+            enemy.secondCooldown = DARKLORD_PORTAL_COOLDOWN;
+        }
         break;
     }
 }

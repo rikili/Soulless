@@ -226,6 +226,9 @@ GameAssets initializeGameAssets(AssetManager& assetManager)
     AssetId arrowTextureId = assetManager.loadTexture("arrow", textures_path("arrow") + ".png");
     assets.textures["arrow"] = arrowTextureId;
 
+    AssetId portalTextureId = assetManager.loadTexture("portal", textures_path("portal") + ".png");
+    assets.textures["portal"] = portalTextureId;
+
     // Dark Lord's attack texture is the same as plasma's
 
     // Collectibles

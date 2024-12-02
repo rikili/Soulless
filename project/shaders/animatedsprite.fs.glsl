@@ -3,6 +3,7 @@ in vec2 TexCoords;
 out vec4 color;
 
 uniform int state;
+uniform bool slow;
 uniform bool visible;
 
 uniform sampler2D image;
@@ -36,6 +37,10 @@ void main()
     } else if (state == 2) {
         computedColor = vec4(1.0f, 1.0f, 1.0f, 0.75f) *  texture(image, spriteTexCoords);
     } 
+
+    if (slow) {
+        computedColor = mix(computedColor, vec4(0.0f, 0.0f, 1.0f, 1.0f), 0.5);
+    }
     
     if (!visible) {
         computedColor.a = 0.0f;

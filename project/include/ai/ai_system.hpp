@@ -198,8 +198,8 @@ struct AIComponent {
 namespace AI_SYSTEM {
     AIComponent& initAIComponent(Entity* entity);
     void tickForEntity(Entity* entity, float elapsed_ms);
-    void create_enemy_projectile(const Entity& enemy_ent);
-    void invoke_enemy_cooldown(const Entity& enemy_ent);
+    void create_enemy_projectile(const Entity& enemy_ent, bool mainSpell);
+    void invoke_enemy_cooldown(const Entity& enemy_ent, bool first);
     void slash(const Entity& enemy_ent);
     void cleanNodeTree(Node* node);
 }

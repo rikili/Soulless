@@ -469,6 +469,20 @@ void CollisionSystem::resolve_post_effects(std::unordered_map<PostResolution, st
 HitTypes CollisionSystem::applyDamage(Entity attacker, Entity victim, std::unordered_map<SpellType, int, SpellTypeHash>& tracker, bool do_scaling)
 {
     SoundManager* soundManager = SoundManager::getSoundManager();
+  
+    if (registry.players.has(victim) && registry.projectiles.has(attacker) && registry.projectiles.get(attacker).type == DamageType::portal && !registry.deaths.has(victim)) {
+        soundManager->playSound(SoundEffect::PORTAL_DAMAGE);
+        Motion &playerMotion = registry.motions.get(victim);
+        Projectile &projectile = registry.projectiles.get(attacker);
+        playerMotion.position = projectile.sourcePosition;
+        Debuff &debuff = registry.debuffs.emplace(victim);
+        debuff.type = DebuffType::SLOW;
+        debuff.timer = 2000.f;
+        debuff.strength = 0.3f;
+
+        registry.deaths.emplace(attacker);
+        return HitTypes::notHit;
+    }
 
     if (registry.healths.has(victim)) {
         const Damage& damage = registry.damages.get(attacker);
@@ -561,7 +575,7 @@ HitTypes CollisionSystem::applyDamage(Entity attacker, Entity victim, std::unord
                 soundManager->playSound(SoundEffect::VILLAGER_DAMAGE);
             }
             else if (registry.players.has(victim)) {
-                soundManager->playSound(SoundEffect::PITCHFORK_DAMAGE);
+                    soundManager->playSound(SoundEffect::PITCHFORK_DAMAGE);
             }
 
             health.health -= damageValue;
@@ -583,7 +597,6 @@ HitTypes CollisionSystem::applyDamage(Entity attacker, Entity victim, std::unord
 
                 onHit.invuln_tracker[victim] = ENEMY_INVINCIBILITY_TIMER;
             }
-
         }
     }
     // projectile <-> projectile -- projectiles don't have health

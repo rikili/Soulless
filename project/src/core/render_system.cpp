@@ -357,6 +357,8 @@ void RenderSystem::drawFrame(float elapsed_ms)
 						}
 					}
 
+					glUniform1i(glGetUniformLocation(shaderProgram, "slow"), false);
+
 					// TODO: Rework this, maybe make an Invisible component
 					if (registry.onHeals.has(registry.players.entities[0]) && registry.interactables.has(entity)) {
 						glUniform1i(glGetUniformLocation(shaderProgram, "visible"), 0);
@@ -371,6 +373,10 @@ void RenderSystem::drawFrame(float elapsed_ms)
 						}
 						else {
 							glUniform1i(glGetUniformLocation(shaderProgram, "state"), 1);
+						}
+
+						if (registry.debuffs.has(entity) && registry.debuffs.get(entity).type == DebuffType::SLOW) {
+							glUniform1i(glGetUniformLocation(shaderProgram, "slow"), true);
 						}
 					}
 					else if (registry.enemies.has(entity) && registry.onHits.has(entity) && registry.onHits.get(entity).isInvincible)

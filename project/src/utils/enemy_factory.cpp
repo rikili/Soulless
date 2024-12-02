@@ -9,6 +9,7 @@ namespace EnemyFactory {
         vec2 velocity,
         float range,
         float cooldown,
+        float secondCooldown,
         float health,
         float maxHealth,
         float damage,
@@ -22,6 +23,7 @@ namespace EnemyFactory {
         enemy_component.type = type;
         enemy_component.range = range;
         enemy_component.cooldown = cooldown;
+        enemy_component.secondCooldown = secondCooldown;
 
         Motion& motion = registry.motions.emplace(enemy);
         motion.position = position;
@@ -70,6 +72,7 @@ namespace EnemyFactory {
             velocity,
             PALADIN_RANGE,
             PALADIN_COOLDOWN,
+            -1,
             PALADIN_HEALTH,
             PALADIN_HEALTH,
             PALADIN_DAMAGE,
@@ -86,6 +89,7 @@ namespace EnemyFactory {
             velocity,
             KNIGHT_RANGE,
             KNIGHT_COOLDOWN,
+            -1,
             KNIGHT_HEALTH,
             KNIGHT_HEALTH,
             KNIGHT_DAMAGE,
@@ -102,6 +106,7 @@ namespace EnemyFactory {
             velocity,
             ARCHER_RANGE,
             ARCHER_COOLDOWN,
+            -1,
             ARCHER_HEALTH,
             ARCHER_HEALTH,
             ARCHER_DAMAGE,
@@ -118,6 +123,7 @@ namespace EnemyFactory {
             velocity,
             SLASHER_RANGE,
             SLASHER_COOLDOWN,
+            -1,
             SLASHER_HEALTH,
             SLASHER_HEALTH,
             SLASHER_DAMAGE,
@@ -133,7 +139,8 @@ namespace EnemyFactory {
             position,
             velocity,
             DARKLORD_RANGE,
-            DARKLORD_COOLDOWN,
+            DARKLORD_RAZOR_COOLDOWN,
+            DARKLORD_PORTAL_COOLDOWN,
             DARKLORD_HEALTH,
             DARKLORD_HEALTH,
             DARKLORD_DAMAGE,
@@ -152,6 +159,7 @@ namespace EnemyFactory {
             velocity,
             PALADIN_RANGE,
             cooldown,
+            -1,
             health,
             PALADIN_HEALTH,
             PALADIN_DAMAGE,
@@ -168,6 +176,7 @@ namespace EnemyFactory {
             velocity,
             KNIGHT_RANGE,
             cooldown,
+            -1,
             health,
             KNIGHT_HEALTH,
             KNIGHT_DAMAGE,
@@ -184,6 +193,7 @@ namespace EnemyFactory {
             velocity,
             ARCHER_RANGE,
             cooldown,
+            -1,
             health,
             ARCHER_HEALTH,
             ARCHER_DAMAGE,
@@ -200,6 +210,7 @@ namespace EnemyFactory {
             velocity,
             SLASHER_RANGE,
             cooldown,
+            -1,
             health,
             SLASHER_HEALTH,
             SLASHER_DAMAGE,
@@ -215,6 +226,7 @@ namespace EnemyFactory {
             position,
             velocity,
             DARKLORD_RANGE,
+            cooldown,
             cooldown,
             health,
             DARKLORD_HEALTH,

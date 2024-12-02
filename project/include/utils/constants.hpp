@@ -33,6 +33,7 @@ enum class DamageType
     plasma,
     wind,
     enemy,
+    portal,
     elementless
 };
 
@@ -224,7 +225,8 @@ const float DARKLORD_HEALTH = 750.f;
 const float DARKLORD_VELOCITY = 0.01f;
 const float DARKLORD_DAMAGE = 20.f;
 const float DARKLORD_RANGE = 250.f;
-const float DARKLORD_COOLDOWN = 5000.f;
+const float DARKLORD_RAZOR_COOLDOWN = 5000.f;
+const float DARKLORD_PORTAL_COOLDOWN = 20000.f;
 // const float DARKLORD_RAZOR_COOLDOWN = 5000.f;
 // const float DARKLORD_CLAW_COOLDOWN = 10000.f;
 // const float DARKLORD_RAZOR_RANGE = 350.f;

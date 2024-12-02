@@ -39,6 +39,7 @@ public:
 	ComponentContainer<AIComponent> ai_systems;
 	ComponentContainer<SpellUnlock> spellUnlocks;
 	ComponentContainer<Decay> decays;
+	ComponentContainer<Debuff> debuffs;
 	ComponentContainer<SpellProjectile> spellProjectiles;
 	CollisionRegistry collision_registry;
 	mat4 viewMatrix;

@@ -8,6 +8,7 @@ namespace EnemyFactory {
         vec2 velocity,
         float range,
         float cooldown,
+        float secondCooldown,
         float health,
         float maxHealth,
         float damage,

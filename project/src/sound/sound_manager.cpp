@@ -59,6 +59,8 @@ bool SoundManager::initialize() {
     registerSound(SoundEffect::POWERUP_PICKUP, "powerup-pickup.wav");
     registerSound(SoundEffect::POWERUP_SPAWN, "powerup-spawn.wav");
     registerSound(SoundEffect::PLASMA, "plasma.wav");
+    registerSound(SoundEffect::COMEHERE, "darklord_comehere.wav");
+    registerSound(SoundEffect::PORTAL_DAMAGE, "portal_damage.wav");
 
     return true;
 }

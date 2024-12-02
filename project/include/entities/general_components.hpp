@@ -65,6 +65,7 @@ struct Enemy {
     EnemyType type;
     float range = 0;
     float cooldown = -1.f;
+    float secondCooldown = -1.f;
     bool movementRestricted = false;
 };
 
@@ -79,6 +80,7 @@ struct Player {
 struct Projectile {
     DamageType type;
     float range = 0;
+    vec2 sourcePosition = vec2(0.0f, 0.0f);
     bool isActive = false;
 };
 
@@ -99,6 +101,16 @@ struct SpellUnlock {
 
 struct Decay {
     float timer = 0;
+};
+
+enum DebuffType {
+    SLOW
+};
+
+struct Debuff {
+    DebuffType type = SLOW;
+    float timer = 0;
+    float strength = 0;
 };
 
 // Timed Component
@@ -254,7 +266,7 @@ struct EnemySpawnTimers {
     float archer = 60000.0f;
     float paladin = 120000.0f;
     float slasher = 180000.0f;
-    float darklord = 270000.0f; // 4.5 min
+    float darklord = 0.0f; // 4.5 min
 
     std::unordered_map<std::string, float&> asMap() {
         return {
