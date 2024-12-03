@@ -167,7 +167,7 @@ void SpellQueue::replaceSpell(int position, SpellType spell) {
 
 void SpellQueue::levelSpell(SpellType spell)
 {
-  if (spell == SpellType::PLASMA) return;
+  if (spell == SpellType::PLASMA && collectedSpells[SpellType::PLASMA] >= 1) return;
   this->collectedSpells[spell]++;
 }
 
