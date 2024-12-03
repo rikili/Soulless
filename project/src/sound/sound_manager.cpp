@@ -83,13 +83,13 @@ void SoundManager::playSound(SoundEffect effect) {
     }
 }
 
-void SoundManager::playMusic(Song song) {
+void SoundManager::playMusic(Song song, int duration) {
     if (Mix_PlayingMusic()) {
         Mix_HaltMusic();
     }
 
     if (music.find(song) != music.end()) {
-        Mix_PlayMusic(music[song], -1);
+        Mix_PlayMusic(music[song], duration);
         musicPlaying = true;
         musicStopped = false;
     }

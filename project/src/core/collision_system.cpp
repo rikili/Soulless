@@ -571,7 +571,7 @@ HitTypes CollisionSystem::applyDamage(Entity attacker, Entity victim, std::unord
                 if (!soundManager->isMusicPlaying()) {
                     soundManager->toggleMusic();
                 }
-                soundManager->playMusic(Song::DEFEAT);
+                soundManager->playMusic(Song::DEFEAT, -1);
                 death.timer = 7000;
             }
             else {
