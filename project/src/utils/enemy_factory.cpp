@@ -15,6 +15,7 @@ namespace EnemyFactory {
         float damage,
         const std::string& texture,
         bool deadlyToPlayer,
+        float healthScale,
         vec2 scale
     ) {
         Entity enemy;
@@ -31,8 +32,8 @@ namespace EnemyFactory {
         motion.scale = scale;
 
         Health& health_component = registry.healths.emplace(enemy);
-        health_component.health = health;
-        health_component.maxHealth = maxHealth;
+        health_component.health = health * healthScale;
+        health_component.maxHealth = maxHealth * healthScale;
 
         auto healthBar = Entity();
         HealthBar& healthBarComp = registry.healthBars.emplace(healthBar);
@@ -64,7 +65,7 @@ namespace EnemyFactory {
         return enemy;
     }
 
-    Entity createPaladin(ECSRegistry& registry, vec2 position, vec2 velocity) {
+    Entity createPaladin(ECSRegistry& registry, vec2 position, vec2 velocity, float healthScale) {
         return createEnemy(
             registry,
             EnemyType::PALADIN,
@@ -77,11 +78,12 @@ namespace EnemyFactory {
             PALADIN_HEALTH,
             PALADIN_DAMAGE,
             "paladin-idle",
-            false
+            false,
+            healthScale
         );
     }
 
-    Entity createKnight(ECSRegistry& registry, vec2 position, vec2 velocity) {
+    Entity createKnight(ECSRegistry& registry, vec2 position, vec2 velocity, float healthScale) {
         return createEnemy(
             registry,
             EnemyType::KNIGHT,
@@ -94,11 +96,12 @@ namespace EnemyFactory {
             KNIGHT_HEALTH,
             KNIGHT_DAMAGE,
             "knight-idle",
-            true
+            true,
+            healthScale
         );
     }
 
-    Entity createArcher(ECSRegistry& registry, vec2 position, vec2 velocity) {
+    Entity createArcher(ECSRegistry& registry, vec2 position, vec2 velocity, float healthScale) {
         return createEnemy(
             registry,
             EnemyType::ARCHER,
@@ -111,11 +114,12 @@ namespace EnemyFactory {
             ARCHER_HEALTH,
             ARCHER_DAMAGE,
             "archer-idle",
-            false
+            false,
+            healthScale
         );
     }
 
-    Entity createSlasher(ECSRegistry& registry, vec2 position, vec2 velocity) {
+    Entity createSlasher(ECSRegistry& registry, vec2 position, vec2 velocity, float healthScale) {
         return createEnemy(
             registry,
             EnemyType::SLASHER,
@@ -128,11 +132,12 @@ namespace EnemyFactory {
             SLASHER_HEALTH,
             SLASHER_DAMAGE,
             "slasher-idle",
-            true
+            true,
+            healthScale
         );
     }
 
-    Entity createDarkLord(ECSRegistry& registry, vec2 position, vec2 velocity) {
+    Entity createDarkLord(ECSRegistry& registry, vec2 position, vec2 velocity, float healthScale) {
         return createEnemy(
             registry,
             EnemyType::DARKLORD,
@@ -146,12 +151,13 @@ namespace EnemyFactory {
             DARKLORD_DAMAGE,
             "darklord-idle",
             true,
+            healthScale,
             { 2.f, 2.f }
         );
     }
 
     // used for reloadability
-    Entity createPaladin(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health) {
+    Entity createPaladin(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health, float healthScale) {
         return createEnemy(
             registry,
             EnemyType::PALADIN,
@@ -164,11 +170,12 @@ namespace EnemyFactory {
             PALADIN_HEALTH,
             PALADIN_DAMAGE,
             "paladin-idle",
-            false
+            false,
+            healthScale
         );
     }
 
-    Entity createKnight(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health) {
+    Entity createKnight(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health, float healthScale) {
         return createEnemy(
             registry,
             EnemyType::KNIGHT,
@@ -181,11 +188,12 @@ namespace EnemyFactory {
             KNIGHT_HEALTH,
             KNIGHT_DAMAGE,
             "knight-idle",
-            true
+            true,
+            healthScale
         );
     }
 
-    Entity createArcher(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health) {
+    Entity createArcher(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health, float healthScale) {
         return createEnemy(
             registry,
             EnemyType::ARCHER,
@@ -198,11 +206,12 @@ namespace EnemyFactory {
             ARCHER_HEALTH,
             ARCHER_DAMAGE,
             "archer-idle",
-            false
+            false,
+            healthScale
         );
     }
 
-    Entity createSlasher(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health) {
+    Entity createSlasher(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health, float healthScale) {
         return createEnemy(
             registry,
             EnemyType::SLASHER,
@@ -215,11 +224,12 @@ namespace EnemyFactory {
             SLASHER_HEALTH,
             SLASHER_DAMAGE,
             "slasher-idle",
-            false
+            false,
+            healthScale
         );
     }
 
-    Entity createDarkLord(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health) {
+    Entity createDarkLord(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health, float healthScale) {
         return createEnemy(
             registry,
             EnemyType::DARKLORD,
@@ -233,6 +243,7 @@ namespace EnemyFactory {
             DARKLORD_DAMAGE,
             "darklord-idle",
             true,
+            healthScale,
             { 2.f, 2.f }
         );
 

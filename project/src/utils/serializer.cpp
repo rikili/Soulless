@@ -11,10 +11,10 @@ void Serializer::serialize() {
     Entity& player_ent = registry.players.entities[0];
     Player& player = registry.players.get(player_ent);
 
-    Health &health = registry.healths.get(player_ent);
+    Health& health = registry.healths.get(player_ent);
     playerData["health"] = std::to_string(health.health);
 
-    Motion &motion = registry.motions.get(player_ent);
+    Motion& motion = registry.motions.get(player_ent);
     json motionData;
     motionData["position"] = { motion.position.x, motion.position.y };
     playerData["motion"] = motionData;
@@ -31,15 +31,15 @@ void Serializer::serialize() {
 
     jsonData["enemies"] = json::array();
     for (const Entity& enemy_entity : registry.enemies.entities) {
-        Enemy &enemy = registry.enemies.get(enemy_entity);
+        Enemy& enemy = registry.enemies.get(enemy_entity);
         json enemyData;
         enemyData["type"] = static_cast<int>(enemy.type);
         enemyData["cooldown"] = enemy.cooldown;
 
-        Health &health = registry.healths.get(enemy_entity);
+        Health& health = registry.healths.get(enemy_entity);
         enemyData["health"] = std::to_string(health.health);
 
-        Motion &motion = registry.motions.get(enemy_entity);
+        Motion& motion = registry.motions.get(enemy_entity);
         json motionData;
         motionData["position"] = { motion.position.x, motion.position.y };
         motionData["velocity"] = { motion.velocity.x, motion.velocity.y };
@@ -62,7 +62,8 @@ void Serializer::serialize() {
     if (file.is_open()) {
         file << jsonData.dump(4);
         file.close();
-    } else {
+    }
+    else {
         std::cerr << "Error saving game state" << std::endl;
     }
 }
@@ -83,13 +84,13 @@ void Serializer::deserialize() {
 
     const auto playerData = jsonData["player"];
 
-    glm::vec2 position = { playerData["motion"]["position"][0].get<float>(), 
+    glm::vec2 position = { playerData["motion"]["position"][0].get<float>(),
                            playerData["motion"]["position"][1].get<float>() };
 
-    Motion &motion = registry.motions.get(player_ent);
+    Motion& motion = registry.motions.get(player_ent);
     motion.position = position;
 
-    Health &health = registry.healths.get(player_ent);
+    Health& health = registry.healths.get(player_ent);
     health.health = std::stof(playerData["health"].get<std::string>());
 
     SpellQueue& spell_queue = player.spell_queue;
@@ -98,7 +99,7 @@ void Serializer::deserialize() {
     spell_queue.setRightSpell(static_cast<SpellType>(playerData["rightSpell"].get<int>()));
 
     const auto& spellQueueData = playerData["spellQueue"];
-    
+
     int pos = 0;
     for (const auto& spellValue : spellQueueData) {
         if (pos < static_cast<int>(spell_queue.getQueue().size())) {
@@ -120,34 +121,35 @@ void Serializer::deserialize() {
 
     for (const auto& enemyData : jsonData["enemies"]) {
         auto type = static_cast<EnemyType>(enemyData["type"].get<int>());
-        glm::vec2 position = { enemyData["motion"]["position"][0].get<float>(), 
+        glm::vec2 position = { enemyData["motion"]["position"][0].get<float>(),
                                enemyData["motion"]["position"][1].get<float>() };
-        glm::vec2 velocity = { enemyData["motion"]["velocity"][0].get<float>(), 
+        glm::vec2 velocity = { enemyData["motion"]["velocity"][0].get<float>(),
                                enemyData["motion"]["velocity"][1].get<float>() };
 
         float cooldown = enemyData["cooldown"].get<float>();
         float health = std::stof(enemyData["health"].get<std::string>());
 
         Entity enemyEntity;
+        // NOTE: serializing health scale is cooked
         switch (type) {
-            case EnemyType::ARCHER:
-                enemyEntity = EnemyFactory::createArcher(registry, position, velocity, cooldown, health);
-                break;
-            case EnemyType::KNIGHT:
-                enemyEntity = EnemyFactory::createKnight(registry, position, velocity, cooldown, health);
-                break;
-            case EnemyType::PALADIN:
-                enemyEntity = EnemyFactory::createPaladin(registry, position, velocity, cooldown, health);
-                break;
-            case EnemyType::SLASHER:
-                enemyEntity = EnemyFactory::createSlasher(registry, position, velocity, cooldown, health);
-                break;
-            case EnemyType::DARKLORD:
-                enemyEntity = EnemyFactory::createDarkLord(registry, position, velocity, cooldown, health);
-                break;
-            default:
-                std::cerr << "Unknown enemy type: " << static_cast<int>(type) << std::endl;
-                continue;
+        case EnemyType::ARCHER:
+            enemyEntity = EnemyFactory::createArcher(registry, position, velocity, cooldown, health, 1);
+            break;
+        case EnemyType::KNIGHT:
+            enemyEntity = EnemyFactory::createKnight(registry, position, velocity, cooldown, health, 1);
+            break;
+        case EnemyType::PALADIN:
+            enemyEntity = EnemyFactory::createPaladin(registry, position, velocity, cooldown, health, 1);
+            break;
+        case EnemyType::SLASHER:
+            enemyEntity = EnemyFactory::createSlasher(registry, position, velocity, cooldown, health, 1);
+            break;
+        case EnemyType::DARKLORD:
+            enemyEntity = EnemyFactory::createDarkLord(registry, position, velocity, cooldown, health, 1);
+            break;
+        default:
+            std::cerr << "Unknown enemy type: " << static_cast<int>(type) << std::endl;
+            continue;
         }
     }
 }

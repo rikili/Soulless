@@ -245,6 +245,7 @@ namespace SpellFactory {
 
     spell.type = SpellType::LIGHTNING;
     damage.value = LIGHTNING_ACTIVE_DAMAGE;
+    damage.type = DamageType::lightning;
 
     spellState.state = State::CASTING;
 
@@ -261,9 +262,9 @@ namespace SpellFactory {
     }
     else
     {
-        spell.level = level;
-        spellState.isChild = false;
-        spellState.timer = LIGHTNING_CASTING_LIFETIME;
+      spell.level = level;
+      spellState.isChild = false;
+      spellState.timer = LIGHTNING_CASTING_LIFETIME;
     }
 
     request.texture = "lightning1";
@@ -303,8 +304,8 @@ namespace SpellFactory {
 
     if (level >= MAX_SPELL_LEVEL) {
       request.texture = "wind-max";
-      spell_motion.scale *= 1.5;
-      spell_motion.collider *= 1.5;
+      spell_motion.scale *= MAX_WIND_SCALE_FACTOR;
+      spell_motion.collider *= MAX_WIND_SCALE_FACTOR;
     }
   }
 
@@ -329,6 +330,7 @@ namespace SpellFactory {
     deadly.to_enemy = true;
 
     damage.value = ICE_DAMAGE;
+    damage.type = DamageType::ice;
 
     if (level >= MAX_SPELL_LEVEL)
     {

@@ -6,9 +6,15 @@
 using glm::vec2;
 
 // --- Game Logic Constants ---
-const unsigned int MAX_ENEMIES = 50;
-const float KNIGHT_SPAWN_INTERVAL_MS = 8000.f;
-const float ARCHER_SPAWN_INTERVAL_MS = 16000.f;
+const unsigned int MAX_ENEMIES = 75;
+
+const float KNIGHT_INIT_SPAWN_TIMER = 0.f;
+const float ARCHER_INIT_SPAWN_TIMER = 60000.f;
+const float PALADIN_INIT_SPAWN_TIMER = 120000.f;
+const float SLASHER_INIT_SPAWN_TIMER = 180000.f;
+
+const float KNIGHT_SPAWN_INTERVAL_MS = 5000.f;
+const float ARCHER_SPAWN_INTERVAL_MS = 12000.f;
 const float PALADIN_SPAWN_INTERVAL_MS = 20000.f;
 const float SLASHER_SPAWN_INTERVAL_MS = 20000.f;
 
@@ -104,13 +110,13 @@ enum class PostResolution
 };
 
 // Fire Constants
-const float FIRE_DAMAGE = 25.f;
+const float FIRE_DAMAGE = 15.f;
 const float FIRE_VELOCITY = 0.8f;
-const float FIRE_RANGE = 250.f;
+const float FIRE_RANGE = 165.f;
 const vec2 FIRE_SCALE = { 0.3, 0.3 };
 const float FIRE_SCALE_FACTOR = 3.f;
 const vec2 FIRE_COLLIDER = { 25, 25 };
-const float FIRE_SCALING[4] = { 1, 1, 1, 1 };
+const float FIRE_SCALING[4] = { 1.0, 1.1, 1.3, 1.4 };
 
 // Max First Constants
 const float MAX_FIRE_DAMAGE_DIRECT = 25.f;
@@ -123,7 +129,7 @@ const float FIRE_SPLASH_LIFETIME = 200.f;
 const vec2 MAX_FIRE_SPLASH_SCALE = { 1.5, 1.5 };
 const float MAX_FIRE_SPLASH_RANGE = FLT_MAX;
 
-const float WATER_DAMAGE = 20.f;
+const float WATER_DAMAGE = 11.f;
 const float WATER_VELOCITY = 0.f;
 const float WATER_RANGE = FLT_MAX; // Range is "infinite" for barrier
 const vec2 WATER_SCALE = { 0.6f, 0.6f };
@@ -134,9 +140,9 @@ const vec2 WATER_EXPLOSION_SCALE = { 1.8, 1.8 };
 const float WATER_SPLASH_RANGE = FLT_MAX;
 const float WATER_SPLASH_LIFETIME = 200.f;
 const float WATER_ABSORB_DMG_BOOST[3] = { 1.2, 1.5, 1.8 };
-const float WATER_SCALING[4] = { 1.1, 1, 1, 1.4 };
+const float WATER_SCALING[4] = { 1.0, 1.1, 1.3, 1.35 };
 
-const float LIGHTNING_ACTIVE_DAMAGE = 30.f;
+const float LIGHTNING_ACTIVE_DAMAGE = 22.f;
 const float LIGHTNING_VELOCITY = 0.f;
 const float LIGHTNING_RANGE = FLT_MAX; // Range is "infinite" for lightning
 const vec2 LIGHTNING_SCALE = { 0.75f, 0.75f };
@@ -149,9 +155,9 @@ const int MAX_LIGHTNING_ATTACK_COUNT = 4;
 const vec2 MAX_LIGHTNING_DELAY_DIFFERENCE = { 100.f, 400.f };
 const vec2 MAX_LIGHTNING_POS_DIFFERENCE = { -50.f, 50.f };
 const float MAX_LIGHTNING_DAMAGE = 7.f;
-const float LIGHTNING_SCALING[4] = { 1.0, 1.1, 1.1, 1.1 };
+const float LIGHTNING_SCALING[4] = { 1.0, 1.1, 1.3, 1.4 };
 
-const float ICE_DAMAGE = 10.f;
+const float ICE_DAMAGE = 3.3f;
 const float ICE_SPEED = 0.4f;
 const float ICE_RANGE = 75.f;
 const vec2 ICE_SCALE = { 0.2, 0.2 };
@@ -163,14 +169,16 @@ const vec2 MAX_ICE_SCALE = { 0.7, 0.2f };
 const vec2 MAX_ICE_COLLIDER = { 15.f, 15.f };
 const float MAX_ICE_RANGE = 400.f;
 const float MAX_ICE_DAMAGE = 30.f;
-const float ICE_SCALING[4] = { 1.0, 1.1, 1.1, 1.1 };
+const float ICE_SCALING[4] = { 1.0, 1.3, 1.6, 2.0 };
 
-const float WIND_DAMAGE = 6.f;
+const float WIND_DAMAGE = 3.f;
 const float WIND_RANGE = FLT_MAX;
 const vec2 WIND_SCALE = { 0.75f, 0.75f };
 const float WIND_SCALE_FACTOR = 1.f;
 const vec2 WIND_COLLIDER = { 40.f, 40.f };
 const float WIND_PLACEMENT_LIFETIME = 3000.f;
+const float MAX_WIND_SCALE_FACTOR = 1.5f;
+const float WIND_SCALING[4] = { 1.0, 1.5, 1.6, 2.0 };
 
 const float PLASMA_DAMAGE = 30.f;
 const float PLASMA_SPEED = 0.01f;
@@ -192,7 +200,8 @@ enum class EnemyType
 
 // --- Enemy Constants ---
 const float ENEMY_BASIC_RANGE = 100.f;
-
+const float INIT_ENEMY_HEALTH_SCALE = 1.f;
+const float ENEMY_HEALTH_SCALING_INCREMENT = 0.00015f;
 
 // Knight + Pitchfork
 const float KNIGHT_HEALTH = 30.f;
@@ -232,17 +241,21 @@ const float SLASHER_RANGE = 50.f;
 const float SLASHER_DAMAGE = 20.f;
 
 // Dark Lord + Razor Wind + Claw Pull
-const float DARKLORD_HEALTH = 750.f;
+const float DARKLORD_HEALTH = 1250.f;
 const float DARKLORD_VELOCITY = 0.025f;
 const float DARKLORD_DAMAGE = 20.f;
 const float DARKLORD_RANGE = 250.f;
 const float DARKLORD_RAZOR_COOLDOWN = 3500.f;
-const float DARKLORD_PORTAL_COOLDOWN = 20000.f;
+const float DARKLORD_PORTAL_COOLDOWN = 12000.f;
 const float DARKLORD_RAZOR_DAMAGE = 25.f;
 const float DARKLORD_RAZOR_SPEED = 0.05f;
 const float DARKLORD_RAZOR_MAX_SPEED = 0.75f;
 const vec2 DARKLORD_SPAWN_POS = { window_width_px / 2.f, window_height_px / 2.f };
 const vec2 DARKLORD_SPAWN_VEL = { 0, 0 };
+
+const int ADVANCED_SQUAD_THRESHOLD = 10;
+const vec2 DARKLORD_SQUAD_DISPLACEMENT = { 80, 80 };
+const vec2 DARKLORD_SQUAD_EDGE_DISPLACEMENT = { 180, 180 };
 
 // --- World Interactables ---
 enum class InteractableType
@@ -255,11 +268,11 @@ enum class InteractableType
 
 // --- Upgrade Requirements ---
 const int MAX_SPELL_LEVEL = 5;
-const int UPGRADE_KILL_COUNT[5] = { 10, 20, 30, 40, 40 };
+const int UPGRADE_KILL_COUNT[5] = { 8, 15, 18, 27, 35 };
 
 // --- Interactable Timers ---
-const float POWERUP_DECAY = 30000.f;
-const float POWERUP_SPAWN_TIMER = 35000.f;
+const float POWERUP_DECAY = 60000.f;
+const float POWERUP_SPAWN_TIMER = 35000;
 const float POWERUP_SPAWN_BUFFER = 180.f; // distance from edge to spawn
 const float MIN_POWERUP_DIST = 80;
 

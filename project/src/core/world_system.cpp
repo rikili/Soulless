@@ -138,13 +138,13 @@ void WorldSystem::handleAnimations() {
 		else {
 
 			if (motion.velocity.x == 0 && motion.velocity.y == 0) {
-				if (animation.state == AnimationState::BLOCKING) { 
+				if (animation.state == AnimationState::BLOCKING) {
 					// Currently only supported for knight
 					rr.texture = peToString(e) + "-block";
 				}
 				else {
 					rr.texture = peToString(e) + "-idle";
-				}	
+				}
 			}
 			else {
 				if (animation.state == AnimationState::RUNNING) {
@@ -271,7 +271,7 @@ void WorldSystem::handleMovements(float elapsed_ms_since_last_update)
 			{
 				// Enemy& enemy = registry.enemies.get(entity);
 				motion.angle = atan2(player_motion.position.y - motion.position.y,
-				player_motion.position.x - motion.position.x);
+					player_motion.position.x - motion.position.x);
 
 				// printd("Enemy angle towards player: %f\n", motion.angle);
 			}
@@ -307,9 +307,9 @@ void WorldSystem::handleMovements(float elapsed_ms_since_last_update)
 void WorldSystem::computeNewDirection(Entity e) {
 
 	// Do not recompute direction while attack animation is in progress, otherwise the direction of that animation will be lost before it's finished
-	if (registry.animations.has(e) && 
+	if (registry.animations.has(e) &&
 		(registry.animations.get(e).state == AnimationState::ATTACKING) ||
-		(registry.animations.get(e).state == AnimationState::BLOCKING) || 
+		(registry.animations.get(e).state == AnimationState::BLOCKING) ||
 		(registry.animations.get(e).state == AnimationState::BATTLECRY)) {
 		return;
 	}
@@ -398,7 +398,7 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 				if (hit.second < PLAYER_INVINCIBILITY_TIMER - 200.f) onHit.invicibilityShader = true;
 				else onHit.invicibilityShader = false;
 			}
-			
+
 			if (hit.second < ENEMY_INVINCIBILITY_TIMER - 200.f)
 			{
 				onHit.invicibilityShader = false;
@@ -517,12 +517,12 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 	}
 
 	if (boss_music_delay_timer > 0) {
-		
+
 		boss_music_delay_timer -= elapsed_ms_since_last_update;
-		
+
 		if (boss_music_delay_timer <= 0) {
 			SoundManager* soundManager = SoundManager::getSoundManager();
-			
+
 			if (bossDefeated) {
 				bossDefeated = false;
 				if (!soundManager->isMusicPlaying()) {
@@ -532,7 +532,7 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 			else {
 				if (!soundManager->isMusicPlaying()) {
 					soundManager->playMusic(Song::BOSS);
-				}	
+				}
 			}
 			boss_music_delay_timer = 0;
 		}
@@ -614,7 +614,7 @@ void WorldSystem::handleSpellStates(float elapsed_ms_since_last_update)
 					}
 
 					if (spell_proj.type == SpellType::LIGHTNING
-						&& registry.spellProjectiles.has(spell_ent) 
+						&& registry.spellProjectiles.has(spell_ent)
 						&& registry.spellProjectiles.get(spell_ent).level >= MAX_SPELL_LEVEL)
 					{
 						if (!spell_state.isChild)
@@ -648,7 +648,7 @@ void WorldSystem::handleSpellStates(float elapsed_ms_since_last_update)
 		{
 			globalOptions.maxedSpellsScene = true;
 			globalOptions.pause = true;
-			this->renderer->playCutscene("levelmax.mp4",Song::LEVELMAX);
+			this->renderer->playCutscene("levelmax.mp4", Song::LEVELMAX);
 		}
 
 	}
@@ -687,20 +687,22 @@ void WorldSystem::restartGame() {
 	//createCollectible({ 1000, 200 }, SpellType::LIGHTNING);
 
 	// Reset enemy spawn timers (rework this if needed)
-	enemySpawnTimers.knight = 0.0f;
-	enemySpawnTimers.archer = 60000.f;
-	enemySpawnTimers.paladin = 120000.f;
-	enemySpawnTimers.slasher = 180000.f;
+	enemySpawnTimers.knight = KNIGHT_INIT_SPAWN_TIMER;
+	enemySpawnTimers.archer = ARCHER_INIT_SPAWN_TIMER;
+	enemySpawnTimers.paladin = PALADIN_INIT_SPAWN_TIMER;
+	enemySpawnTimers.slasher = SLASHER_INIT_SPAWN_TIMER;
 	//enemySpawnTimers.darklord = 270000.f;
 
 	// Spawn all at start (for debug)
-	/* 
+	/*
 	enemySpawnTimers.archer = 0.f;
 	enemySpawnTimers.paladin = 0.f;
 	enemySpawnTimers.slasher = 0.f;
 	enemySpawnTimers.darklord = 0.f;
 	*/
 	lightnings_to_create = {};
+
+	enemy_health_scale = INIT_ENEMY_HEALTH_SCALE;
 }
 
 void WorldSystem::reloadGame() {
@@ -766,25 +768,25 @@ Entity WorldSystem::createPlayer() {
 }
 
 
-void WorldSystem::createEnemy(EnemyType type, vec2 position, vec2 velocity)
+void WorldSystem::createEnemy(EnemyType type, vec2 position, vec2 velocity, float healthScale)
 {
 	EnemyType enemy_type = type;
 
 	switch (enemy_type) {
 	case EnemyType::KNIGHT:
-		EnemyFactory::createKnight(registry, position, velocity);
+		EnemyFactory::createKnight(registry, position, velocity, healthScale);
 		break;
 	case EnemyType::ARCHER:
-		EnemyFactory::createArcher(registry, position, velocity);
+		EnemyFactory::createArcher(registry, position, velocity, healthScale);
 		break;
 	case EnemyType::PALADIN:
-		EnemyFactory::createPaladin(registry, position, velocity);
+		EnemyFactory::createPaladin(registry, position, velocity, healthScale);
 		break;
 	case EnemyType::SLASHER:
-		EnemyFactory::createSlasher(registry, position, velocity);
+		EnemyFactory::createSlasher(registry, position, velocity, healthScale);
 		break;
 	case EnemyType::DARKLORD:
-		EnemyFactory::createDarkLord(registry, position, velocity);
+		EnemyFactory::createDarkLord(registry, position, velocity, 1); // Darklord has fixed health scale
 		break;
 	}
 }
@@ -816,6 +818,44 @@ Entity WorldSystem::createBackgroundObject(vec2 position, vec2 scale, AssetId te
 	return object;
 }
 
+void WorldSystem::spawn_darklord_squad()
+{
+	if (registry.enemies.size() < 10)
+	{
+		// spawn advanced squad
+		for (int x = -1; x <= 1; x++)
+		{
+			for (int y = -1; y <= 1; y++)
+			{
+				vec2 spawn_pos = DARKLORD_SPAWN_POS;
+				spawn_pos.x += (DARKLORD_SQUAD_DISPLACEMENT.x * x);
+				spawn_pos.y += (DARKLORD_SQUAD_DISPLACEMENT.y * y);
+
+				if (x == 0) this->createEnemy(EnemyType::SLASHER, spawn_pos, { 0, 0 }, enemy_health_scale);
+				else if (y == 0) this->createEnemy(EnemyType::ARCHER, spawn_pos, { 0, 0 }, enemy_health_scale);
+				else this->createEnemy(EnemyType::PALADIN, spawn_pos, { 0, 0 }, enemy_health_scale);
+
+			}
+		}
+	}
+
+	for (int x = 0; x <= 2; x++)
+	{
+		for (int y = 0; y <= 2; y++)
+		{
+			vec2 spawn_pos = DARKLORD_SPAWN_POS;
+			spawn_pos.x = (x * 0.5f) * (x != 1 ? window_width_px - DARKLORD_SQUAD_EDGE_DISPLACEMENT.x : window_width_px);
+			spawn_pos.y = (y * 0.5f) * (y != 1 ? window_height_px - DARKLORD_SQUAD_EDGE_DISPLACEMENT.x : window_height_px);
+
+			if (x == 1 && y == 1) continue;
+			else if (x == 1) this->createEnemy(EnemyType::PALADIN, spawn_pos, { 0, 0 }, enemy_health_scale);
+			else if (y == 1) this->createEnemy(EnemyType::PALADIN, spawn_pos, { 0, 0 }, enemy_health_scale);
+			else this->createEnemy(EnemyType::ARCHER, spawn_pos, { 0, 0 }, enemy_health_scale);
+
+		}
+	}
+}
+
 /**
  * @brief Handles the logic for spawning enemies and their movement direction
  * towards the player
@@ -826,6 +866,8 @@ Entity WorldSystem::createBackgroundObject(vec2 position, vec2 scale, AssetId te
  */
 void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 {
+	enemy_health_scale += ENEMY_HEALTH_SCALING_INCREMENT * (elapsed_ms_since_last_update / 1000.f);
+
 	enemySpawnTimers.knight -= elapsed_ms_since_last_update;
 	enemySpawnTimers.archer -= elapsed_ms_since_last_update;
 	enemySpawnTimers.paladin -= elapsed_ms_since_last_update;
@@ -880,22 +922,22 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 
 		if (should_spawn_knight) {
 			enemySpawnTimers.knight = KNIGHT_SPAWN_INTERVAL_MS;
-			this->createEnemy(EnemyType::KNIGHT, position, { 0, 0 });
+			this->createEnemy(EnemyType::KNIGHT, position, { 0, 0 }, enemy_health_scale);
 		}
 
 		if (should_spawn_archer) {
 			enemySpawnTimers.archer = ARCHER_SPAWN_INTERVAL_MS;
-			this->createEnemy(EnemyType::ARCHER, position, { 0, 0 });
+			this->createEnemy(EnemyType::ARCHER, position, { 0, 0 }, enemy_health_scale);
 		}
 
 		if (should_spawn_paladin) {
 			enemySpawnTimers.paladin = PALADIN_SPAWN_INTERVAL_MS;
-			this->createEnemy(EnemyType::PALADIN, position, { 0, 0 });
+			this->createEnemy(EnemyType::PALADIN, position, { 0, 0 }, enemy_health_scale);
 		}
 
 		if (should_spawn_slasher) {
 			enemySpawnTimers.slasher = SLASHER_SPAWN_INTERVAL_MS;
-			this->createEnemy(EnemyType::SLASHER, position, { 0, 0 });
+			this->createEnemy(EnemyType::SLASHER, position, { 0, 0 }, enemy_health_scale);
 		}
 
 		if (should_spawn_darklord) {
@@ -903,15 +945,16 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 			soundManager->playSound(SoundEffect::BOSS_DEATH_BELL);
 			soundManager->stopMusic();
 			boss_music_delay_timer = 3700.f;
-			
+
 			vec2 spawnPosition = { registry.motions.get(player_mage).position.x, registry.motions.get(player_mage).position.y - 100.f };
 			spawnPosition.y = glm::clamp(spawnPosition.y, 0.f, (float)window_height_px);
 			enemySpawnTimers.darklord = false;
 			this->did_boss_spawn = true;
+			spawn_darklord_squad();
 			if (registry.worldTimer >= 0) registry.worldTimer = 0;
 			removeInteractable(InteractableType::BOSS);
 
-			this->createEnemy(EnemyType::DARKLORD, DARKLORD_SPAWN_POS, DARKLORD_SPAWN_VEL);
+			this->createEnemy(EnemyType::DARKLORD, DARKLORD_SPAWN_POS, DARKLORD_SPAWN_VEL, 1); // Darklord has fixed health scale
 
 			// For testing the cutscene. Uncomment if needed.
 			// {
@@ -948,9 +991,7 @@ void WorldSystem::handleCollectible(const float elapsed_ms_since_last_update)
 		Motion& motion = registry.motions.get(player_mage);
 		Player& player = registry.players.get(player_mage);
 		SoundManager* sound_manager = SoundManager::getSoundManager();
-		const std::vector<SpellType> missing_spells = player.spell_queue.getMissingSpells();
-		int remaining_spells = missing_spells.size() - NOT_DROPPED_SPELL_COUNT;
-		std::uniform_int_distribution<int> spell_choice(0, static_cast<int>(SpellType::COUNT) -  1 - NOT_DROPPED_SPELL_COUNT);
+		std::uniform_int_distribution<int> spell_choice(0, static_cast<int>(SpellType::COUNT) - 1 - NOT_DROPPED_SPELL_COUNT);
 		while (true)
 		{
 			float x = hor_distr(gen);
@@ -989,6 +1030,9 @@ void WorldSystem::createCollectible(const vec2 position, const SpellType type)
 	decay.timer = POWERUP_DECAY;
 
 	switch (type) {
+	case SpellType::FIRE:
+		request.texture = "fire-collect";
+		break;
 	case SpellType::LIGHTNING:
 		request.texture = "lightning-collect";
 		break;

@@ -38,7 +38,7 @@ private:
    void loadBackgroundObjects();
    Entity createPlayer();
    void computeNewDirection(Entity e);
-   void createEnemy(EnemyType type, vec2 position, vec2 velocity);
+   void createEnemy(EnemyType type, vec2 position, vec2 velocity, float healthScale);
    Entity createBackgroundObject(vec2 position, vec2 scale, AssetId texture, bool animate);
    void handle_enemy_logic(float elapsed_ms_since_last_update);
    std::string peToString(Entity e);
@@ -49,6 +49,7 @@ private:
    void createPlasmaAltar();
    void handleInteractable();
    void removeInteractable(InteractableType type);
+   void spawn_darklord_squad();
 
    // Mix_Music* background_music;
    GLFWwindow* window{};
@@ -63,6 +64,8 @@ private:
    bool did_plasma_altar_spawn = false;
    float boss_music_delay_timer = 0;
    bool bossDefeated = false;
-   
+
    std::queue<vec2> lightnings_to_create; // positions to source lightning from, only for MAX lightning
+
+   float enemy_health_scale = INIT_ENEMY_HEALTH_SCALE;
 };

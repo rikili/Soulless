@@ -529,6 +529,9 @@ HitTypes CollisionSystem::applyDamage(Entity attacker, Entity victim, std::unord
             case SpellType::ICE:
                 damageValue *= ICE_SCALING[proj.level - 1];
                 break;
+            case SpellType::WIND:
+                damageValue *= WIND_SCALING[proj.level - 1];
+                break;
 
             }
         }
@@ -633,7 +636,7 @@ HitTypes CollisionSystem::applyDamage(Entity attacker, Entity victim, std::unord
             {
                 OnHit& onHit = registry.onHits.has(victim) ? registry.onHits.get(victim) : registry.onHits.emplace(victim);
                 // add invulnerability timer for entity
-                if (damage.type == DamageType::wind || damage.type == DamageType::plasma)
+                if (damage.type == DamageType::wind || damage.type == DamageType::plasma || damage.type == DamageType::lightning || damage.type == DamageType::ice)
                 {
                     onHit.invuln_tracker[attacker] = ENEMY_INVINCIBILITY_TIMER;
                 }

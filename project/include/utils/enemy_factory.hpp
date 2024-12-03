@@ -14,21 +14,22 @@ namespace EnemyFactory {
         float damage,
         const std::string& texture,
         bool deadlyToPlayer = false,
+        float healthScale = 1.f,
         vec2 scale = { 1.f, 1.f }
     );
 
-    Entity createPaladin(ECSRegistry& registry, vec2 position, vec2 velocity);
-    Entity createPaladin(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health);
+    Entity createPaladin(ECSRegistry& registry, vec2 position, vec2 velocity, float healthScale);
+    Entity createPaladin(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health, float healthScale);
 
-    Entity createKnight(ECSRegistry& registry, vec2 position, vec2 velocity);
-    Entity createKnight(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health);
+    Entity createKnight(ECSRegistry& registry, vec2 position, vec2 velocity, float healthScale);
+    Entity createKnight(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health, float healthScale);
 
-    Entity createArcher(ECSRegistry& registry, vec2 position, vec2 velocity);
-    Entity createArcher(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health);
+    Entity createArcher(ECSRegistry& registry, vec2 position, vec2 velocity, float healthScale);
+    Entity createArcher(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health, float healthScale);
 
-    Entity createSlasher(ECSRegistry& registry, vec2 position, vec2 velocity);
-    Entity createSlasher(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health);
+    Entity createSlasher(ECSRegistry& registry, vec2 position, vec2 velocity, float healthScale);
+    Entity createSlasher(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health, float healthScale);
 
-    Entity createDarkLord(ECSRegistry& registry, vec2 position, vec2 velocity);
-    Entity createDarkLord(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health);
+    Entity createDarkLord(ECSRegistry& registry, vec2 position, vec2 velocity, float healthScale);
+    Entity createDarkLord(ECSRegistry& registry, vec2 position, vec2 velocity, float cooldown, float health, float healthScale);
 }
