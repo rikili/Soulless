@@ -30,6 +30,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		return true;
 	}
 
+	if (globalOptions.pause || globalOptions.tutorial || renderer->isPlayingVideo())
+	{
+		return true;
+	}
+
 	interactProx.in_proximity = Proximity::NONE;
 
 	this->handleProjectiles(elapsed_ms_since_last_update);
@@ -632,6 +637,22 @@ void WorldSystem::handleSpellStates(float elapsed_ms_since_last_update)
 
 		}
 	}
+
+
+	if (!globalOptions.maxedSpellsScene)
+	{
+		constexpr int MAX_SPELLS = static_cast<int>(SpellType::COUNT);
+		Player& player = registry.players.get(registry.players.entities[0]);
+		int unlockedSpells = player.spell_queue.getCollectedSpells().size();
+		if (unlockedSpells == MAX_SPELLS || unlockedSpells > 1)
+		{
+			globalOptions.maxedSpellsScene = true;
+			globalOptions.pause = true;
+			this->renderer->playCutscene("levelmax.mp4",Song::LEVELMAX);
+		}
+
+	}
+
 }
 
 
@@ -889,11 +910,24 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 			this->did_boss_spawn = true;
 			if (registry.worldTimer >= 0) registry.worldTimer = 0;
 			removeInteractable(InteractableType::BOSS);
-			
 
 			this->createEnemy(EnemyType::DARKLORD, DARKLORD_SPAWN_POS, DARKLORD_SPAWN_VEL);
+
+			// For testing the cutscene. Uncomment if needed.
+			// {
+			// 	globalOptions.bossdefeatScene = true;
+			// 	this->renderer->playCutscene("endscene.mp4", Song::ENDSCENE);
+			// }
 		}
 	}
+
+	if (!globalOptions.bossdefeatScene && bossDefeated)
+	{
+		globalOptions.bossdefeatScene = true;
+		this->renderer->playCutscene("endscene.mp4", Song::ENDSCENE);
+	}
+
+
 }
 
 void WorldSystem::handleCollectible(const float elapsed_ms_since_last_update)

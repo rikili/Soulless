@@ -38,6 +38,7 @@ enum class Song {
     INTRO,
     BOSS,
     LEVELMAX,
+    ENDSCENE
 };
 
 class SoundManager {

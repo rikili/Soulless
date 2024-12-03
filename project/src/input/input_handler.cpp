@@ -53,6 +53,7 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
         // Serializer::serialize();
     }
 
+
     if (isTutorialOn() || globalOptions.pause)
     {
         if (key == GLFW_KEY_SPACE && !globalOptions.loadingOldGame && action == GLFW_PRESS) {
@@ -64,6 +65,7 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
             // {
             //     soundManager->toggleMusic();
             // }
+
             globalOptions.tutorial = false;
             if (!renderer->isPlayingVideo() && !globalOptions.introPlayed)
             {
@@ -82,8 +84,10 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
             {
                 renderer->stopVideo();
                 globalOptions.tutorial = false;
-                globalOptions.pause = false;
-                soundManager->playMusic(Song::MAIN);
+                if (!globalOptions.bossdefeatScene)
+                {
+                    globalOptions.pause = false;
+                }
             }
         }
 

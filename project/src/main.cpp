@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
        const float elapsed_ms = static_cast<float>((std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count()) / 1000.0f;
        t = now;
        
-       if (!globalOptions.tutorial && !globalOptions.pause) {
+       if (!globalOptions.tutorial && !globalOptions.pause && !renderer->isPlayingVideo()){
            if (registry.game_over) input_handler->reset();
            world.step(elapsed_ms);  // (2) Update the game state
            if (registry.game_over) continue;
@@ -71,6 +71,11 @@ int main(int argc, char* argv[])
            world.reloadGame();
            globalOptions.loadingOldGame = false;
        }
+
+       if (globalOptions.bossdefeatScene && !renderer->isPlayingVideo()) {
+           glfwSetWindowShouldClose(window, GLFW_TRUE);
+       }
+
    }
    
    // TODO: Add cleanup code here*

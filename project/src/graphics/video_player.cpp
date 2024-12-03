@@ -8,7 +8,7 @@ VideoPlayer::~VideoPlayer() {
 }
 
 bool VideoPlayer::initialize(const std::string& filename, GLuint shader_program) {
-    // std::cout << "Initializing with shader program: " << shader_program << std::endl;
+    std::cout << "Initializing with shader program: " << shader_program << std::endl;
 
     this->shader_program = shader_program;
 
@@ -17,9 +17,9 @@ bool VideoPlayer::initialize(const std::string& filename, GLuint shader_program)
     GLint viewLoc = glGetUniformLocation(shader_program, "view");
     GLint texLoc = glGetUniformLocation(shader_program, "videoTexture");
 
-    // std::cout << "Shader uniform locations - projection: " << projLoc
-    //           << ", view: " << viewLoc
-    //           << ", videoTexture: " << texLoc << std::endl;
+    std::cout << "Shader uniform locations - projection: " << projLoc
+              << ", view: " << viewLoc
+              << ", videoTexture: " << texLoc << std::endl;
 
     if (!initializeFFmpeg(filename)) {
         return false;
@@ -36,25 +36,25 @@ bool VideoPlayer::initialize(const std::string& filename, GLuint shader_program)
 
 bool VideoPlayer::initializeFFmpeg(const std::string& filename) {
     const std::string file_path = video_path(filename);
-    // std::cout << "Attempting to open video file: " << file_path << std::endl;
+    std::cout << "Attempting to open video file: " << file_path << std::endl;
 
     int result = avformat_open_input(&fmt_ctx, file_path.c_str(), nullptr, nullptr);
     if (result < 0) {
         char errbuf[AV_ERROR_MAX_STRING_SIZE];
         av_strerror(result, errbuf, AV_ERROR_MAX_STRING_SIZE);
-        // std::cerr << "Failed to open video file. Error: " << errbuf << std::endl;
+        std::cerr<< "Failed to open video file. Error: " << errbuf << std::endl;
         return false;
     }
-    // std::cout << "Successfully opened video file" << std::endl;
+    std::cout << "Successfully opened video file" << std::endl;
 
     result = avformat_find_stream_info(fmt_ctx, nullptr);
     if (result < 0) {
         char errbuf[AV_ERROR_MAX_STRING_SIZE];
         av_strerror(result, errbuf, AV_ERROR_MAX_STRING_SIZE);
-        // std::cerr << "Failed to find stream info. Error: " << errbuf << std::endl;
+        std::cerr << "Failed to find stream info. Error: " << errbuf << std::endl;
         return false;
     }
-    // std::cout << "Found stream info" << std::endl;
+    std::cout << "Found stream info" << std::endl;
 
     for (unsigned int i = 0; i < fmt_ctx->nb_streams; ++i) {
         if (fmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
@@ -68,14 +68,14 @@ bool VideoPlayer::initializeFFmpeg(const std::string& filename) {
         std::cerr << "Could not find video stream in file" << std::endl;
         return false;
     }
-    // std::cout << "Found video stream at index " << video_stream_idx << std::endl;
+    std::cout << "Found video stream at index " << video_stream_idx << std::endl;
 
     const AVCodec* codec = avcodec_find_decoder(video_stream->codecpar->codec_id);
     if (!codec) {
         std::cerr << "Failed to find decoder for codec id: " << video_stream->codecpar->codec_id << std::endl;
         return false;
     }
-    // std::cout << "Found decoder: " << codec->name << std::endl;
+    std::cout << "Found decoder: " << codec->name << std::endl;
 
     codec_ctx = avcodec_alloc_context3(codec);
     if (!codec_ctx) {
@@ -88,7 +88,7 @@ bool VideoPlayer::initializeFFmpeg(const std::string& filename) {
     if (result < 0) {
         char errbuf[AV_ERROR_MAX_STRING_SIZE];
         av_strerror(result, errbuf, AV_ERROR_MAX_STRING_SIZE);
-        // std::cerr << "Failed to copy codec params. Error: " << errbuf << std::endl;
+        std::cerr << "Failed to copy codec params. Error: " << errbuf << std::endl;
         return false;
     }
 
@@ -97,7 +97,7 @@ bool VideoPlayer::initializeFFmpeg(const std::string& filename) {
     if (result < 0) {
         char errbuf[AV_ERROR_MAX_STRING_SIZE];
         av_strerror(result, errbuf, AV_ERROR_MAX_STRING_SIZE);
-        // std::cerr << "Failed to open codec. Error: " << errbuf << std::endl;
+        std::cerr << "Failed to open codec. Error: " << errbuf << std::endl;
         return false;
     }
     // std::cout << "Successfully opened codec" << std::endl;
@@ -115,7 +115,7 @@ bool VideoPlayer::initializeFFmpeg(const std::string& filename) {
                                       codec_ctx->height, 1);
     uint8_t* internal_buffer = (uint8_t*)av_malloc(size * sizeof(uint8_t));
     if (!internal_buffer) {
-        // std::cerr << "Failed to allocate internal buffer" << std::endl;
+        std::cerr << "Failed to allocate internal buffer" << std::endl;
         return false;
     }
 

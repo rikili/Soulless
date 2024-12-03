@@ -260,6 +260,8 @@ struct GlobalOptions {
     bool showFps = false;
     bool loadingOldGame = false;
     bool introPlayed = false;
+    bool maxedSpellsScene = false;
+    bool bossdefeatScene = false;
 
     // -- DEBUG options, will refactor --
     bool debugSpellSpawn = false;

@@ -92,7 +92,7 @@ enum class SpellType
     WIND = 4,
     PLASMA = 5,
     // Add any new spells here
-    COUNT // Used to track how many spell types we have
+    COUNT = 6// Used to track how many spell types we have
 };
 const int NOT_DROPPED_SPELL_COUNT = 1;
 

@@ -40,6 +40,7 @@ bool SoundManager::initialize() {
     registerMusic(Song::INTRO, "intro.wav");
     registerMusic(Song::BOSS, "boss_background_music.wav");
     registerMusic(Song::LEVELMAX, "levelmax.wav");
+    registerMusic(Song::ENDSCENE, "endscene.wav");
 
     registerSound(SoundEffect::FIRE, "fireball.wav");
     registerSound(SoundEffect::FIRE_MAX, "fireball_max.wav");

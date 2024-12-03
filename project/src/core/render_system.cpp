@@ -1053,6 +1053,7 @@ void RenderSystem::stopVideo() {
 		is_playing_video = false;
 		globalOptions.pause = false;
 		SoundManager* soundManager = SoundManager::getSoundManager();
+		soundManager->stopMusic();
 		soundManager->playMusic(Song::MAIN);
 	}
 }
@@ -1072,9 +1073,10 @@ bool RenderSystem::isPlayingVideo() const {
 }
 
 void RenderSystem::playCutscene(const std::string& filename, Song song) {
-	globalOptions.pause = true;
 	stopVideo();
+	globalOptions.pause = true;
 	SoundManager* soundManager = SoundManager::getSoundManager();
+	soundManager->stopMusic();
 	soundManager->playMusic(song);
 	this->playVideo(filename);
 
