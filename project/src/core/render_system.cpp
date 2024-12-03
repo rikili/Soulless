@@ -233,7 +233,11 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		case 3:
 			drawText("Press shift + f to show FPS.", "deutsch", 20, currentY, 1.0f, color, false);
 			currentY -= tutFontSize * 1.5;
-			drawText("Press k to display collision boxes.", "deutsch", 20, currentY, 1.0f, color, false);
+			drawText("Press k to enable debug mode which shows collision boxes.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("After pressing k, press p to spawn powerups.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("Press J to restart game.", "deutsch", 20, currentY, 1.0f, color, false);
 			break;
 		case 4:
 			drawText("Fire: shoots a fireball, damaging the first enemy hit; Max level: explodes on impact.", "deutsch", 20, currentY, 1.0f, color, false);
