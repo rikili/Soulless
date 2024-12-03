@@ -74,7 +74,7 @@ AIComponent& AI_SYSTEM::initAIComponent(Entity* entity) {
                 enemy.eTimer -= elapsed_ms;
                 Animation& knightAnimation = registry.animations.get(entity);
 
-                if (enemy.eTimer < KNIGHT_BLOCK_COOLDOWN / 2.0) {
+                if (enemy.eTimer >= KNIGHT_BLOCK_COOLDOWN / 2.0) {
                     enemy.blocking = true;
 
                     motion.velocity = { 0, 0 };
