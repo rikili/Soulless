@@ -194,24 +194,23 @@ void RenderSystem::drawFrame(float elapsed_ms)
 		case 0:
 			break;
 		case 1:
-			drawText("As a dark mage you must survive against an army of knights and archers.", "deutsch", 20, currentY, 1.0f, color, false);
+			drawText("As a dark mage you must survive against an army of angry enemies.", "deutsch", 20, currentY, 1.0f, color, false);
 			currentY -= tutFontSize * 1.5;
-			drawText("As time goes on new enemies will spawn with new strength and weaknesses.", "deutsch", 20, currentY, 1.0f, color, false);
+			drawText("As time goes on, different types of enemies will spawn.", "deutsch", 20, currentY, 1.0f, color, false);
 			currentY -= tutFontSize * 1.5;
-			drawText("Consuming campfires will heal you, but be careful, they don't spawn fast.", "deutsch", 20, currentY, 1.0f, color, false);
+			drawText("You must fight the Dark Lord to win the game.", "deutsch", 20, currentY, 1.0f, color, false);
 			currentY -= tutFontSize * 1.5;
 			drawText("You combat the enemies by casting spells. At the start you have one spell- Fire.", "deutsch", 20, currentY, 1.0f, color, false);
 			currentY -= tutFontSize * 1.5;
-			drawText("You will find new spell collectibles on the map or dropped by enemies.", "deutsch", 20, currentY, 1.0f, color, false);
+			drawText("You will find new spell collectibles dropped randomly by enemies.", "deutsch", 20, currentY, 1.0f, color, false);
 			currentY -= tutFontSize * 1.5;
 			drawText("You can cast two spells at a time, so choose wisely to drop or cast it.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("You can drop either spell to regain a small amount of health.", "deutsch", 20, currentY, 1.0f, color, false);
 			currentY -= tutFontSize * 1.5;
 			drawText("Spells are leveled up by killing enemies with the spell or by picking it up off the ground.", "deutsch", 20, currentY, 1.0f, color, false);
 			currentY -= tutFontSize * 1.5;
 			drawText("Once a spell reaches its max level, it will evolve, gaining unique effects.", "deutsch", 20, currentY, 1.0f, color, false);
-			currentY -= tutFontSize * 1.5;
-			drawText("Progress can be seen at the bottom left corner of the screen.", "deutsch", 20, currentY, 1.0f, color, false);
-
 			break;
 
 		case 2:
