@@ -202,7 +202,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 			currentY -= tutFontSize * 1.5;
 			drawText("You combat the enemies by casting spells. At the start you have one spell- Fire.", "deutsch", 20, currentY, 1.0f, color, false);
 			currentY -= tutFontSize * 1.5;
-			drawText("You will find new spell collectibles dropped randomly by enemies.", "deutsch", 20, currentY, 1.0f, color, false);
+			drawText("Spells will drop randomly across the map.", "deutsch", 20, currentY, 1.0f, color, false);
 			currentY -= tutFontSize * 1.5;
 			drawText("You can cast two spells at a time, so choose wisely to drop or cast it.", "deutsch", 20, currentY, 1.0f, color, false);
 			currentY -= tutFontSize * 1.5;
