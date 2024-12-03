@@ -531,7 +531,7 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 			}
 			else {
 				if (!soundManager->isMusicPlaying()) {
-					soundManager->playMusic(Song::BOSS);
+					soundManager->playMusic(Song::BOSS, -1);
 				}
 			}
 			boss_music_delay_timer = 0;
@@ -671,8 +671,7 @@ void WorldSystem::restartGame() {
 	}
 	if (!globalOptions.tutorial && !globalOptions.pause) {
 		SoundManager* soundManager = SoundManager::getSoundManager();
-		soundManager->stopMusic();
-		soundManager->playMusic(Song::MAIN);
+		soundManager->playMusic(Song::MAIN, -1);
 	}
 	player_mage = this->createPlayer();
 	this->createTileGrid();
