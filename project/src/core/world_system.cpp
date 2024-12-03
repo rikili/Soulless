@@ -639,7 +639,7 @@ void WorldSystem::handleSpellStates(float elapsed_ms_since_last_update)
 	}
 
 
-	if (!globalOptions.maxedSpellsScene)
+	if (!globalOptions.maxedSpellsScene && !globalOptions.pause && !registry.game_over)
 	{
 		constexpr int MAX_SPELLS = static_cast<int>(SpellType::COUNT); // Change when testing
 		Player& player = registry.players.get(registry.players.entities[0]);
@@ -671,6 +671,7 @@ void WorldSystem::restartGame() {
 	}
 	if (!globalOptions.tutorial && !globalOptions.pause) {
 		SoundManager* soundManager = SoundManager::getSoundManager();
+		soundManager->stopMusic();
 		soundManager->playMusic(Song::MAIN);
 	}
 	player_mage = this->createPlayer();

@@ -77,7 +77,8 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
             {
                 globalOptions.pause = false;
                 globalOptions.tutorial = false;
-                soundManager->toggleMusic();
+                soundManager->stopMusic();
+                soundManager->playMusic(Song::MAIN);
             }
 
             if (renderer->isPlayingVideo())
