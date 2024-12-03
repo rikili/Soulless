@@ -44,13 +44,13 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
     SoundManager* soundManager = SoundManager::getSoundManager();
 
     if (action == GLFW_PRESS && key == GLFW_KEY_L && (globalOptions.pause || globalOptions.tutorial) && !globalOptions.loadingOldGame) {
-        printd("Loading game\n");
-        globalOptions.loadingOldGame = true;
+        // printd("Loading game\n");
+        // globalOptions.loadingOldGame = true;
     }
 
     if (action == GLFW_PRESS && key == GLFW_KEY_S && (globalOptions.pause || globalOptions.tutorial) && !globalOptions.loadingOldGame && !registry.deaths.has(registry.players.entities[0])) {
-        printd("Saving game\n");
-        Serializer::serialize();
+        // printd("Saving game\n");
+        // Serializer::serialize();
     }
 
     if (isTutorialOn() || globalOptions.pause)

@@ -228,8 +228,8 @@ void RenderSystem::drawFrame(float elapsed_ms)
 			currentY -= tutFontSize * 1.5;
 			drawText("Press shift + T to pause/show tutorial.", "deutsch", 20, currentY, 1.0f, color, false);
 			currentY -= tutFontSize * 1.5;
-			drawText("While paused, press s to save or l to load game.", "deutsch", 20, currentY, 1.0f, color, false);
-			currentY -= tutFontSize * 1.5;
+			// drawText("While paused, press s to save or l to load game.", "deutsch", 20, currentY, 1.0f, color, false);
+			// currentY -= tutFontSize * 1.5;
 			break;
 		case 3:
 			drawText("Press shift + f to show FPS.", "deutsch", 20, currentY, 1.0f, color, false);
