@@ -247,7 +247,9 @@ void RenderSystem::drawFrame(float elapsed_ms)
 			currentY -= tutFontSize * 1.5;
 			drawText("Ice: shoots ice shards; Max level: shoots only one ice shard that pierces enemies.", "deutsch", 20, currentY, 1.0f, color, false);
 			currentY -= tutFontSize * 1.5;
-			drawText("Plasma: slowly accelerating arc that damages enemies it passes through. Not upgradable.", "deutsch", 20, currentY, 1.0f, color, false);
+			drawText("Plasma: arc that damages enemies it passes through. Not upgradable.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("To obtain plasma, player must sacrifice 5 random spell levels.", "deutsch", 20, currentY, 1.0f, color, false);
 			break;
 		}
 
