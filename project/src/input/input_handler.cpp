@@ -88,6 +88,7 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
                 {
                     globalOptions.pause = false;
                 }
+                this->reset();
             }
         }
 
