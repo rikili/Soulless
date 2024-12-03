@@ -524,7 +524,7 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 			SoundManager* soundManager = SoundManager::getSoundManager();
 
 			if (bossDefeated) {
-				bossDefeated = false;
+				// bossDefeated = false;
 				if (!soundManager->isMusicPlaying()) {
 					soundManager->fadeInMusic(Song::MAIN);
 				}
