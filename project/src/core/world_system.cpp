@@ -641,10 +641,10 @@ void WorldSystem::handleSpellStates(float elapsed_ms_since_last_update)
 
 	if (!globalOptions.maxedSpellsScene)
 	{
-		constexpr int MAX_SPELLS = static_cast<int>(SpellType::COUNT);
+		constexpr int MAX_SPELLS = static_cast<int>(SpellType::COUNT); // Change when testing
 		Player& player = registry.players.get(registry.players.entities[0]);
-		int unlockedSpells = player.spell_queue.getCollectedSpells().size();
-		if (unlockedSpells == MAX_SPELLS || unlockedSpells > 1)
+		const int unlockedSpells = player.spell_queue.getCollectedSpells().size();
+		if (unlockedSpells == MAX_SPELLS)
 		{
 			globalOptions.maxedSpellsScene = true;
 			globalOptions.pause = true;
