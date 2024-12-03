@@ -253,7 +253,7 @@ void RenderSystem::drawFrame(float elapsed_ms)
 			break;
 		}
 
-		std::string message = "Press SPACE or click to ";
+		std::string message = "Press SPACE to ";
 		std::string start = globalOptions.pause ? "resume." : "start.";
 		drawText(message + start, "deutsch", window_width_px / 2.0f, tutFontSize * 1.5, 1.0f, selectedColor);
 		return;

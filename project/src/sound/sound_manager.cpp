@@ -90,6 +90,7 @@ void SoundManager::playMusic(Song song) {
     if (music.find(song) != music.end()) {
         Mix_PlayMusic(music[song], -1);
         musicPlaying = true;
+        musicStopped = false;
     }
     else {
         std::cerr << "Song not found!" << std::endl;
@@ -100,6 +101,7 @@ void SoundManager::fadeInMusic(Song song) {
     if (music.find(song) != music.end()) {
         Mix_FadeInMusic(music[song], -1, 1000);
         musicPlaying = true;
+        musicStopped = false;
     }
     else {
         std::cerr << "Song not found!" << std::endl;
@@ -107,6 +109,10 @@ void SoundManager::fadeInMusic(Song song) {
 }
 
 void SoundManager::toggleMusic() {
+    if (musicStopped) {
+        return;
+    }
+
     if (musicPlaying) {
         Mix_PauseMusic();
         musicPlaying = false;
@@ -115,6 +121,14 @@ void SoundManager::toggleMusic() {
         Mix_ResumeMusic();
         musicPlaying = true;
     }
+}
+
+void SoundManager::stopMusic() {
+    if (musicPlaying) {
+        Mix_HaltMusic();
+    }
+    musicPlaying = false;
+    musicStopped = true;
 }
 
 bool SoundManager::isMusicPlaying() {

@@ -54,6 +54,8 @@ public:
 
     void toggleMusic();
 
+    void stopMusic();
+
     void removeSoundManager();
 
     bool isMusicPlaying();
@@ -64,6 +66,7 @@ private:
     SoundManager();
 
     bool musicPlaying;
+    bool musicStopped; // used for when we stop using a song
 
     static SoundManager* instance;
 

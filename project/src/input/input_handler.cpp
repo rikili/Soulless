@@ -56,14 +56,14 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
     if (isTutorialOn() || globalOptions.pause)
     {
         if (key == GLFW_KEY_SPACE && !globalOptions.loadingOldGame && action == GLFW_PRESS) {
-            if (!globalOptions.pause)
-            {
-                // soundManager->playMusic(Song::MAIN);
-            }
-            else
-            {
-                // soundManager->toggleMusic();
-            }
+            // if (!globalOptions.pause)
+            // {
+            //     soundManager->playMusic(Song::MAIN);
+            // }
+            // else
+            // {
+            //     soundManager->toggleMusic();
+            // }
             globalOptions.tutorial = false;
             if (!renderer->isPlayingVideo() && !globalOptions.introPlayed)
             {
@@ -75,6 +75,7 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
             {
                 globalOptions.pause = false;
                 globalOptions.tutorial = false;
+                soundManager->toggleMusic();
             }
 
             if (renderer->isPlayingVideo())
@@ -211,17 +212,17 @@ void InputHandler::onMouseMove(vec2 mouse_position)
 void InputHandler::onMouseKey(GLFWwindow* window, int button, int action, int mods)
 {
     if (isTutorialOn() && !globalOptions.loadingOldGame) {
-        SoundManager* soundManager = SoundManager::getSoundManager();
-        if (!globalOptions.pause)
-        {
-            soundManager->playMusic(Song::MAIN);
-        }
-        else
-        {
-            soundManager->toggleMusic();
-        }
-        globalOptions.tutorial = false;
-        globalOptions.pause = false;
+        // SoundManager* soundManager = SoundManager::getSoundManager();
+        // if (!globalOptions.pause)
+        // {
+        //     soundManager->playMusic(Song::MAIN);
+        // }
+        // else
+        // {
+        //     soundManager->toggleMusic();
+        // }
+        // globalOptions.tutorial = false;
+        // globalOptions.pause = false;
         return;
     }
 

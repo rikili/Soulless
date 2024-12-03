@@ -521,13 +521,11 @@ void WorldSystem::handleTimers(float elapsed_ms_since_last_update)
 			if (bossDefeated) {
 				bossDefeated = false;
 				if (!soundManager->isMusicPlaying()) {
-					soundManager->toggleMusic();
 					soundManager->fadeInMusic(Song::MAIN);
 				}
 			}
 			else {
 				if (!soundManager->isMusicPlaying()) {
-					soundManager->toggleMusic();
 					soundManager->playMusic(Song::BOSS);
 				}	
 			}
@@ -882,7 +880,7 @@ void WorldSystem::handle_enemy_logic(const float elapsed_ms_since_last_update)
 		if (should_spawn_darklord) {
 			SoundManager* soundManager = SoundManager::getSoundManager();
 			soundManager->playSound(SoundEffect::BOSS_DEATH_BELL);
-			soundManager->toggleMusic();
+			soundManager->stopMusic();
 			boss_music_delay_timer = 3700.f;
 			
 			vec2 spawnPosition = { registry.motions.get(player_mage).position.x, registry.motions.get(player_mage).position.y - 100.f };

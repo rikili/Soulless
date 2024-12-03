@@ -577,7 +577,7 @@ HitTypes CollisionSystem::applyDamage(Entity attacker, Entity victim, std::unord
                 if (registry.enemies.get(victim).type == EnemyType::DARKLORD) {
                     death.timer = 4000.f;
                     bossDeath = true;
-                    soundManager->toggleMusic();
+                    soundManager->stopMusic();
                     soundManager->playSound(SoundEffect::CHOIR);
                 }
             }
