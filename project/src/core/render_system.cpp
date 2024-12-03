@@ -252,7 +252,9 @@ void RenderSystem::drawFrame(float elapsed_ms)
 			currentY -= tutFontSize * 1.5;
 			drawText("Plasma: arc that damages enemies it passes through. Not upgradable.", "deutsch", 20, currentY, 1.0f, color, false);
 			currentY -= tutFontSize * 1.5;
-			drawText("To obtain plasma, player must sacrifice 5 random spell levels.", "deutsch", 20, currentY, 1.0f, color, false);
+			drawText("To obtain plasma, player must sacrifice 5 random spell levels to the necromancer.", "deutsch", 20, currentY, 1.0f, color, false);
+			currentY -= tutFontSize * 1.5;
+			drawText("The necromancer will spawn after 7.5 minutes.", "deutsch", 20, currentY, 1.0f, color, false);
 			break;
 		}
 
