@@ -1052,6 +1052,7 @@ void RenderSystem::stopVideo() {
 		video_player->cleanup();
 		is_playing_video = false;
 		globalOptions.pause = false;
+		globalOptions.introPlayed  = true;
 		SoundManager* soundManager = SoundManager::getSoundManager();
 		soundManager->stopMusic();
 		soundManager->playMusic(Song::MAIN);

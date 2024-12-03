@@ -70,7 +70,6 @@ void InputHandler::onKey(int key, int scancode, int action, int mods)
             if (!renderer->isPlayingVideo() && !globalOptions.introPlayed)
             {
                 this->renderer->playCutscene("intro.mp4", Song::INTRO);
-                globalOptions.introPlayed  = true;
                 return;
             }
             if (globalOptions.introPlayed)
