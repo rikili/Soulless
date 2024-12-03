@@ -49,7 +49,7 @@ public:
 
     void playSound(SoundEffect effect);
 
-    void playMusic(Song song);
+    void playMusic(Song song, int duration);
 
     void fadeInMusic(Song song);
 
