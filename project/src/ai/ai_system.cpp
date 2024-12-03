@@ -415,7 +415,7 @@ void AI_SYSTEM::create_enemy_projectile(const Entity& enemy_ent, bool mainSpell)
             attack_velocity = 0.0f;
             attack_damage = 0;
             attack_texture = "portal";
-            projectile_motion.collider = { 25.f, 30.f };
+            projectile_motion.collider = { 25.f, 32.5f };
             projectile.type = DamageType::portal;
             projectile.range = DARKLORD_PORTAL_COOLDOWN / 4.0f;
             projectile.sourcePosition = enemy_motion.position;
