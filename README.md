@@ -1,18 +1,17 @@
-# Team10
-
-
-
-Team 10 - Soulless
+# Soulless
 
 ### **Instructions to Start the Game:**
 
+**Option 1:**
 1. In the project folder, run:
    - cmake .
    - make
 2. After building, run ./soulless
 3. Ensure that your machine's audio is on.
 
+**Option 2 (generally, Windows only):**
 
+With Visual Studio + C++ development kit installed, the game can be built and ran without configuration.
 
 ------
 
